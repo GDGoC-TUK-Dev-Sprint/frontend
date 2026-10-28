@@ -6,7 +6,6 @@
 
 - React Native 0.87
 - TypeScript
-- NativeWind v4
 
 ## 요구 사항
 
