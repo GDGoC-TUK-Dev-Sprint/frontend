@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Text,
   View,
+  type DimensionValue,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import CloseIcon from '../assets/icons/close.svg';
@@ -19,6 +20,7 @@ type Props = {
   title: string;
   onClose: () => void;
   headerRight?: React.ReactNode; // 닫기 버튼 왼쪽 (예: 모두 읽음)
+  height?: DimensionValue; // 기본은 Figma 시트 높이. 내용이 짧으면 'auto'
   children: React.ReactNode;
 };
 
@@ -31,6 +33,7 @@ export default function BottomSheet({
   title,
   onClose,
   headerRight,
+  height = '88%',
   children,
 }: Props) {
   const { t } = useTranslation();
@@ -77,7 +80,7 @@ export default function BottomSheet({
           accessibilityLabel={t('common.close')}
         />
         <Animated.View
-          style={[styles.sheet, { transform: [{ translateY: dragY }] }]}
+          style={[styles.sheet, { height, transform: [{ translateY: dragY }] }]}
         >
           <View style={styles.dragArea} {...panResponder.panHandlers}>
             <View style={styles.handle} />
@@ -111,7 +114,6 @@ const styles = StyleSheet.create({
   },
   // Figma 시트 높이 860 / 화면 973
   sheet: {
-    height: '88%',
     gap: 16,
     borderTopWidth: 1,
     borderColor: '#F1F5F9', // Figma 값

@@ -39,7 +39,12 @@ export default function AppHeader({
             accessibilityRole="button"
             accessibilityLabel={t('common.back')}
           >
-            <ChevronRightIcon width={24} height={24} style={styles.back} />
+            <ChevronRightIcon
+              width={24}
+              height={24}
+              color={colors.text.muted}
+              style={styles.back}
+            />
           </Pressable>
         )}
       </View>
