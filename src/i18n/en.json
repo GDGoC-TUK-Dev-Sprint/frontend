@@ -1,6 +1,6 @@
 {
   "language": { "current": "English" },
-  "common": { "back": "Back", "notifications": "Notifications", "clear": "Clear" },
+  "common": { "back": "Back", "notifications": "Notifications", "clear": "Clear", "close": "Close" },
   "tabs": {
     "home": "Home",
     "map": "Map",
@@ -65,5 +65,28 @@
     "viewSchedule": "View schedule",
     "viewOnMap": "View on map",
     "imageSource": "Images provided by Korea Tourism Organization."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "readAll": "Mark all read",
+    "tab": "{{name}} ({{count}})",
+    "tabs": {
+      "all": "All",
+      "schedule": "Trips",
+      "visit": "Visit info",
+      "notice": "Notices"
+    },
+    "today": "Today",
+    "earlier": "Earlier",
+    "justNow": "Just now",
+    "minutesAgo": "{{count}} min ago",
+    "hoursAgo": "{{count}} hr ago",
+    "yesterday": "Yesterday",
+    "links": {
+      "schedule": "View schedule",
+      "visit": "View place info",
+      "notice": "View notice"
+    },
+    "empty": "No notifications"
   }
 }
