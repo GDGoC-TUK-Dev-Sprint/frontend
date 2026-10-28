@@ -13,8 +13,11 @@ KOREADY(코레디) 프론트엔드 저장소에서 작업할 때 따르는 안�
 | 테스트·린트 | Jest (`@react-native/jest-preset`), ESLint (`@react-native/eslint-config`), Prettier 2.8.8 |
 | 런타임 | Node.js >= 22.11.0 |
 
-- TODO: spec은 Expo + EAS Build를 전제로 한다(spec §2.3, §7.2, §7.5). 현재 저장소는 Expo가 없는 bare RN CLI다. 어느 쪽으로 갈지 결정이 필요하다.
-- TODO: README에는 NativeWind v4가 적혀 있으나 `package.json`에 설치되어 있지 않다.
+- 개발 환경: bare React Native CLI, 맥에서 개발한다. Android·iOS 앱만 만들고 웹 빌드는 하지 않는다.
+- spec.md의 Expo, EAS Build, Vercel 웹 배포 관련 내용(§2.3, §7.1, §7.2, §7.5 등)은 폐기되었다. spec이 갱신되기 전까지는 이 CLAUDE.md가 우선한다.
+- 푸시 알림, 음성 인식, OCR 등 네이티브 모듈은 아직 선정하지 않았다. 임의로 설치하지 말고 먼저 질문한다.
+- 스타일링은 `StyleSheet` + `src/theme/tokens.ts`로 한다. NativeWind는 쓰지 않는다.
+- 폰트는 Pretendard, 화면 이동은 React Navigation을 쓴다.
 - TODO: 지도 SDK, i18n 라이브러리, 토큰 보안 저장소 라이브러리는 아직 정해지지 않았다.
 - 서버는 Spring Boot REST API다(spec §7.2). TODO: 백엔드 저장소 위치.
 
@@ -69,8 +72,6 @@ npm test                    # Jest
 
 - TODO: 릴리스 빌드 명령(Android APK·AAB, iOS 아카이브). 저장소에 스크립트가 없다.
 - TODO: 타입 체크 스크립트. 저장소에 스크립트가 없다.
-- TODO: 웹 빌드·배포. spec §7.5는 Vercel 웹 배포를 전제로 하지만 저장소에 구성이 없다.
-
 ## 6. 코드 규칙과 폴더 구조
 
 ### 현재 `src/` 구조
@@ -101,7 +102,7 @@ src/
 
 - 모르는 API, 응답 필드, 색상, 문구는 추측해서 만들지 않는다. `docs/`에서 찾고, 없으면 사용자에게 질문한다.
 - spec §9의 API 요청·응답 필드는 초안이다(Figma에 정의되어 있지 않음). 확정되지 않은 필드에 의존하는 코드를 쓰기 전에 확인한다.
-- 문서끼리 충돌하면 spec.md가 우선한다. 충돌을 발견하면 사용자에게 알린다.
+- 문서끼리 충돌하면 spec.md가 우선한다(단, 1절에서 폐기한 개발 환경 내용은 CLAUDE.md가 우선). 충돌을 발견하면 사용자에게 알린다.
 - Figma는 읽기만 하고 수정하지 않는다.
 - 키, 시크릿, 토큰을 코드, 문서, 커밋, 로그에 넣지 않는다 (spec §11, rule.md R-C10).
 - 한 번에 큰 변경을 하지 않는다. 작은 단위로 나눠 진행한다.
@@ -111,5 +112,6 @@ src/
 - 커밋은 Conventional Commits 형식(`타입(범위): 내용`)을 따르고 한국어로 쓴다. 예: `feat(auth): 로그인 화면 추가`
 - 커밋 메시지와 PR 본문에 Claude, Anthropic, `Co-Authored-By`, "Generated with Claude Code" 문구를 넣지 않는다.
 - 브랜치 이름은 `타입/이슈번호-설명` 형식으로 짓는다. `main`에 직접 푸시하지 않는다.
-- PR과 이슈는 `.github`의 템플릿을 따른다. TODO: 현재 저장소에 `.github` 폴더가 없다.
+- 작업 브랜치는 `develop`에서 만들고 PR로 `develop`에 합친다. `main`에는 최종 단계에서 `develop`을 PR로 합친다.
+- PR과 이슈는 조직 `GDGoC-TUK-Dev-Sprint/.github` 저장소의 템플릿(`bug_report`, `feature_request`, `PULL_REQUEST_TEMPLATE`)을 따른다. 이 저장소에 `.github/ISSUE_TEMPLATE`을 따로 만들면 조직 템플릿이 적용되지 않으므로 만들지 않는다.
 - 커밋, 푸시, PR 생성 전에 반드시 사용자에게 먼저 확인한다.
