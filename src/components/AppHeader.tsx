@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import Logo from '../assets/images/logo.svg';
 import BellIcon from '../assets/icons/bell.svg';
 import ChevronRightIcon from '../assets/icons/chevron-right.svg';
@@ -23,6 +24,7 @@ export default function AppHeader({
   showBell,
 }: Props) {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + 16 }]}>
@@ -33,7 +35,7 @@ export default function AppHeader({
             onPress={onBack}
             hitSlop={8}
             accessibilityRole="button"
-            accessibilityLabel="뒤로 가기"
+            accessibilityLabel={t('common.back')}
           >
             <ChevronRightIcon width={24} height={24} style={styles.back} />
           </Pressable>
@@ -44,7 +46,7 @@ export default function AppHeader({
         {/* TODO: 언어 및 통화 설정 팝업(F7, Figma 10) */}
         <Pressable style={styles.language} accessibilityRole="button">
           <GlobeIcon width={13.2} height={13.2} style={styles.globe} />
-          <Text style={styles.languageText}>한국어</Text>
+          <Text style={styles.languageText}>{t('language.current')}</Text>
           <ChevronDownIcon width={7} height={4.317} />
         </Pressable>
         {/* TODO: 알림 화면(01a)은 MVP 포함 여부 미정 (spec Q13) */}
@@ -52,7 +54,7 @@ export default function AppHeader({
           <Pressable
             style={styles.bell}
             accessibilityRole="button"
-            accessibilityLabel="알림"
+            accessibilityLabel={t('common.notifications')}
           >
             <BellIcon width={14} height={17.5} />
           </Pressable>

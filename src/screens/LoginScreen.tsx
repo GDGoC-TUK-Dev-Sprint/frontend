@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import ScreenPlaceholder from '../components/ScreenPlaceholder';
 import { useAuth } from '../auth/AuthContext';
 import type { RootStackParamList } from '../navigation/RootNavigator';
@@ -10,18 +11,19 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 export default function LoginScreen({ navigation }: Props) {
   const { signIn } = useAuth();
+  const { t } = useTranslation();
   return (
-    <ScreenPlaceholder title="로그인">
+    <ScreenPlaceholder title={t('auth.login')}>
       {/* TODO: 로그인 폼과 POST /api/auth/login 연동 전까지 쓰는 임시 버튼 */}
-      <Button title="임시 로그인" onPress={signIn} />
+      <Button title={t('auth.tempLogin')} onPress={signIn} />
       <View style={styles.signup}>
-        <Text style={styles.signupText}>아직 계정이 없나요?</Text>
+        <Text style={styles.signupText}>{t('auth.noAccount')}</Text>
         <Text
           style={[styles.signupText, styles.signupLink]}
           onPress={() => navigation.navigate('Signup')}
           accessibilityRole="link"
         >
-          회원가입
+          {t('auth.signup')}
         </Text>
       </View>
     </ScreenPlaceholder>
