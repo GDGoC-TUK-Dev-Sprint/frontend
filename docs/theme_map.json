@@ -1,0 +1,80 @@
+{
+  "_note": "테마 -> TourAPI 신분류체계(lclsSystm) 코드 접두어 (v0.2, Figma 2026-10-28 테마 8종 기준). 코드가 접두어로 시작하면 해당 테마에 매핑. exclude_prefixes는 전체 후보에서 제외. 초안이므로 서울 데이터 적재 후 분류별 장소 수를 보고 조정한다.",
+  "themes": {
+    "shopping": {
+      "label_ko": "쇼핑",
+      "prefixes": [
+        "SH01",
+        "SH02",
+        "SH04",
+        "SH05",
+        "SH06"
+      ],
+      "cost_item": "shopping"
+    },
+    "experience": {
+      "label_ko": "체험 관광",
+      "prefixes": [
+        "EX"
+      ],
+      "cost_item": "attraction"
+    },
+    "food": {
+      "label_ko": "음식",
+      "prefixes": [
+        "FD01",
+        "FD02",
+        "FD03",
+        "FD04",
+        "FD05"
+      ],
+      "cost_item": "food"
+    },
+    "festival": {
+      "label_ko": "축제/공연/행사",
+      "prefixes": [
+        "EV"
+      ],
+      "cost_item": "attraction"
+    },
+    "history": {
+      "label_ko": "역사 관광",
+      "prefixes": [
+        "HS"
+      ],
+      "cost_item": "attraction"
+    },
+    "nature": {
+      "label_ko": "자연관광",
+      "prefixes": [
+        "NA",
+        "VE03"
+      ],
+      "cost_item": null
+    },
+    "leisure": {
+      "label_ko": "레저 스포츠",
+      "prefixes": [
+        "LS"
+      ],
+      "cost_item": "attraction"
+    },
+    "culture": {
+      "label_ko": "문화 관광",
+      "prefixes": [
+        "VE01",
+        "VE02",
+        "VE07",
+        "VE09"
+      ],
+      "cost_item": "attraction"
+    }
+  },
+  "exclude_prefixes": [
+    "AC",
+    "C01",
+    "VE08",
+    "VE10",
+    "VE11"
+  ]
+}

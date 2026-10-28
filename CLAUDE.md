@@ -1,0 +1,115 @@
+# CLAUDE.md
+
+KOREADY(코레디) 프론트엔드 저장소에서 작업할 때 따르는 안내서다. 세부 내용은 복사하지 않고 `docs/` 문서로 연결한다.
+
+## 1. 프로젝트 소개와 기술 스택
+
+공공데이터로 서울 여행 동선을 짜고, 같은 국적 여행자의 실제 지출 통계로 **범위와 근거가 있는 여행 경비**를 보여주는 방한 외국인 전용 여행 계획 서비스의 모바일 클라이언트다 (@docs/spec.md §1.1).
+
+| 영역 | 현재 저장소 상태 (`package.json` 기준) |
+|---|---|
+| 프레임워크 | bare React Native CLI, `react-native` 0.87.1, `react` 19.2.3 |
+| 언어 | TypeScript (`@react-native/typescript-config`) |
+| 테스트·린트 | Jest (`@react-native/jest-preset`), ESLint (`@react-native/eslint-config`), Prettier 2.8.8 |
+| 런타임 | Node.js >= 22.11.0 |
+
+- TODO: spec은 Expo + EAS Build를 전제로 한다(spec §2.3, §7.2, §7.5). 현재 저장소는 Expo가 없는 bare RN CLI다. 어느 쪽으로 갈지 결정이 필요하다.
+- TODO: README에는 NativeWind v4가 적혀 있으나 `package.json`에 설치되어 있지 않다.
+- TODO: 지도 SDK, i18n 라이브러리, 토큰 보안 저장소 라이브러리는 아직 정해지지 않았다.
+- 서버는 Spring Boot REST API다(spec §7.2). TODO: 백엔드 저장소 위치.
+
+## 2. 문서 안내 (읽는 순서)
+
+1. @docs/spec.md: 기준 문서(v1.6). 기능(§4), 경비 로직(§5), API 32개(§9), 화면 대응표와 Figma 수정 항목(§10), 미결정 사항(§15). §9와 §10은 Figma를 따른다.
+2. @docs/api_schema_core.md: 핵심 외부 API(TourAPI `KorService2`, ODsay)의 필드. 앱이 직접 부르지 않으며, 화면에 나오는 데이터가 어디서 오는지 이해하는 데 쓴다.
+3. @docs/api_schema.md: 나머지 외부 API(환율, Papago 등) 전체 스키마.
+4. @docs/recommendation_design.md: 추천 순위·동선 알고리즘 상세(서버 로직).
+5. @docs/rule.md: TourAPI 계열 호출·저장·표시 규칙(R-xx 번호). 대부분 서버용이고, 프론트 관련 규칙은 6절에 요약했다.
+6. @docs/theme_map.json: 테마 ↔ TourAPI 분류체계 매핑 초안.
+
+## 3. 확정된 결정사항 (어기면 안 됨)
+
+- **숙박·항공은 경비에서 제외한다.** 경비 화면과 희망 예산 모두 "숙박·항공 제외" 기준이다 (spec §2.2, §5.1, F1-6).
+- **경비는 범위로 표시한다.** 중간값을 크게 보여주고, 범위(알뜰/보통/여유)와 항목별 근거 배지·출처 시트를 함께 둔다 (spec F4-1, F4-2, F4-5, F4-6).
+- 경비 화면의 모든 수치는 `GET /api/trips/{tripId}/cost-estimate` 응답 하나에서 나온다. 화면마다 따로 계산하지 않는다 (spec F4-9).
+- **로그인이 필수이고 게스트 모드는 없다.** 앱 시작 때 `GET /api/users/me`로 토큰을 확인하고, 실패하면 재발급을 시도한 뒤 로그인 화면으로 보낸다 (spec F8-1, F11).
+- 401 응답은 한 곳에서 토큰 재발급(`POST /api/auth/refresh`) 후 재시도한다. 토큰은 기기 보안 저장소에 둔다 (spec F11-4, F11-7).
+- **표시 통화는 한 가지만 쓴다.** KRW·JPY·USD·EUR 중 하나를 고르고, 환산은 서버가 한다 (spec F4-8, F7-3).
+- **앱 언어는 영어·한국어 2개다.** 기본값은 기기 로케일이고, 지원하지 않는 언어면 영어를 쓴다 (spec F7-1, F7-2).
+- 모든 요청에 `Accept-Language: ko | en`과 `X-Currency`를 보낸다. 언어·통화 설정은 서버가 아니라 기기에만 저장한다 (spec F7-4, F7-5, §9.1).
+- 화면 문자열은 하드코딩하지 않는다 (spec §12).
+
+## 4. 아직 결정되지 않은 사항 (임의로 구현하지 말고 사용자에게 물어볼 것)
+
+| # | 내용 | 근거 |
+|---|---|---|
+| Q8 | 지도 SDK: Figma는 네이버 지도, spec은 Google 공급자 기본 + 네이버 조건부 | spec §15, §7.6 |
+| Q12 | 비밀번호 찾기·재설정: Figma에 화면이 없고, 이메일을 받지 않아 복구 수단이 없음 | spec §15, F11-9 |
+| Q13 | 알림(01a)을 MVP에 넣을지 여부: 화면만 있고 API는 없음 | spec §15, F14 |
+| Q14 | 추천 모드 "상관없음"을 화면에 둘지 여부: Figma 조건 입력에 모드 토글이 없음 | spec §15, recommendation_design §12 |
+| Q15 | 챗봇 장소 카드의 별점·대기시간·예약 가능 표시: 데이터 소스가 없음 | spec §15, F13-3 |
+| Q16 | 번역(F9)과 지도 앱 길 안내 버튼(F10)을 MVP에 유지할지 여부: Figma에 화면·API가 없음 | spec §15 |
+| - | 행사/축제 테마(`EV`) 포함 여부: rule.md R-ID02·R-K15는 MVP에서 제외, spec은 테마 8종에 포함 | rule.md §2.1·§3.3, spec F1-7 |
+
+이 밖에 spec에 `[결정 필요]`·`[확인 필요]`로 표시된 항목도 같은 방식으로 다룬다.
+
+## 5. 개발 명령어
+
+```bash
+npm install                 # 의존성 설치
+bundle install              # iOS 최초 1회
+bundle exec pod install     # iOS 최초 1회 (README 기준)
+
+npm start                   # Metro 개발 서버
+npm run ios                 # iOS 빌드 및 실행
+npm run android             # Android 빌드 및 실행
+npm run lint                # ESLint
+npm test                    # Jest
+```
+
+- TODO: 릴리스 빌드 명령(Android APK·AAB, iOS 아카이브). 저장소에 스크립트가 없다.
+- TODO: 타입 체크 스크립트. 저장소에 스크립트가 없다.
+- TODO: 웹 빌드·배포. spec §7.5는 Vercel 웹 배포를 전제로 하지만 저장소에 구성이 없다.
+
+## 6. 코드 규칙과 폴더 구조
+
+### 현재 `src/` 구조
+
+```
+src/
+├ api/          # (비어 있음)
+├ components/   # (비어 있음)
+├ screens/      # (비어 있음)
+└ theme/
+   └ tokens.ts  # 색·타이포·간격·라운드·그림자 토큰 (Figma 디자인시스템 기준 초안)
+```
+
+- 색·글자·간격 값은 `src/theme/tokens.ts`에서만 가져온다. 파일 안의 `TODO` 값(`primarySoft`, `text.muted`, 폰트 패밀리, 그림자 불투명도)은 Figma 확인이 끝나지 않은 값이다 (spec §10.2 디자인시스템).
+- TODO: 각 폴더의 역할, 파일·컴포넌트 이름 규칙, 상태 관리, API 클라이언트 구조. 이를 정한 문서가 없다.
+
+### rule.md 중 프론트에 해당하는 규칙
+
+- **R-C01**: 앱·웹은 TourAPI를 직접 호출하지 않는다. 모든 외부 API는 서버를 거친다.
+- **R-C10**: 인증키는 서버 비밀 저장소에만 둔다. 코드, Git, 앱 번들, 로그에 넣지 않는다.
+- **R-C52**: 장소 화면과 앱 정보 화면에 출처를 표시한다 (예: "자료: 한국관광공사 TourAPI").
+- **R-K09**: 이용시간·휴무·요금은 자유 텍스트다. HTML 태그(`<br>` 등)를 제거해 표시하고, 파싱에 실패하면 원문을 보여주며 "정보가 다를 수 있어요"를 붙인다.
+- **R-K11**: 이미지 저작권 `Type3`은 원본 그대로 쓴다. 자르기, 필터, 글자 덧씌우기를 하지 않는다. `Type1`은 출처를 표시해 쓴다.
+- **R-K12**: TourAPI 이미지 URL이 `http://`로 올 수 있다. 처리 방식은 서버에서 확인 중이다.
+- 나머지 규칙(호출 형식, 한도, 배치, 코드 체계)은 서버용이다. 필요하면 @docs/rule.md 를 본다.
+
+## 7. 작업 방식 규칙
+
+- 모르는 API, 응답 필드, 색상, 문구는 추측해서 만들지 않는다. `docs/`에서 찾고, 없으면 사용자에게 질문한다.
+- spec §9의 API 요청·응답 필드는 초안이다(Figma에 정의되어 있지 않음). 확정되지 않은 필드에 의존하는 코드를 쓰기 전에 확인한다.
+- 문서끼리 충돌하면 spec.md가 우선한다. 충돌을 발견하면 사용자에게 알린다.
+- Figma는 읽기만 하고 수정하지 않는다.
+- 키, 시크릿, 토큰을 코드, 문서, 커밋, 로그에 넣지 않는다 (spec §11, rule.md R-C10).
+- 한 번에 큰 변경을 하지 않는다. 작은 단위로 나눠 진행한다.
+
+## 8. Git 규칙
+
+- 커밋은 Conventional Commits 형식(`타입(범위): 내용`)을 따르고 한국어로 쓴다. 예: `feat(auth): 로그인 화면 추가`
+- 커밋 메시지와 PR 본문에 Claude, Anthropic, `Co-Authored-By`, "Generated with Claude Code" 문구를 넣지 않는다.
+- 브랜치 이름은 `타입/이슈번호-설명` 형식으로 짓는다. `main`에 직접 푸시하지 않는다.
+- PR과 이슈는 `.github`의 템플릿을 따른다. TODO: 현재 저장소에 `.github` 폴더가 없다.
+- 커밋, 푸시, PR 생성 전에 반드시 사용자에게 먼저 확인한다.
