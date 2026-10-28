@@ -43,3 +43,55 @@ export const mockTrip: Trip = {
   thumbnailLabel: '성수동',
   stops: ['성수동 카페거리 → 서울숲', '경복궁 & 서촌 미식 투어'],
 };
+
+// 알림 (01a 알림 확인). 알림 API가 없다 (spec F14, Q13)
+export type NotificationCategory = 'schedule' | 'visit' | 'notice';
+
+export type AppNotification = {
+  id: string;
+  category: NotificationCategory;
+  title: string;
+  message: string;
+  createdAt: string; // ISO 8601
+  read: boolean;
+};
+
+// 시간 표시(방금 전·10분 전·어제)가 항상 Figma처럼 보이도록 지금 기준으로 만든다
+const ago = (minutes: number) =>
+  new Date(Date.now() - minutes * 60000).toISOString();
+
+export const mockNotifications: AppNotification[] = [
+  {
+    id: 'n1',
+    category: 'visit',
+    title: '방문 전 확인해 주세요',
+    message: '국립중앙박물관의 운영시간과 이용 정보를 확인해 보세요.',
+    createdAt: ago(0),
+    read: false,
+  },
+  {
+    id: 'n2',
+    category: 'schedule',
+    title: '오늘의 일정이 곧 시작돼요!',
+    message: '오전 10시에 경복궁을 방문할 예정이에요.',
+    createdAt: ago(10),
+    read: true,
+  },
+  {
+    id: 'n3',
+    category: 'notice',
+    title: '공지) KOREADY의 새로운 기능',
+    message:
+      'KOREADY의 새로운 기능을 소개합니다. 여행에 도움이 되는 새로운 기능을 확인해보세요.',
+    createdAt: ago(24 * 60),
+    read: true,
+  },
+  {
+    id: 'n4',
+    category: 'visit',
+    title: '방문 전 확인해 주세요',
+    message: '국립중앙박물관의 운영시간과 이용 정보를 확인해 보세요.',
+    createdAt: ago(24 * 60 + 30),
+    read: true,
+  },
+];

@@ -1,6 +1,11 @@
 {
   "language": { "current": "한국어" },
-  "common": { "back": "뒤로 가기", "notifications": "알림", "clear": "지우기" },
+  "common": {
+    "back": "뒤로 가기",
+    "notifications": "알림",
+    "clear": "지우기",
+    "close": "닫기"
+  },
   "tabs": {
     "home": "홈",
     "map": "지도",
@@ -65,5 +70,28 @@
     "viewSchedule": "일정 자세히 보기",
     "viewOnMap": "지도에서 보기",
     "imageSource": "한국관광공사 이미지를 사용하였습니다."
+  },
+  "notifications": {
+    "title": "알림",
+    "readAll": "모두 읽음",
+    "tab": "{{name}} ({{count}})",
+    "tabs": {
+      "all": "전체",
+      "schedule": "여행 일정",
+      "visit": "방문 정보",
+      "notice": "공지"
+    },
+    "today": "오늘",
+    "earlier": "이전 알림",
+    "justNow": "방금 전",
+    "minutesAgo": "{{count}}분 전",
+    "hoursAgo": "{{count}}시간 전",
+    "yesterday": "어제",
+    "links": {
+      "schedule": "일정 보기",
+      "visit": "장소 정보 보기",
+      "notice": "공지 사항"
+    },
+    "empty": "알림이 없어요"
   }
 }

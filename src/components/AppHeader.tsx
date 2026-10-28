@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +7,7 @@ import BellIcon from '../assets/icons/bell.svg';
 import ChevronRightIcon from '../assets/icons/chevron-right.svg';
 import ChevronDownIcon from '../assets/icons/chevron-down.svg';
 import GlobeIcon from '../assets/icons/globe.svg';
+import NotificationSheet from './NotificationSheet';
 import { colors, fontFamily, typography } from '../theme/tokens';
 
 // Figma 「navi」 컴포넌트. 왼쪽은 로고 또는 뒤로가기, 오른쪽은 언어 버튼(+ 알림)
@@ -25,6 +26,7 @@ export default function AppHeader({
 }: Props) {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + 16 }]}>
@@ -49,9 +51,10 @@ export default function AppHeader({
           <Text style={styles.languageText}>{t('language.current')}</Text>
           <ChevronDownIcon width={7} height={4.317} />
         </Pressable>
-        {/* TODO: 알림 화면(01a)은 MVP 포함 여부 미정 (spec Q13) */}
+        {/* 알림(01a)은 API가 없어 더미 데이터로 보여준다 (spec Q13) */}
         {showBell && (
           <Pressable
+            onPress={() => setNotificationsOpen(true)}
             style={styles.bell}
             accessibilityRole="button"
             accessibilityLabel={t('common.notifications')}
@@ -60,6 +63,12 @@ export default function AppHeader({
           </Pressable>
         )}
       </View>
+      {showBell && (
+        <NotificationSheet
+          visible={notificationsOpen}
+          onClose={() => setNotificationsOpen(false)}
+        />
+      )}
     </View>
   );
 }
