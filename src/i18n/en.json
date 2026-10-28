@@ -1,6 +1,6 @@
 {
   "language": { "current": "English" },
-  "common": { "back": "Back", "notifications": "Notifications" },
+  "common": { "back": "Back", "notifications": "Notifications", "clear": "Clear" },
   "tabs": {
     "home": "Home",
     "map": "Map",
@@ -12,8 +12,25 @@
     "login": "Log in",
     "signup": "Sign up",
     "noAccount": "Don't have an account?",
-    "tempLogin": "Temp log in",
+    "welcome": "Welcome!",
+    "loginId": "ID",
+    "password": "Password",
+    "loginNotice": "Log in to save your trip plans and view them anytime",
+    "or": "or",
+    "google": "Continue with Google",
+    "apple": "Continue with Apple",
     "tempLogout": "Temp log out"
+  },
+  "signup": {
+    "name": "Name",
+    "namePlaceholder": "Name (up to 50 characters)",
+    "loginIdRule": "4–30 lowercase letters, numbers, or _",
+    "passwordRule": "8–64 characters",
+    "passwordConfirm": "Confirm password",
+    "passwordConfirmPlaceholder": "Re-enter password",
+    "passwordMismatch": "Passwords don't match",
+    "socialNotice": "Google and Apple accounts can start right from the login screen",
+    "submit": "Sign up"
   },
   "onboarding": {
     "next": "Next",
