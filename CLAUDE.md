@@ -110,6 +110,7 @@ src/
 ## 8. Git 규칙
 
 - 커밋은 Conventional Commits 형식(`타입(범위): 내용`)을 따르고 한국어로 쓴다. 예: `feat(auth): 로그인 화면 추가`
+- PR은 Squash and merge로 합친다. PR 제목이 Squash 커밋 제목이 되므로 PR 제목도 Conventional Commits 형식으로 쓴다.
 - 커밋 메시지와 PR 본문에 Claude, Anthropic, `Co-Authored-By`, "Generated with Claude Code" 문구를 넣지 않는다.
 - 브랜치 이름은 `타입/이슈번호-설명` 형식으로 짓는다. `main`에 직접 푸시하지 않는다.
 - 작업 브랜치는 `develop`에서 만들고 PR로 `develop`에 합친다. `main`에는 최종 단계에서 `develop`을 PR로 합친다.
