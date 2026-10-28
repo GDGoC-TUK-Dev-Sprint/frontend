@@ -47,5 +47,23 @@
       "eyebrow": "여행 경비까지 미리 준비",
       "heading": "예상 경비를\n한눈에 확인할 수 있어요."
     }
+  },
+  "home": {
+    "heading": "나에게 딱 맞는 한국 여행을\n시작해보세요",
+    "description": "여행지를 추천받고, 최적의 동선을 만들고, 예상 경비까지 한 번에 확인해보세요.",
+    "popularCourse": "실시간 서울 인기 코스",
+    "detail": "자세히",
+    "chatTitle": "여행 중 궁금한게 있나요?",
+    "chatSubtitle": "KOREADY에게 무엇이든 물어보세요",
+    "chatStart": "채팅시작",
+    "myTrips": "나의 여행 티켓",
+    "viewAll": "전체보기",
+    "upcoming": "진행 예정",
+    "dDay": "D-{{count}}",
+    "tripNumber": "일정 번호 #{{number}}",
+    "tripMeta": "{{region}} 여행 · {{period}} · {{count}}명",
+    "viewSchedule": "일정 자세히 보기",
+    "viewOnMap": "지도에서 보기",
+    "imageSource": "한국관광공사 이미지를 사용하였습니다."
   }
 }
