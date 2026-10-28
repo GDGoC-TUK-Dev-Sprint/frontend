@@ -57,20 +57,9 @@ export const radius = {
   cardSmall: 12,
 } as const;
 
-// React Native 그림자 (피그마: y 4, blur 12)
+// 피그마 effect 스타일 card·footer. boxShadow는 CSS box-shadow와 같아 피그마 값을 그대로 쓴다
+// shadow* + elevation 대신 쓰는 이유: Android elevation은 색·불투명도를 지정할 수 없다 (New Architecture 필요)
 export const shadow = {
-  card: {
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08, // TODO 피그마 그림자 불투명도 확인
-    shadowRadius: 12,
-    elevation: 4, // Android
-  },
-  bottomBar: {
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.08, // TODO 피그마 그림자 불투명도 확인
-    shadowRadius: 12,
-    elevation: 8,
-  },
+  card: { boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.05)' },
+  bottomBar: { boxShadow: '0px -4px 12px rgba(0, 0, 0, 0.05)' },
 } as const;
