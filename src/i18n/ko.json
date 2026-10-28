@@ -1,0 +1,18 @@
+{
+  "language": { "current": "한국어" },
+  "common": { "back": "뒤로 가기", "notifications": "알림" },
+  "tabs": {
+    "home": "홈",
+    "map": "지도",
+    "chatbot": "챗봇",
+    "plan": "계획 확인",
+    "myPage": "마이페이지"
+  },
+  "auth": {
+    "login": "로그인",
+    "signup": "회원가입",
+    "noAccount": "아직 계정이 없나요?",
+    "tempLogin": "임시 로그인",
+    "tempLogout": "임시 로그아웃"
+  }
+}

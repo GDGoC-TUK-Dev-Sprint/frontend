@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import ScreenPlaceholder from '../components/ScreenPlaceholder';
 
 export default function MapScreen() {
-  return <ScreenPlaceholder title="지도" />;
+  const { t } = useTranslation();
+  return <ScreenPlaceholder title={t('tabs.map')} />;
 }

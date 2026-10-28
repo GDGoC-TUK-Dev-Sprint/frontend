@@ -4,6 +4,7 @@ import {
   createNativeStackNavigator,
   type NativeStackHeaderProps,
 } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthContext';
 import AppHeader from '../components/AppHeader';
 import LoginScreen from '../screens/LoginScreen';
@@ -30,6 +31,7 @@ const renderSignupHeader = ({
 // 로그인 필수, 게스트 모드 없음 (spec F8-1): 로그인 전에는 인증 화면만, 로그인 후에는 메인 탭만 등록한다
 export default function RootNavigator() {
   const { isSignedIn } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <NavigationContainer>
@@ -50,7 +52,7 @@ export default function RootNavigator() {
             <Stack.Screen
               name="Signup"
               component={SignupScreen}
-              options={{ title: '회원가입', header: renderSignupHeader }}
+              options={{ title: t('auth.signup'), header: renderSignupHeader }}
             />
           </>
         )}

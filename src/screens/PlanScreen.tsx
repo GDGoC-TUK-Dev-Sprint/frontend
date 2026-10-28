@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import ScreenPlaceholder from '../components/ScreenPlaceholder';
 
 export default function PlanScreen() {
-  return <ScreenPlaceholder title="계획 확인" />;
+  const { t } = useTranslation();
+  return <ScreenPlaceholder title={t('tabs.plan')} />;
 }
