@@ -38,7 +38,7 @@ const px = (size: number, ratio: number) => Math.round(size * ratio);
 export const typography = {
   display:       { fontSize: 28, fontFamily: fontFamily.bold, lineHeight: px(28, 1.1) },
   titleStrong:   { fontSize: 22, fontFamily: fontFamily.bold, lineHeight: px(22, 1.3) },
-  titleBase:     { fontSize: 16, fontFamily: fontFamily.semibold, lineHeight: px(16, 1.4) },
+  titleBase:     { fontSize: 16, fontFamily: fontFamily.medium, lineHeight: px(16, 1.4) },
   bodyStrong:    { fontSize: 14, fontFamily: fontFamily.semibold, lineHeight: px(14, 1.5) },
   bodyBase:      { fontSize: 14, fontFamily: fontFamily.regular, lineHeight: px(14, 1.5) },
   bodySubtle:    { fontSize: 12, fontFamily: fontFamily.medium, lineHeight: px(12, 1.5) },
