@@ -12,7 +12,6 @@ import { colors, typography } from '../theme/tokens';
 
 // Figma 「Input Field」 컴포넌트. 포커스되면 흰 배경 + 파란 테두리
 // 값이 있으면 오른쪽에 지우기 버튼
-const PLACEHOLDER = '#99A1AD'; // Figma 값, 토큰에 없음
 
 type Props = Omit<TextInputProps, 'style'> & {
   value: string;
@@ -49,7 +48,7 @@ export default function TextField({
           setFocused(false);
           onBlur?.(e);
         }}
-        placeholderTextColor={PLACEHOLDER}
+        placeholderTextColor={colors.text.muted}
         style={styles.input}
       />
       {value.length > 0 && (
@@ -77,7 +76,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.surface.subtle,
     borderRadius: 12,
-    backgroundColor: colors.surface.base,
+    backgroundColor: colors.surface.subtle,
   },
   focused: {
     borderColor: colors.brand.primary,
