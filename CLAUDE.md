@@ -17,7 +17,7 @@ KOREADY(코레디) 프론트엔드 저장소에서 작업할 때 따르는 안�
 - spec.md의 Expo, EAS Build, Vercel 웹 배포 관련 내용(§2.3, §7.1, §7.2, §7.5 등)은 폐기되었다. spec이 갱신되기 전까지는 이 CLAUDE.md가 우선한다.
 - 푸시 알림, 음성 인식, OCR 등 네이티브 모듈은 아직 선정하지 않았다. 임의로 설치하지 말고 먼저 질문한다.
 - 스타일링은 `StyleSheet` + `src/theme/tokens.ts`로 한다. NativeWind는 쓰지 않는다.
-- 폰트는 Pretendard, 화면 이동은 React Navigation을 쓴다.
+- 폰트는 Pretendard, 화면 이동은 React Navigation, 아이콘·로고는 `react-native-svg`(SVG)를 쓴다.
 - TODO: 지도 SDK, i18n 라이브러리, 토큰 보안 저장소 라이브러리는 아직 정해지지 않았다.
 - 서버는 Spring Boot REST API다(spec §7.2). TODO: 백엔드 저장소 위치.
 
@@ -74,19 +74,23 @@ npm test                    # Jest
 - TODO: 타입 체크 스크립트. 저장소에 스크립트가 없다.
 ## 6. 코드 규칙과 폴더 구조
 
-### 현재 `src/` 구조
+### `src/` 폴더 역할
 
-```
-src/
-├ api/          # (비어 있음)
-├ components/   # (비어 있음)
-├ screens/      # (비어 있음)
-└ theme/
-   └ tokens.ts  # 색·타이포·간격·라운드·그림자 토큰 (Figma 디자인시스템 기준 초안)
-```
+| 폴더 | 넣는 것 |
+|---|---|
+| `screens/` | 화면 1개 = 파일 1개, 이름은 `○○Screen.tsx` (예: `LoginScreen.tsx`) |
+| `components/` | 여러 화면에서 같이 쓰는 UI (예: `AppHeader`, `ScreenPlaceholder`) |
+| `navigation/` | 스택·탭 구성(`RootNavigator`, `MainTabs`), 하단 탭바(`TabBar`), 화면 파라미터 타입 |
+| `auth/` | 로그인 상태(`AuthContext`). 토큰 저장·재발급은 인증 API 연동 때 추가 |
+| `api/` | 서버 API 호출 (spec §9). 아직 없음 |
+| `theme/` | `tokens.ts` (색·타이포·간격·라운드·그림자) |
+| `assets/` | `fonts/`(Pretendard), `icons/`(Figma 아이콘 SVG), `images/`(로고 등) |
+| `__tests__/` | Jest 테스트 |
 
-- 색·글자·간격 값은 `src/theme/tokens.ts`에서만 가져온다. 파일 안의 `TODO` 값(`primarySoft`, `text.muted`, 폰트 패밀리, 그림자 불투명도)은 Figma 확인이 끝나지 않은 값이다 (spec §10.2 디자인시스템).
-- TODO: 각 폴더의 역할, 파일·컴포넌트 이름 규칙, 상태 관리, API 클라이언트 구조. 이를 정한 문서가 없다.
+- 색·글자·간격 값은 `src/theme/tokens.ts`에서 가져온다. 토큰에 없는 Figma 색은 쓰는 파일 안에 Figma 값 그대로 두고 주석을 단다. `tokens.ts`의 `TODO` 값(`primarySoft`, `text.muted`, 그림자 불투명도)은 Figma 확인 전이다 (spec §10.2).
+- 굵기는 `fontWeight`가 아니라 `fontFamily`(Pretendard 굵기별 파일)로 지정한다. 폰트를 추가하면 `src/assets/fonts`와 `android/app/src/main/assets/fonts`에 넣고 iOS `Info.plist`·Xcode 리소스에 등록한다.
+- 아이콘·로고는 Figma에서 받은 SVG를 `src/assets/`에 두고 `react-native-svg-transformer`로 컴포넌트처럼 import한다. 상태에 따라 색이 바뀌는 아이콘은 선 색을 `currentColor`로 바꾸고 `color` prop으로 지정한다.
+- TODO: 화면을 기능별 하위 폴더로 묶을지, 한 화면에서만 쓰는 컴포넌트의 위치, 상태 관리, API 클라이언트 구조. 화면을 구현하면서 정한다.
 
 ### rule.md 중 프론트에 해당하는 규칙
 
