@@ -47,5 +47,23 @@
       "eyebrow": "Plan your budget ahead",
       "heading": "See your estimated\ntrip costs at a glance."
     }
+  },
+  "home": {
+    "heading": "Start a Korea trip\nmade just for you",
+    "description": "Get place recommendations, the best route, and estimated costs all in one place.",
+    "popularCourse": "Trending in Seoul now",
+    "detail": "More",
+    "chatTitle": "Questions during your trip?",
+    "chatSubtitle": "Ask KOREADY anything",
+    "chatStart": "Start chat",
+    "myTrips": "My trip tickets",
+    "viewAll": "View all",
+    "upcoming": "Upcoming",
+    "dDay": "D-{{count}}",
+    "tripNumber": "Trip #{{number}}",
+    "tripMeta": "{{region}} · {{period}} · Party of {{count}}",
+    "viewSchedule": "View schedule",
+    "viewOnMap": "View on map",
+    "imageSource": "Images provided by Korea Tourism Organization."
   }
 }

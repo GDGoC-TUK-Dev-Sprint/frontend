@@ -85,6 +85,7 @@ npm test                    # Jest
 | `api/` | 서버 API 호출 (spec §9). 아직 없음 |
 | `theme/` | `tokens.ts` (색·타이포·간격·라운드·그림자) |
 | `assets/` | `fonts/`(Pretendard), `icons/`(Figma 아이콘 SVG), `images/`(로고 등) |
+| `mocks/` | API 연동 전 더미 데이터와 그 타입. 더미는 모든 화면이 이 한 곳에서 가져온다 |
 | `__tests__/` | Jest 테스트 |
 
 - 색·글자·간격 값은 `src/theme/tokens.ts`에서 가져온다. 토큰에 없는 Figma 색은 쓰는 파일 안에 Figma 값 그대로 두고 주석을 단다. `tokens.ts`의 `TODO` 값(`primarySoft`, `text.muted`, 그림자 불투명도)은 Figma 확인 전이다 (spec §10.2).
