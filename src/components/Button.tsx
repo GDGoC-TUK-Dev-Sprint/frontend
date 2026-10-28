@@ -126,13 +126,7 @@ const styles = StyleSheet.create({
   compact: { height: 40 },
   small: { height: 32, gap: 2, paddingHorizontal: 10, borderRadius: 8 },
   border: { borderWidth: 1, borderColor: colors.surface.subtle },
-  shadow: {
-    shadowColor: colors.brand.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 4,
-  },
+  shadow: { boxShadow: '0px 4px 12px rgba(0, 120, 255, 0.25)' },
   iconButton: {
     width: 46,
     height: 46,
