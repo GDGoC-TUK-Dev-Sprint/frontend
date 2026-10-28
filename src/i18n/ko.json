@@ -14,5 +14,21 @@
     "noAccount": "아직 계정이 없나요?",
     "tempLogin": "임시 로그인",
     "tempLogout": "임시 로그아웃"
+  },
+  "onboarding": {
+    "next": "다음",
+    "start": "여행 계획 생성하기",
+    "place": {
+      "eyebrow": "나에게 딱 맞는 한국 여행",
+      "heading": "여행 조건과 취향에\n맞는 장소를 찾아드려요."
+    },
+    "route": {
+      "eyebrow": "어디부터 가야 할지 고민이라면",
+      "heading": "위치와 시간을 고려해\n효율적인 동선을 추천해요"
+    },
+    "cost": {
+      "eyebrow": "여행 경비까지 미리 준비",
+      "heading": "예상 경비를\n한눈에 확인할 수 있어요."
+    }
   }
 }

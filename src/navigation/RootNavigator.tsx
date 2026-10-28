@@ -8,10 +8,12 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthContext';
 import AppHeader from '../components/AppHeader';
 import LoginScreen from '../screens/LoginScreen';
+import OnboardingScreen from '../screens/OnboardingScreen';
 import SignupScreen from '../screens/SignupScreen';
 import MainTabs from './MainTabs';
 
 export type RootStackParamList = {
+  Onboarding: undefined;
   Login: undefined;
   Signup: undefined;
   Main: undefined;
@@ -28,7 +30,7 @@ const renderSignupHeader = ({
   <AppHeader title={options.title} onBack={navigation.goBack} />
 );
 
-// 로그인 필수, 게스트 모드 없음 (spec F8-1): 로그인 전에는 인증 화면만, 로그인 후에는 메인 탭만 등록한다
+// 로그인 필수, 게스트 모드 없음 (spec F8-1): 로그인 전에는 온보딩·인증 화면만, 로그인 후에는 메인 탭만 등록한다
 export default function RootNavigator() {
   const { isSignedIn } = useAuth();
   const { t } = useTranslation();
@@ -44,6 +46,11 @@ export default function RootNavigator() {
           />
         ) : (
           <>
+            <Stack.Screen
+              name="Onboarding"
+              component={OnboardingScreen}
+              options={{ headerShown: false }}
+            />
             <Stack.Screen
               name="Login"
               component={LoginScreen}
