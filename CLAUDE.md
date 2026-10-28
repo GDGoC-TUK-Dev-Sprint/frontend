@@ -18,7 +18,8 @@ KOREADY(코레디) 프론트엔드 저장소에서 작업할 때 따르는 안�
 - 푸시 알림, 음성 인식, OCR 등 네이티브 모듈은 아직 선정하지 않았다. 임의로 설치하지 말고 먼저 질문한다.
 - 스타일링은 `StyleSheet` + `src/theme/tokens.ts`로 한다. NativeWind는 쓰지 않는다.
 - 폰트는 Pretendard, 화면 이동은 React Navigation, 아이콘·로고는 `react-native-svg`(SVG)를 쓴다.
-- TODO: 지도 SDK, i18n 라이브러리, 토큰 보안 저장소 라이브러리는 아직 정해지지 않았다.
+- 지도는 네이버 지도 SDK를 쓴다 (Q8 팀 결정, 2026-10-29). spec §7.6·§15는 아직 Google 기본으로 적혀 있다.
+- TODO: 토큰 보안 저장소 라이브러리는 아직 정해지지 않았다.
 - 서버는 Spring Boot REST API다(spec §7.2). TODO: 백엔드 저장소 위치.
 
 ## 2. 문서 안내 (읽는 순서)
@@ -46,7 +47,6 @@ KOREADY(코레디) 프론트엔드 저장소에서 작업할 때 따르는 안�
 
 | # | 내용 | 근거 |
 |---|---|---|
-| Q8 | 지도 SDK: Figma는 네이버 지도, spec은 Google 공급자 기본 + 네이버 조건부 | spec §15, §7.6 |
 | Q12 | 비밀번호 찾기·재설정: Figma에 화면이 없고, 이메일을 받지 않아 복구 수단이 없음 | spec §15, F11-9 |
 | Q13 | 알림(01a)을 MVP에 넣을지 여부: 화면만 있고 API는 없음 | spec §15, F14 |
 | Q14 | 추천 모드 "상관없음"을 화면에 둘지 여부: Figma 조건 입력에 모드 토글이 없음 | spec §15, recommendation_design §12 |

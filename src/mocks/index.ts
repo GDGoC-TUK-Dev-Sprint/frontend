@@ -95,3 +95,114 @@ export const mockNotifications: AppNotification[] = [
     read: true,
   },
 ];
+
+// 조건 입력 선택지 (02 조건 입력·02a 숙소 위치 검색). GET /api/meta/options (spec API 8)
+// 국적은 권역 코드로만 저장한다 (spec F1-1, §11). 권역 매핑은 서버가 한다
+export type Country = {
+  code: string; // ISO 3166-1 alpha-2
+  name: string;
+  nameEn: string;
+  flag: string; // TODO: Figma는 국기 SVG. API 응답에 국기 이미지가 있는지 확인 후 교체
+};
+
+// 여행 테마 8종. 코드는 신분류체계 대분류 (spec F1-7, §5A.2)
+export type Theme = { code: string; name: string };
+
+// 숙소 미정 시 고르는 서울 지역 (spec F1-3 ②)
+export type Area = { code: string; name: string };
+
+export type MetaOptions = {
+  countries: Country[];
+  themes: Theme[];
+  areas: Area[];
+};
+
+export const mockMetaOptions: MetaOptions = {
+  countries: [
+    { code: 'JP', name: '일본', nameEn: 'Japan', flag: '🇯🇵' },
+    { code: 'CN', name: '중국', nameEn: 'China', flag: '🇨🇳' },
+    { code: 'TW', name: '대만', nameEn: 'Taiwan', flag: '🇹🇼' },
+    { code: 'US', name: '미국', nameEn: 'United States', flag: '🇺🇸' },
+    { code: 'TH', name: '태국', nameEn: 'Thailand', flag: '🇹🇭' },
+    { code: 'VN', name: '베트남', nameEn: 'Vietnam', flag: '🇻🇳' },
+  ],
+  themes: [
+    { code: 'SH', name: '쇼핑' },
+    { code: 'EX', name: '체험 관광' },
+    { code: 'FD', name: '음식' },
+    { code: 'EV', name: '축제/공연/행사' },
+    { code: 'HS', name: '역사 관광' },
+    { code: 'NA', name: '자연관광' },
+    { code: 'LS', name: '레저 스포츠' },
+    { code: 'VE', name: '문화 관광' },
+  ],
+  areas: [
+    { code: 'myeongdong-jongno', name: '명동·종로' },
+    { code: 'hongdae-mapo', name: '홍대·마포' },
+    { code: 'gangnam', name: '강남' },
+    { code: 'itaewon-yongsan', name: '이태원·용산' },
+    { code: 'seongsu', name: '성수' },
+    { code: 'jamsil', name: '잠실' },
+    { code: 'dongdaemun', name: '동대문' },
+    { code: 'yeouido', name: '여의도' },
+    { code: 'seoulstation-namdaemun', name: '서울역·남대문' },
+    { code: 'sinchon', name: '신촌' },
+  ],
+};
+
+// 숙소 검색 결과. GET /api/lodgings (spec API 9, F1-3b)
+export type LodgingType = 'hotel' | 'guesthouse' | 'hanok';
+
+export type Lodging = {
+  id: string;
+  name: string;
+  nameEn: string;
+  address: string;
+  type: LodgingType;
+  typeName: string; // 유형 배지 문구
+  lat: number;
+  lng: number;
+};
+
+const mockLodgings: Lodging[] = [
+  {
+    id: 'l1',
+    name: '명동 센트럴 호텔',
+    nameEn: 'Myeongdong Central Hotel',
+    address: '서울 중구 명동길 00',
+    type: 'hotel',
+    typeName: '호텔',
+    lat: 37.564,
+    lng: 126.985,
+  },
+  {
+    id: 'l2',
+    name: '명동 스카이 게스트하우스',
+    nameEn: 'Myeongdong Sky Guesthouse',
+    address: '서울 중구 퇴계로 00',
+    type: 'guesthouse',
+    typeName: '게스트하우스',
+    lat: 37.561,
+    lng: 126.986,
+  },
+  {
+    id: 'l3',
+    name: '명동 한옥 스테이',
+    nameEn: 'Myeongdong Hanok Stay',
+    address: '서울 중구 남대문로 00',
+    type: 'hanok',
+    typeName: '한옥',
+    lat: 37.563,
+    lng: 126.981,
+  },
+];
+
+// TODO: GET /api/lodgings?query= 로 교체. 서버는 이름·주소를 국문·영문으로 검색한다
+export const searchMockLodgings = (query: string) => {
+  const q = query.trim().toLowerCase();
+  return mockLodgings.filter(lodging =>
+    [lodging.name, lodging.nameEn, lodging.address].some(text =>
+      text.toLowerCase().includes(q),
+    ),
+  );
+};
