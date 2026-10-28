@@ -5,7 +5,7 @@
 export const colors = {
   brand: {
     primary: '#0078FF',
-    primarySoft: '#DBEAFF', // TODO 피그마 라벨이 #0078FF로 적혀 있음. 색 견본에서 추정한 값
+    primarySoft: '#DBEAFE', // brand-primary-soft
     surfaceSubtle: '#EFF6FF', // surface-brand-subtle
   },
   surface: {
@@ -17,7 +17,7 @@ export const colors = {
   },
   text: {
     base: '#383838',
-    muted: '#6A7384', // TODO 피그마 라벨이 #383838로 적혀 있음. 색 견본에서 추정한 값
+    muted: '#697383', // text-muted
     subtle: '#94A3B8',
     negative: '#FA5252',
   },
