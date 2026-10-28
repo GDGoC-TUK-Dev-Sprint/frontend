@@ -14,5 +14,21 @@
     "noAccount": "Don't have an account?",
     "tempLogin": "Temp log in",
     "tempLogout": "Temp log out"
+  },
+  "onboarding": {
+    "next": "Next",
+    "start": "Create my trip plan",
+    "place": {
+      "eyebrow": "A Korea trip made for you",
+      "heading": "Find places that fit\nyour trip and taste."
+    },
+    "route": {
+      "eyebrow": "Not sure where to start?",
+      "heading": "Get efficient routes\nbased on place and time."
+    },
+    "cost": {
+      "eyebrow": "Plan your budget ahead",
+      "heading": "See your estimated\ntrip costs at a glance."
+    }
   }
 }
