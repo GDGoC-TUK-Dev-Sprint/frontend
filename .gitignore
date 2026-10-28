@@ -77,3 +77,6 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Claude Code (개인 로컬 설정)
+.claude/settings.local.json
