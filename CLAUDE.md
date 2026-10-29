@@ -85,6 +85,7 @@ npm test                    # Jest
 | `api/` | 서버 API 호출 (spec §9). 아직 없음 |
 | `theme/` | `tokens.ts` (색·타이포·간격·라운드·그림자) |
 | `assets/` | `fonts/`(Pretendard), `icons/`(Figma 아이콘 SVG), `images/`(로고 등) |
+| `utils/` | 화면과 무관한 순수 함수 (예: `date.ts` 날짜 계산). 테스트는 `__tests__/`에 둔다 |
 | `mocks/` | API 연동 전 더미 데이터와 그 타입. 더미는 모든 화면이 이 한 곳에서 가져온다 |
 | `__tests__/` | Jest 테스트 |
 

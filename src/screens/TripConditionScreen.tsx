@@ -5,10 +5,7 @@ import { useTranslation } from 'react-i18next';
 import Badge from '../components/Badge';
 import BottomSheet from '../components/BottomSheet';
 import Button from '../components/Button';
-import DateRangeModal, {
-  formatDot,
-  type DateRange,
-} from '../components/DateRangeModal';
+import DateRangeModal, { type DateRange } from '../components/DateRangeModal';
 import LodgingSearchSheet from '../components/LodgingSearchSheet';
 import TextField from '../components/TextField';
 import ArrowForwardIcon from '../assets/icons/arrow-forward.svg';
@@ -36,6 +33,7 @@ import {
   spacing,
   typography,
 } from '../theme/tokens';
+import { formatDateRange, nightsBetween } from '../utils/date';
 
 // Figma 「02 조건 입력」 (spec F1). 선택지는 GET /api/meta/options 더미
 // TODO: 메인에서 들어오는 버튼은 디자이너가 정한 뒤 연결
@@ -78,6 +76,12 @@ export default function TripConditionScreen() {
     setThemeCodes(codes =>
       codes.includes(code) ? codes.filter(c => c !== code) : [...codes, code],
     );
+
+  // "2박 3일", 같은 날이면 "당일치기"
+  const nights = dates && nightsBetween(dates.start, dates.end);
+  const nightsLabel = nights
+    ? t('condition.nights', { nights, days: nights + 1 })
+    : t('condition.dayTrip');
 
   const stayTitle =
     stay?.kind === 'lodging'
@@ -252,15 +256,10 @@ export default function TripConditionScreen() {
               <View>
                 <Text style={[typography.bodyBase, { color: TEXT_STRONG }]}>
                   {dates
-                    ? `${formatDot(dates.start, '. ')} ~ ${formatDot(
-                        dates.end,
-                        '. ',
-                      ).slice(6)}`
+                    ? formatDateRange(dates.start, dates.end)
                     : t('condition.datePlaceholder')}
                 </Text>
-                {dates && (
-                  <Text style={styles.nights}>{nightsLabel(t, dates)}</Text>
-                )}
+                {dates && <Text style={styles.nights}>{nightsLabel}</Text>}
               </View>
             </View>
             <View style={styles.row}>
@@ -423,7 +422,6 @@ export default function TripConditionScreen() {
           icon={ArrowForwardIcon}
           iconSize={12}
           shadow={canSubmit}
-          style={!canSubmit && styles.disabled}
         />
       </View>
 
@@ -492,17 +490,6 @@ export default function TripConditionScreen() {
       />
     </View>
   );
-}
-
-// "2박 3일", 같은 날이면 "당일치기"
-function nightsLabel(
-  t: ReturnType<typeof useTranslation>['t'],
-  { start, end }: DateRange,
-) {
-  const nights = Math.round((end.getTime() - start.getTime()) / 86400000);
-  return nights === 0
-    ? t('condition.dayTrip')
-    : t('condition.nights', { nights, days: nights + 1 });
 }
 
 function Section({
@@ -753,7 +740,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 16,
     borderRadius: 14,
-    backgroundColor: '#F8F9FC', // Figma 값
+    backgroundColor: colors.surface.base,
   },
   dateIcon: {
     width: 40,

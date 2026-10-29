@@ -33,7 +33,7 @@ export default function BottomSheet({
   title,
   onClose,
   headerRight,
-  height = '88%',
+  height = '88%', // Figma 시트 높이 860 / 화면 973
   children,
 }: Props) {
   const { t } = useTranslation();
@@ -112,7 +112,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     backgroundColor: 'rgba(0,0,0,0.45)', // Figma 값
   },
-  // Figma 시트 높이 860 / 화면 973
   sheet: {
     gap: 16,
     borderTopWidth: 1,

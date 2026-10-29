@@ -20,6 +20,7 @@ import MapIcon from '../assets/icons/map.svg';
 import TicketIcon from '../assets/icons/ticket.svg';
 import { mockFeaturedCourse, mockTrip } from '../mocks';
 import type { MainTabParamList } from '../navigation/MainTabs';
+import { formatMonthDay, parseDate } from '../utils/date';
 import {
   colors,
   fontFamily,
@@ -39,10 +40,7 @@ const STOP_COLORS = [colors.brand.primary, '#6366F1'];
 export default function HomeScreen({ navigation }: Props) {
   const { t, i18n } = useTranslation();
   const formatDate = (date: string) =>
-    new Date(date).toLocaleDateString(i18n.language, {
-      month: 'short',
-      day: 'numeric',
-    });
+    formatMonthDay(parseDate(date), i18n.language);
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>

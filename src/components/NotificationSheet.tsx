@@ -13,6 +13,7 @@ import {
   type NotificationCategory,
 } from '../mocks';
 import { colors, fontFamily, typography } from '../theme/tokens';
+import { formatMonthDay, isSameDay, timeAgo } from '../utils/date';
 
 // Figma 「01a 알림 확인」. 알림은 API가 없어 더미 데이터로 보여준다 (spec F14, Q13)
 const TABS = ['all', 'schedule', 'visit', 'notice'] as const;
@@ -60,10 +61,7 @@ export default function NotificationSheet({ visible, onClose }: Props) {
     const date = new Date(createdAt);
     const { key, count: n } = timeAgo(date, now);
     return key === 'date'
-      ? date.toLocaleDateString(i18n.language, {
-          month: 'short',
-          day: 'numeric',
-        })
+      ? formatMonthDay(date, i18n.language)
       : t(`notifications.${key}`, { count: n });
   };
 
@@ -174,27 +172,6 @@ function NotificationCard({
       </View>
     </View>
   );
-}
-
-const isSameDay = (a: Date, b: Date) => a.toDateString() === b.toDateString();
-
-// "방금 전 · N분 전 · N시간 전 · 어제" 중 무엇을 쓸지 정한다. 그보다 오래되면 날짜
-export function timeAgo(
-  date: Date,
-  now: Date,
-): {
-  key: 'justNow' | 'minutesAgo' | 'hoursAgo' | 'yesterday' | 'date';
-  count?: number;
-} {
-  const minutes = Math.floor((now.getTime() - date.getTime()) / 60000);
-  if (minutes < 1) return { key: 'justNow' };
-  if (minutes < 60) return { key: 'minutesAgo', count: minutes };
-  if (isSameDay(date, now)) {
-    return { key: 'hoursAgo', count: Math.floor(minutes / 60) };
-  }
-  const yesterday = new Date(now);
-  yesterday.setDate(now.getDate() - 1);
-  return isSameDay(date, yesterday) ? { key: 'yesterday' } : { key: 'date' };
 }
 
 const styles = StyleSheet.create({
