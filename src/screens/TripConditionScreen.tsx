@@ -12,11 +12,12 @@ import { mockMetaOptions } from '../mocks';
 import { colors, shadow, spacing, typography } from '../theme/tokens';
 import { useTripCondition } from './tripCondition/useTripCondition';
 import ConditionIntro from './tripCondition/ConditionIntro';
-import BudgetThemeSection from './tripCondition/BudgetThemeSection';
-import ScheduleSection from './tripCondition/ScheduleSection';
 import BasicInfoSection from './tripCondition/BasicInfoSection';
+import ScheduleSection from './tripCondition/ScheduleSection';
+import BudgetThemeSection from './tripCondition/BudgetThemeSection';
 
 // Figma 「02 조건 입력」 (spec F1). 선택지는 GET /api/meta/options 더미
+// 구역은 tripCondition/ 폴더, 입력 상태는 useTripCondition 훅. 이 파일은 배치와 선택 창(시트·달력)만 맡는다
 // TODO: 메인에서 들어오는 버튼은 디자이너가 정한 뒤 연결
 // TODO: 추천 모드 "상관없음" 토글은 Figma에 없어 넣지 않음 (spec Q14)
 
