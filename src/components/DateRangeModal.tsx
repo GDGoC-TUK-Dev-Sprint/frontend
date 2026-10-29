@@ -7,6 +7,13 @@ import CheckIcon from '../assets/icons/check.svg';
 import ChevronRightIcon from '../assets/icons/chevron-right.svg';
 import CloseBoldIcon from '../assets/icons/close-bold.svg';
 import { colors, fontFamily, typography } from '../theme/tokens';
+import {
+  formatDot,
+  isSameDay,
+  monthGrid,
+  pickDay,
+  startOfDay,
+} from '../utils/date';
 
 // Figma 「Date Selection Card」(02 조건 입력의 날짜 선택). 지난 날짜는 고를 수 없다 (spec F1-4)
 // Figma 달력 글꼴은 SF Pro. 앱 폰트(Pretendard)로 맞춤
@@ -21,7 +28,6 @@ type Props = {
 
 // Figma 값 (토큰 없음)
 const TEXT_STRONG = '#1A1C1C';
-const BOX = '#F8F9FC';
 
 export default function DateRangeModal({
   visible,
@@ -149,12 +155,12 @@ export default function DateRangeModal({
                 {week.map((day, d) => {
                   if (!day) return <View key={d} style={styles.cell} />;
                   const past = day < today;
-                  const isStart = sameDay(day, start);
-                  const isEnd = sameDay(day, end);
+                  const isStart = isSameDay(day, start);
+                  const isEnd = isSameDay(day, end);
                   const inRange = !!start && !!end && day > start && day < end;
                   // 시작~끝 사이를 잇는 띠. 시작·끝 칸은 반쪽만 칠한다
                   const band =
-                    start && end && !sameDay(start, end)
+                    start && end && !isSameDay(start, end)
                       ? inRange
                         ? styles.bandFull
                         : isStart
@@ -179,7 +185,7 @@ export default function DateRangeModal({
                       <View
                         style={[
                           styles.day,
-                          sameDay(day, today) && styles.today,
+                          isSameDay(day, today) && styles.today,
                           (isStart || isEnd) && styles.daySelected,
                         ]}
                       >
@@ -206,7 +212,6 @@ export default function DateRangeModal({
             disabled={!start || !end}
             size="medium"
             icon={CheckIcon}
-            style={(!start || !end) && styles.disabled}
           />
         </View>
       </View>
@@ -234,44 +239,14 @@ function DateBox({ label, date }: { label: string; date?: Date }) {
   );
 }
 
-// 2026.10.21 (sep '. ' 이면 2026. 10. 21)
-export const formatDot = (date: Date, sep = '.') =>
-  [date.getFullYear(), pad(date.getMonth() + 1), pad(date.getDate())].join(sep);
-
-const pad = (n: number) => String(n).padStart(2, '0');
-const startOfDay = (date: Date) =>
-  new Date(date.getFullYear(), date.getMonth(), date.getDate());
 const firstOfMonth = (date: Date) =>
   new Date(date.getFullYear(), date.getMonth(), 1);
 const addMonths = (date: Date, n: number) =>
   new Date(date.getFullYear(), date.getMonth() + n, 1);
-const sameDay = (a: Date, b?: Date) => !!b && a.getTime() === b.getTime();
 const chunk = <T,>(items: T[], size: number) =>
   Array.from({ length: Math.ceil(items.length / size) }, (_, i) =>
     items.slice(i * size, i * size + size),
   );
-
-// 달력 칸: 1일 앞은 요일만큼 빈칸(null), 마지막 주는 7칸을 채운다
-export function monthGrid(month: Date): (Date | null)[] {
-  const year = month.getFullYear();
-  const m = month.getMonth();
-  const days = new Date(year, m + 1, 0).getDate();
-  const cells: (Date | null)[] = Array(new Date(year, m, 1).getDay()).fill(
-    null,
-  );
-  for (let d = 1; d <= days; d++) cells.push(new Date(year, m, d));
-  while (cells.length % 7) cells.push(null);
-  return cells;
-}
-
-// 첫 탭은 시작, 두 번째 탭은 끝. 시작보다 앞을 누르면 시작을 바꾸고, 다 고른 뒤 누르면 새로 시작
-export function pickDay(
-  { start, end }: { start?: Date; end?: Date },
-  day: Date,
-): { start?: Date; end?: Date } {
-  if (!start || end || day < start) return { start: day, end: undefined };
-  return { start, end: day };
-}
 
 const styles = StyleSheet.create({
   overlay: {
@@ -320,7 +295,7 @@ const styles = StyleSheet.create({
     gap: 8,
     padding: 12,
     borderRadius: 12,
-    backgroundColor: BOX,
+    backgroundColor: colors.surface.base,
   },
   dateIcon: {
     width: 36,

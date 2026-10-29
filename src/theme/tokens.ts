@@ -20,6 +20,18 @@ export const colors = {
     muted: '#697383', // text-muted
     subtle: '#94A3B8',
     negative: '#FA5252',
+    // 아래 세 값은 디자인 시스템에 없음, 확인 필요 (Figma 화면에 직접 쓰인 값)
+    strong: '#1A1C1C', // 조건 입력 제목·입력값
+    label: '#354153', // 입력 라벨
+    emphasis: '#0F172A', // 인원 숫자
+  },
+  // 디자인 시스템에 없음, 확인 필요
+  icon: {
+    strong: '#334155', // 인원 − 아이콘
+  },
+  // 디자인 시스템에 없음, 확인 필요
+  border: {
+    divider: '#E8E8E8', // 조건 입력 섹션 구분선
   },
 } as const;
 
@@ -36,14 +48,46 @@ export const fontFamily = {
 const px = (size: number, ratio: number) => Math.round(size * ratio);
 
 export const typography = {
-  display:       { fontSize: 28, fontFamily: fontFamily.bold, lineHeight: px(28, 1.1) },
-  titleStrong:   { fontSize: 22, fontFamily: fontFamily.bold, lineHeight: px(22, 1.3) },
-  titleBase:     { fontSize: 16, fontFamily: fontFamily.medium, lineHeight: px(16, 1.4) },
-  bodyStrong:    { fontSize: 14, fontFamily: fontFamily.semibold, lineHeight: px(14, 1.5) },
-  bodyBase:      { fontSize: 14, fontFamily: fontFamily.regular, lineHeight: px(14, 1.5) },
-  bodySubtle:    { fontSize: 12, fontFamily: fontFamily.medium, lineHeight: px(12, 1.5) },
-  captionBase:   { fontSize: 11, fontFamily: fontFamily.regular, lineHeight: px(11, 1.6) },
-  captionSubtle: { fontSize: 10, fontFamily: fontFamily.regular, lineHeight: px(10, 1.6) },
+  display: {
+    fontSize: 28,
+    fontFamily: fontFamily.bold,
+    lineHeight: px(28, 1.1),
+  },
+  titleStrong: {
+    fontSize: 22,
+    fontFamily: fontFamily.bold,
+    lineHeight: px(22, 1.3),
+  },
+  titleBase: {
+    fontSize: 16,
+    fontFamily: fontFamily.medium,
+    lineHeight: px(16, 1.4),
+  },
+  bodyStrong: {
+    fontSize: 14,
+    fontFamily: fontFamily.semibold,
+    lineHeight: px(14, 1.5),
+  },
+  bodyBase: {
+    fontSize: 14,
+    fontFamily: fontFamily.regular,
+    lineHeight: px(14, 1.5),
+  },
+  bodySubtle: {
+    fontSize: 12,
+    fontFamily: fontFamily.medium,
+    lineHeight: px(12, 1.5),
+  },
+  captionBase: {
+    fontSize: 11,
+    fontFamily: fontFamily.regular,
+    lineHeight: px(11, 1.6),
+  },
+  captionSubtle: {
+    fontSize: 10,
+    fontFamily: fontFamily.regular,
+    lineHeight: px(10, 1.6),
+  },
 } as const;
 
 export const spacing = {

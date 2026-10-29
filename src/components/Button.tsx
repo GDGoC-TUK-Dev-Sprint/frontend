@@ -71,6 +71,7 @@ export default function Button({
         { backgroundColor: bg },
         variant === 'outline' && size !== 'small' && styles.border,
         shadow && styles.shadow,
+        disabled && styles.disabled,
         style,
       ]}
     >
@@ -127,6 +128,8 @@ const styles = StyleSheet.create({
   small: { height: 32, gap: 2, paddingHorizontal: 10, borderRadius: 8 },
   border: { borderWidth: 1, borderColor: colors.surface.subtle },
   shadow: { boxShadow: '0px 4px 12px rgba(0, 120, 255, 0.25)' },
+  // TODO: Figma에 비활성 버튼 디자인이 없어 흐리게만 표시. 디자이너 확인 후 수정
+  disabled: { opacity: 0.4 },
   iconButton: {
     width: 46,
     height: 46,
