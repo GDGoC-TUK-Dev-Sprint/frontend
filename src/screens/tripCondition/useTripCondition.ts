@@ -106,3 +106,6 @@ export function useTripCondition() {
       ),
   };
 }
+
+// 구역 컴포넌트가 받는 입력 상태와 동작
+export type TripConditionForm = ReturnType<typeof useTripCondition>;

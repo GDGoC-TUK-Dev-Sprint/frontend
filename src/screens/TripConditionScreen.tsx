@@ -2,7 +2,6 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import Badge from '../components/Badge';
 import BottomSheet from '../components/BottomSheet';
 import BudgetChip from '../components/BudgetChip';
 import Button from '../components/Button';
@@ -18,7 +17,6 @@ import BedIcon from '../assets/icons/bed.svg';
 import CalendarSolidIcon from '../assets/icons/calendar-solid.svg';
 import CheckIcon from '../assets/icons/check.svg';
 import ChevronRightIcon from '../assets/icons/chevron-right.svg';
-import EffectIcon from '../assets/icons/effect.svg';
 import HelpIcon from '../assets/icons/help.svg';
 import PinIcon from '../assets/icons/pin.svg';
 import PlaneIcon from '../assets/icons/plane.svg';
@@ -37,6 +35,7 @@ import {
   MIN_TRAVELERS,
   useTripCondition,
 } from './tripCondition/useTripCondition';
+import ConditionIntro from './tripCondition/ConditionIntro';
 
 // Figma 「02 조건 입력」 (spec F1). 선택지는 GET /api/meta/options 더미
 // TODO: 메인에서 들어오는 버튼은 디자이너가 정한 뒤 연결
@@ -55,15 +54,7 @@ export default function TripConditionScreen() {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.intro}>
-          <Badge
-            label={t('condition.badge')}
-            tone="highlight"
-            icon={EffectIcon}
-          />
-          <Text style={styles.heading}>{t('condition.heading')}</Text>
-          <Text style={styles.description}>{t('condition.description')}</Text>
-        </View>
+        <ConditionIntro />
 
         {/* ① 기본 정보 */}
         <Section
@@ -434,16 +425,6 @@ const styles = StyleSheet.create({
   gap4: { gap: 4 },
   gap12: { gap: 12 },
   muted: { color: colors.text.muted },
-
-  intro: { alignItems: 'flex-start', gap: 10 },
-  heading: { ...typography.titleStrong, color: colors.text.strong },
-  description: {
-    fontFamily: fontFamily.regular,
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: -6, // Figma 제목과 설명 간격 4
-    color: colors.text.muted,
-  },
 
   fieldHeader: {
     flexDirection: 'row',
