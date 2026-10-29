@@ -39,11 +39,6 @@ import { formatDateRange, nightsBetween } from '../utils/date';
 // TODO: 메인에서 들어오는 버튼은 디자이너가 정한 뒤 연결
 // TODO: 추천 모드 "상관없음" 토글은 Figma에 없어 넣지 않음 (spec Q14)
 
-// Figma 값 (토큰 없음)
-const TEXT_STRONG = '#1A1C1C';
-const LABEL = '#354153';
-const DIVIDER = '#E8E8E8';
-
 // 1인 희망 예산 프리셋 (원, spec F1-6)
 const BUDGET_PRESETS = [300000, 500000, 1000000];
 // TODO: Figma에 인원 상한이 없다. 기존 안 10명 (spec F1-5 확인 필요)
@@ -150,7 +145,9 @@ export default function TripConditionScreen() {
 
           <View style={styles.lodging}>
             <View style={styles.fieldHeader}>
-              <Text style={[typography.bodySubtle, { color: LABEL }]}>
+              <Text
+                style={[typography.bodySubtle, { color: colors.text.label }]}
+              >
                 {t('condition.lodgingQuestion')}
               </Text>
               {/* TODO: 지도에서 선택(02b). 네이버 지도 SDK 연동 이슈에서 구현 */}
@@ -254,7 +251,9 @@ export default function TripConditionScreen() {
                 />
               </View>
               <View>
-                <Text style={[typography.bodyBase, { color: TEXT_STRONG }]}>
+                <Text
+                  style={[typography.bodyBase, { color: colors.text.strong }]}
+                >
                   {dates
                     ? formatDateRange(dates.start, dates.end)
                     : t('condition.datePlaceholder')}
@@ -278,7 +277,9 @@ export default function TripConditionScreen() {
 
           <View style={styles.travelers}>
             <View>
-              <Text style={[typography.bodyStrong, { color: TEXT_STRONG }]}>
+              <Text
+                style={[typography.bodyStrong, { color: colors.text.strong }]}
+              >
                 {t('condition.travelers')}
               </Text>
               <Text
@@ -299,7 +300,11 @@ export default function TripConditionScreen() {
                 accessibilityRole="button"
                 accessibilityLabel={t('condition.decrease')}
               >
-                <MinusIcon width={10.5} height={1.5} color="#334155" />
+                <MinusIcon
+                  width={10.5}
+                  height={1.5}
+                  color={colors.icon.strong}
+                />
               </Pressable>
               <Text style={styles.count}>
                 {t('condition.travelerCount', { count: travelers })}
@@ -395,7 +400,11 @@ export default function TripConditionScreen() {
                     <Text
                       style={[
                         typography.bodySubtle,
-                        { color: selected ? TEXT_STRONG : colors.text.base },
+                        {
+                          color: selected
+                            ? colors.text.strong
+                            : colors.text.base,
+                        },
                       ]}
                     >
                       {theme.name}
@@ -549,7 +558,9 @@ function Field({
   return (
     <View style={styles.field}>
       <View style={styles.fieldHeader}>
-        <Text style={[typography.bodyBase, { color: LABEL }]}>{label}</Text>
+        <Text style={[typography.bodyBase, { color: colors.text.label }]}>
+          {label}
+        </Text>
         <Text style={[typography.captionBase, { color: colors.text.muted }]}>
           {hint}
         </Text>
@@ -613,7 +624,7 @@ const styles = StyleSheet.create({
   disabled: { opacity: 0.4 },
 
   intro: { alignItems: 'flex-start', gap: 10 },
-  heading: { ...typography.titleStrong, color: TEXT_STRONG },
+  heading: { ...typography.titleStrong, color: colors.text.strong },
   description: {
     fontFamily: fontFamily.regular,
     fontSize: 14,
@@ -650,7 +661,7 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.semibold,
     fontSize: 16,
     lineHeight: 24,
-    color: TEXT_STRONG,
+    color: colors.text.strong,
   },
   sectionSubtitle: {
     ...typography.captionBase,
@@ -665,7 +676,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.brand.primarySoft,
   },
   // Figma는 구분선이 섹션 간격 안쪽으로 4px 올라가 있다
-  sectionDivider: { height: 1, marginVertical: -4, backgroundColor: DIVIDER },
+  sectionDivider: {
+    height: 1,
+    marginVertical: -4,
+    backgroundColor: colors.border.divider,
+  },
 
   field: { gap: 6 },
   fieldHeader: {
@@ -682,7 +697,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: colors.surface.subtle,
   },
-  selectText: { ...typography.bodyBase, color: TEXT_STRONG },
+  selectText: { ...typography.bodyBase, color: colors.text.strong },
   flag: { fontSize: 18, marginRight: 8 },
   down: { transform: [{ rotate: '90deg' }] },
 
@@ -781,13 +796,13 @@ const styles = StyleSheet.create({
   },
   minus: { backgroundColor: colors.surface.default },
   plus: { backgroundColor: colors.brand.primary },
-  count: { ...typography.bodyStrong, color: '#0F172A' }, // Figma 값
+  count: { ...typography.bodyStrong, color: colors.text.emphasis },
 
   subLabel: {
     fontFamily: fontFamily.regular,
     fontSize: 13,
     lineHeight: 19.5,
-    color: LABEL,
+    color: colors.text.label,
   },
   budget: { gap: 10 },
   budgetChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },

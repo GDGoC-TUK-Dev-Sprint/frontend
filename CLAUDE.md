@@ -89,7 +89,7 @@ npm test                    # Jest
 | `mocks/` | API 연동 전 더미 데이터와 그 타입. 더미는 모든 화면이 이 한 곳에서 가져온다 |
 | `__tests__/` | Jest 테스트 |
 
-- 색·글자·간격 값은 `src/theme/tokens.ts`에서 가져온다. 토큰에 없는 Figma 색은 쓰는 파일 안에 Figma 값 그대로 두고 주석을 단다. `tokens.ts`의 `TODO` 값(`primarySoft`, `text.muted`, 그림자 불투명도)은 Figma 확인 전이다 (spec §10.2).
+- 색·글자·간격 값은 `src/theme/tokens.ts`에서 가져온다. 디자인 시스템에 없는 Figma 색은 `tokens.ts`에 Figma 값 그대로 넣고 "디자인 시스템에 없음, 확인 필요" 주석을 단다. 예전 화면에는 아직 파일 안 상수로 남은 값이 있다. `tokens.ts`의 `TODO` 값(`primarySoft`, `text.muted`, 그림자 불투명도)은 Figma 확인 전이다 (spec §10.2).
 - 굵기는 `fontWeight`가 아니라 `fontFamily`(Pretendard 굵기별 파일)로 지정한다. 폰트를 추가하면 `src/assets/fonts`와 `android/app/src/main/assets/fonts`에 넣고 iOS `Info.plist`·Xcode 리소스에 등록한다.
 - 아이콘·로고는 Figma에서 받은 SVG를 `src/assets/`에 두고 `react-native-svg-transformer`로 컴포넌트처럼 import한다. 상태에 따라 색이 바뀌는 아이콘은 선 색을 `currentColor`로 바꾸고 `color` prop으로 지정한다.
 - TODO: 화면을 기능별 하위 폴더로 묶을지, 한 화면에서만 쓰는 컴포넌트의 위치, 상태 관리, API 클라이언트 구조. 화면을 구현하면서 정한다.
