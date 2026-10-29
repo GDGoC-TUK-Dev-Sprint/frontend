@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -7,7 +7,7 @@ import BottomSheet from '../components/BottomSheet';
 import BudgetChip from '../components/BudgetChip';
 import Button from '../components/Button';
 import CheckCircle from '../components/CheckCircle';
-import DateRangeModal, { type DateRange } from '../components/DateRangeModal';
+import DateRangeModal from '../components/DateRangeModal';
 import Field from '../components/Field';
 import LodgingSearchSheet from '../components/LodgingSearchSheet';
 import Section from '../components/Section';
@@ -22,12 +22,7 @@ import EffectIcon from '../assets/icons/effect.svg';
 import HelpIcon from '../assets/icons/help.svg';
 import PinIcon from '../assets/icons/pin.svg';
 import PlaneIcon from '../assets/icons/plane.svg';
-import {
-  mockMetaOptions,
-  type Area,
-  type Country,
-  type Lodging,
-} from '../mocks';
+import { mockMetaOptions } from '../mocks';
 import {
   colors,
   fontFamily,
@@ -35,57 +30,24 @@ import {
   spacing,
   typography,
 } from '../theme/tokens';
-import { formatDateRange, nightsBetween } from '../utils/date';
+import { formatDateRange } from '../utils/date';
+import {
+  BUDGET_PRESETS,
+  MAX_TRAVELERS,
+  MIN_TRAVELERS,
+  useTripCondition,
+} from './tripCondition/useTripCondition';
 
 // Figma 「02 조건 입력」 (spec F1). 선택지는 GET /api/meta/options 더미
 // TODO: 메인에서 들어오는 버튼은 디자이너가 정한 뒤 연결
 // TODO: 추천 모드 "상관없음" 토글은 Figma에 없어 넣지 않음 (spec Q14)
-
-// 1인 희망 예산 프리셋 (원, spec F1-6)
-const BUDGET_PRESETS = [300000, 500000, 1000000];
-// TODO: Figma에 인원 상한이 없다. 기존 안 10명 (spec F1-5 확인 필요)
-const MAX_TRAVELERS = 10;
-
-// 숙소는 검색으로 고른 숙소 또는 "아직 못 정함"(지역 선택은 선택 사항)
-type Stay =
-  | { kind: 'lodging'; lodging: Lodging }
-  | { kind: 'undecided'; area?: Area };
 
 export default function TripConditionScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   // TODO: GET /api/meta/options 연동
   const { countries, themes, areas } = mockMetaOptions;
-
-  const [country, setCountry] = useState<Country>();
-  const [stay, setStay] = useState<Stay>();
-  const [dates, setDates] = useState<DateRange>();
-  const [travelers, setTravelers] = useState(1);
-  const [budget, setBudget] = useState<number>();
-  const [customBudget, setCustomBudget] = useState(false);
-  const [themeCodes, setThemeCodes] = useState<string[]>([]);
-  const [sheet, setSheet] = useState<'country' | 'lodging' | 'dates'>();
-  const closeSheet = () => setSheet(undefined);
-
-  const canSubmit = !!country && !!stay && !!dates && themeCodes.length > 0;
-
-  const toggleTheme = (code: string) =>
-    setThemeCodes(codes =>
-      codes.includes(code) ? codes.filter(c => c !== code) : [...codes, code],
-    );
-
-  // "2박 3일", 같은 날이면 "당일치기"
-  const nights = dates && nightsBetween(dates.start, dates.end);
-  const nightsLabel = nights
-    ? t('condition.nights', { nights, days: nights + 1 })
-    : t('condition.dayTrip');
-
-  const stayTitle =
-    stay?.kind === 'lodging'
-      ? stay.lodging.name
-      : stay?.area
-      ? t('condition.areaCenter', { area: stay.area.name })
-      : t('condition.lodgingPlaceholder');
+  const form = useTripCondition();
 
   return (
     <View style={styles.screen}>
@@ -115,14 +77,18 @@ export default function TripConditionScreen() {
           >
             <Pressable
               style={styles.select}
-              onPress={() => setSheet('country')}
+              onPress={() => form.openPicker('country')}
               accessibilityRole="button"
             >
               <View style={styles.row}>
-                {country && <Text style={styles.flag}>{country.flag}</Text>}
-                <Text style={[styles.selectText, !country && styles.muted]}>
-                  {country
-                    ? `${country.name} (${country.nameEn})`
+                {form.country && (
+                  <Text style={styles.flag}>{form.country.flag}</Text>
+                )}
+                <Text
+                  style={[styles.selectText, !form.country && styles.muted]}
+                >
+                  {form.country
+                    ? `${form.country.name} (${form.country.nameEn})`
                     : t('condition.countryPlaceholder')}
                 </Text>
               </View>
@@ -176,7 +142,7 @@ export default function TripConditionScreen() {
 
             <Pressable
               style={styles.lodgingCard}
-              onPress={() => setSheet('lodging')}
+              onPress={() => form.openPicker('lodging')}
               accessibilityRole="button"
             >
               <View style={styles.bed}>
@@ -189,9 +155,9 @@ export default function TripConditionScreen() {
               <View style={styles.flex}>
                 <View style={[styles.row, styles.gap4]}>
                   <Text style={styles.lodgingTitle} numberOfLines={1}>
-                    {stayTitle}
+                    {form.stayTitle}
                   </Text>
-                  {!stay && <View style={styles.dot} />}
+                  {!form.stay && <View style={styles.dot} />}
                 </View>
                 <Text
                   style={[
@@ -211,9 +177,9 @@ export default function TripConditionScreen() {
 
             <Pressable
               style={styles.undecided}
-              onPress={() => setStay({ kind: 'undecided' })}
+              onPress={form.chooseUndecided}
               accessibilityRole="radio"
-              accessibilityState={{ checked: stay?.kind === 'undecided' }}
+              accessibilityState={{ checked: form.stay?.kind === 'undecided' }}
             >
               <View style={styles.helpIcon}>
                 <HelpIcon width={24} height={24} color={colors.text.muted} />
@@ -234,7 +200,7 @@ export default function TripConditionScreen() {
                 </Text>
               </View>
               <CheckCircle
-                checked={stay?.kind === 'undecided'}
+                checked={form.stay?.kind === 'undecided'}
                 emptyColor={colors.text.subtle}
               />
             </Pressable>
@@ -245,7 +211,7 @@ export default function TripConditionScreen() {
         <Section number={2} title={t('condition.schedule')}>
           <Pressable
             style={styles.dateCard}
-            onPress={() => setSheet('dates')}
+            onPress={() => form.openPicker('dates')}
             accessibilityRole="button"
           >
             <View style={[styles.row, styles.gap12]}>
@@ -260,18 +226,20 @@ export default function TripConditionScreen() {
                 <Text
                   style={[typography.bodyBase, { color: colors.text.strong }]}
                 >
-                  {dates
-                    ? formatDateRange(dates.start, dates.end)
+                  {form.dates
+                    ? formatDateRange(form.dates.start, form.dates.end)
                     : t('condition.datePlaceholder')}
                 </Text>
-                {dates && <Text style={styles.nights}>{nightsLabel}</Text>}
+                {form.dates && (
+                  <Text style={styles.nights}>{form.nightsLabel}</Text>
+                )}
               </View>
             </View>
             <View style={styles.row}>
               <Text
                 style={[typography.bodySubtle, { color: colors.brand.primary }]}
               >
-                {dates ? t('condition.change') : t('condition.select')}
+                {form.dates ? t('condition.change') : t('condition.select')}
               </Text>
               <ChevronRightIcon
                 width={20}
@@ -295,11 +263,13 @@ export default function TripConditionScreen() {
               </Text>
             </View>
             <Stepper
-              value={travelers}
-              min={1}
+              value={form.travelers}
+              min={MIN_TRAVELERS}
               max={MAX_TRAVELERS}
-              onChange={setTravelers}
-              valueLabel={t('condition.travelerCount', { count: travelers })}
+              onChange={form.setTravelers}
+              valueLabel={t('condition.travelerCount', {
+                count: form.travelers,
+              })}
               decreaseLabel={t('condition.decrease')}
               increaseLabel={t('condition.increase')}
             />
@@ -322,30 +292,21 @@ export default function TripConditionScreen() {
                     man: amount / 10000,
                     won: amount.toLocaleString('en-US'),
                   })}
-                  selected={!customBudget && budget === amount}
-                  onPress={() => {
-                    setCustomBudget(false);
-                    setBudget(amount);
-                  }}
+                  selected={!form.customBudget && form.budget === amount}
+                  onPress={() => form.selectBudgetPreset(amount)}
                 />
               ))}
               <BudgetChip
                 label={t('condition.budgetCustom')}
                 icon
-                selected={customBudget}
-                onPress={() => {
-                  setCustomBudget(true);
-                  setBudget(undefined);
-                }}
+                selected={form.customBudget}
+                onPress={form.startCustomBudget}
               />
             </View>
-            {customBudget && (
+            {form.customBudget && (
               <TextField
-                value={budget ? String(budget) : ''}
-                onChangeText={text => {
-                  const n = Number(text.replace(/\D/g, ''));
-                  setBudget(n > 0 ? n : undefined);
-                }}
+                value={form.budget ? String(form.budget) : ''}
+                onChangeText={form.changeCustomBudget}
                 placeholder={t('condition.budgetCustomPlaceholder')}
                 clearLabel={t('common.clear')}
                 keyboardType="number-pad"
@@ -364,12 +325,12 @@ export default function TripConditionScreen() {
             </View>
             <View style={styles.themes}>
               {themes.map(theme => {
-                const selected = themeCodes.includes(theme.code);
+                const selected = form.themeCodes.includes(theme.code);
                 return (
                   <Pressable
                     key={theme.code}
                     style={[styles.theme, selected && styles.themeSelected]}
-                    onPress={() => toggleTheme(theme.code)}
+                    onPress={() => form.toggleTheme(theme.code)}
                     accessibilityRole="checkbox"
                     accessibilityState={{ checked: selected }}
                   >
@@ -403,17 +364,17 @@ export default function TripConditionScreen() {
         {/* TODO: POST /api/trips 후 장소 선택(02c)으로 이동 */}
         <Button
           label={t('condition.submit')}
-          disabled={!canSubmit}
+          disabled={!form.canSubmit}
           icon={ArrowForwardIcon}
           iconSize={12}
-          shadow={canSubmit}
+          shadow={form.canSubmit}
         />
       </View>
 
       <BottomSheet
-        visible={sheet === 'country'}
+        visible={form.picker === 'country'}
         title={t('condition.country')}
-        onClose={closeSheet}
+        onClose={form.closePicker}
         height="auto"
       >
         <ScrollView contentContainerStyle={styles.countryList}>
@@ -421,18 +382,15 @@ export default function TripConditionScreen() {
             <Pressable
               key={c.code}
               style={styles.countryRow}
-              onPress={() => {
-                setCountry(c);
-                closeSheet();
-              }}
+              onPress={() => form.selectCountry(c)}
               accessibilityRole="radio"
-              accessibilityState={{ checked: c.code === country?.code }}
+              accessibilityState={{ checked: c.code === form.country?.code }}
             >
               <Text style={styles.flag}>{c.flag}</Text>
               <Text style={[styles.selectText, styles.flex]}>
                 {`${c.name} (${c.nameEn})`}
               </Text>
-              {c.code === country?.code && (
+              {c.code === form.country?.code && (
                 <CheckIcon
                   width={20}
                   height={20}
@@ -445,33 +403,24 @@ export default function TripConditionScreen() {
       </BottomSheet>
 
       <LodgingSearchSheet
-        visible={sheet === 'lodging'}
-        onClose={closeSheet}
+        visible={form.picker === 'lodging'}
+        onClose={form.closePicker}
         areas={areas}
         selectedLodgingId={
-          stay?.kind === 'lodging' ? stay.lodging.id : undefined
+          form.stay?.kind === 'lodging' ? form.stay.lodging.id : undefined
         }
         selectedAreaCode={
-          stay?.kind === 'undecided' ? stay.area?.code : undefined
+          form.stay?.kind === 'undecided' ? form.stay.area?.code : undefined
         }
-        onSelectLodging={lodging => {
-          setStay({ kind: 'lodging', lodging });
-          closeSheet();
-        }}
-        onSelectArea={area => {
-          setStay({ kind: 'undecided', area });
-          closeSheet();
-        }}
+        onSelectLodging={form.selectLodging}
+        onSelectArea={form.selectArea}
       />
 
       <DateRangeModal
-        visible={sheet === 'dates'}
-        initial={dates}
-        onApply={range => {
-          setDates(range);
-          closeSheet();
-        }}
-        onClose={closeSheet}
+        visible={form.picker === 'dates'}
+        initial={form.dates}
+        onApply={form.applyDates}
+        onClose={form.closePicker}
       />
     </View>
   );
