@@ -2,6 +2,7 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import BottomSheet from '../components/BottomSheet';
 import Button from '../components/Button';
 import DateRangeModal from '../components/DateRangeModal';
@@ -9,6 +10,8 @@ import LodgingSearchSheet from '../components/LodgingSearchSheet';
 import ArrowForwardIcon from '../assets/icons/arrow-forward.svg';
 import CheckIcon from '../assets/icons/check.svg';
 import { mockMetaOptions } from '../mocks';
+import type { RootStackParamList } from '../navigation/RootNavigator';
+import { useTrip } from '../trips/TripContext';
 import { colors, shadow, spacing, typography } from '../theme/tokens';
 import { useTripCondition } from './tripCondition/useTripCondition';
 import ConditionIntro from './tripCondition/ConditionIntro';
@@ -18,15 +21,26 @@ import BudgetThemeSection from './tripCondition/BudgetThemeSection';
 
 // Figma 「02 조건 입력」 (spec F1). 선택지는 GET /api/meta/options 더미
 // 구역은 tripCondition/ 폴더, 입력 상태는 useTripCondition 훅. 이 파일은 배치와 선택 창(시트·달력)만 맡는다
-// TODO: 메인에서 들어오는 버튼은 디자이너가 정한 뒤 연결
 // TODO: 추천 모드 "상관없음" 토글은 Figma에 없어 넣지 않음 (spec Q14)
 
-export default function TripConditionScreen() {
+type Props = NativeStackScreenProps<RootStackParamList, 'TripCondition'>;
+
+export default function TripConditionScreen({ navigation }: Props) {
   const { t } = useTranslation();
+  const { setTrip } = useTrip();
   const insets = useSafeAreaInsets();
   // TODO: GET /api/meta/options 연동
   const { countries, themes, areas } = mockMetaOptions;
   const form = useTripCondition();
+
+  // TODO: spec은 POST /api/trips 후 장소 선택(02c)으로 가고, 메인 티켓에는 확정한 여행만 나온다(F4-10)
+  // 장소 선택 화면이 없어 지금은 여행을 바로 저장하고 메인으로 돌아간다
+  const submit = () => {
+    const trip = form.toTrip();
+    if (!trip) return;
+    setTrip(trip);
+    navigation.goBack();
+  };
 
   return (
     <View style={styles.screen}>
@@ -49,9 +63,9 @@ export default function TripConditionScreen() {
           { paddingBottom: Math.max(insets.bottom, spacing.screenPadding) },
         ]}
       >
-        {/* TODO: POST /api/trips 후 장소 선택(02c)으로 이동 */}
         <Button
           label={t('condition.submit')}
+          onPress={submit}
           disabled={!form.canSubmit}
           icon={ArrowForwardIcon}
           iconSize={12}

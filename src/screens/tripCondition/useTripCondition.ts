@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DateRange } from '../../components/DateRangeModal';
-import type { Area, Country, Lodging } from '../../mocks';
-import { nightsBetween } from '../../utils/date';
+import type { Area, Country, Lodging, Trip } from '../../mocks';
+import { formatDot, nightsBetween } from '../../utils/date';
 
 // 조건 입력 화면(Figma 「02 조건 입력」, spec F1)의 입력 상태와 규칙
 
@@ -28,12 +28,18 @@ export function useTripCondition() {
   const [travelers, setTravelers] = useState(MIN_TRAVELERS);
   const [budget, setBudget] = useState<number>();
   const [customBudget, setCustomBudget] = useState(false);
+  const [anyBudget, setAnyBudget] = useState(false); // "상관없음"
   const [themeCodes, setThemeCodes] = useState<string[]>([]);
   const [picker, setPicker] = useState<Picker>();
   const closePicker = () => setPicker(undefined);
 
-  // 국적·숙소(또는 미정)·날짜·테마가 모두 있어야 생성 버튼이 켜진다. 예산은 선택 사항
-  const canSubmit = !!country && !!stay && !!dates && themeCodes.length > 0;
+  // 국적·숙소(또는 미정)·날짜·예산(또는 상관없음)·테마가 모두 있어야 생성 버튼이 켜진다
+  const canSubmit =
+    !!country &&
+    !!stay &&
+    !!dates &&
+    (anyBudget || !!budget) &&
+    themeCodes.length > 0;
 
   // "2박 3일", 같은 날이면 "당일치기"
   const nights = dates && nightsBetween(dates.start, dates.end);
@@ -49,6 +55,20 @@ export function useTripCondition() {
       ? t('condition.areaCenter', { area: stay.area.name })
       : t('condition.lodgingPlaceholder');
 
+  // 입력한 조건으로 만든 여행. 동선 전이라 장소(route)는 없다
+  // TODO: POST /api/trips 응답으로 교체. 여행 번호·제목은 서버가 정한다
+  const toTrip = (): Trip | undefined =>
+    canSubmit && dates
+      ? {
+          tripNumber: String(Date.now()).slice(-4),
+          title: t('condition.tripTitle', { period: nightsLabel }),
+          region: t('condition.tripRegion'),
+          startDate: formatDot(dates.start, '-'),
+          endDate: formatDot(dates.end, '-'),
+          travelers,
+        }
+      : undefined;
+
   return {
     country,
     stay,
@@ -56,11 +76,13 @@ export function useTripCondition() {
     travelers,
     budget,
     customBudget,
+    anyBudget,
     themeCodes,
     picker,
     canSubmit,
     nightsLabel,
     stayTitle,
+    toTrip,
 
     openPicker: setPicker,
     closePicker,
@@ -87,11 +109,18 @@ export function useTripCondition() {
 
     selectBudgetPreset: (amount: number) => {
       setCustomBudget(false);
+      setAnyBudget(false);
       setBudget(amount);
+    },
+    selectAnyBudget: () => {
+      setCustomBudget(false);
+      setAnyBudget(true);
+      setBudget(undefined);
     },
     // "직접입력"을 고르면 프리셋 선택을 지우고 입력칸을 연다
     startCustomBudget: () => {
       setCustomBudget(true);
+      setAnyBudget(false);
       setBudget(undefined);
     },
     // 숫자만 남기고, 0이나 빈 값은 미입력으로 본다

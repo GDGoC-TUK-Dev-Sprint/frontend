@@ -12,14 +12,18 @@ export type FeaturedCourse = {
 };
 
 // 나의 여행 티켓 (01 메인). GET /api/trips (spec API 17, F12-6)
+// D-day는 startDate로 화면에서 계산한다
 export type Trip = {
   tripNumber: string;
-  dDay: number;
   title: string;
   region: string;
   startDate: string; // YYYY-MM-DD
   endDate: string;
   travelers: number;
+  route?: TripRoute; // 동선을 만들기 전에는 없다. 없으면 티켓의 장소 영역을 숨긴다
+};
+
+export type TripRoute = {
   thumbnail: ImageSourcePropType;
   thumbnailLabel: string;
   stops: string[];
@@ -31,17 +35,19 @@ export const mockFeaturedCourse: FeaturedCourse = {
   image: require('../assets/images/dummy-course.jpg'),
 };
 
-export const mockTrip: Trip = {
+// 동선까지 만든 여행 예시. 앱 시작 때부터 티켓을 보려면 TripContext의 초기값으로 넣는다
+export const mockTripSample: Trip = {
   tripNumber: 'TK-2024',
-  dDay: 12,
   title: '서울 감성 카페 & 도심 힐링 탐방',
   region: '서울',
-  startDate: '2026-09-18',
-  endDate: '2026-09-20',
+  startDate: '2026-11-13',
+  endDate: '2026-11-15',
   travelers: 2,
-  thumbnail: require('../assets/images/dummy-place.jpg'),
-  thumbnailLabel: '성수동',
-  stops: ['성수동 카페거리 → 서울숲', '경복궁 & 서촌 미식 투어'],
+  route: {
+    thumbnail: require('../assets/images/dummy-place.jpg'),
+    thumbnailLabel: '성수동',
+    stops: ['성수동 카페거리 → 서울숲', '경복궁 & 서촌 미식 투어'],
+  },
 };
 
 // 알림 (01a 알림 확인). 알림 API가 없다 (spec F14, Q13)

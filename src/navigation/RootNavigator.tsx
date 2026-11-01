@@ -49,7 +49,6 @@ export default function RootNavigator() {
               component={MainTabs}
               options={{ headerShown: false }}
             />
-            {/* TODO: 메인에서 들어오는 버튼은 디자이너가 정한 뒤 연결 */}
             <Stack.Screen
               name="TripCondition"
               component={TripConditionScreen}

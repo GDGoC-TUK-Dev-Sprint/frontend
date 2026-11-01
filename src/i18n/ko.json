@@ -56,7 +56,6 @@
   "home": {
     "heading": "나에게 딱 맞는 한국 여행을\n시작해보세요",
     "description": "여행지를 추천받고, 최적의 동선을 만들고, 예상 경비까지 한 번에 확인해보세요.",
-    "popularCourse": "실시간 서울 인기 코스",
     "detail": "자세히",
     "chatTitle": "여행 중 궁금한게 있나요?",
     "chatSubtitle": "KOREADY에게 무엇이든 물어보세요",
@@ -69,7 +68,10 @@
     "tripMeta": "{{region}} 여행 · {{period}} · {{count}}명",
     "viewSchedule": "일정 자세히 보기",
     "viewOnMap": "지도에서 보기",
-    "imageSource": "한국관광공사 이미지를 사용하였습니다."
+    "imageSource": "한국관광공사 이미지를 사용하였습니다.",
+    "emptyTitle": "아직 준비 중인 여행이 없어요",
+    "emptyDescription": "여행 조건을 입력하면\n나만의 맞춤 여행 일정을 만들어드려요.",
+    "planTrip": "여행 계획 세우기"
   },
   "notifications": {
     "title": "알림",
@@ -130,10 +132,13 @@
     "budgetNotice": "숙박과 항공 제외 예산을 작성해주세요.",
     "budget": "1인 희망 예산",
     "budgetAmount": "{{man}}만원",
+    "budgetAny": "상관없음",
     "budgetCustom": "직접입력",
     "budgetCustomPlaceholder": "1인 예산 (원)",
     "themes": "어떤 여행을 좋아하시나요?",
     "multiSelect": "다중 선택 가능",
+    "tripRegion": "서울",
+    "tripTitle": "서울 {{period}} 여행",
     "submit": "이 조건으로 여행 계획 생성하기",
     "dateTitle": "여행 일정을 선택해주세요.",
     "dateSubtitle": "날짜를 선택하면 최적의 일정을 추천해드려요",

@@ -82,6 +82,7 @@ npm test                    # Jest
 | `components/` | 여러 화면에서 같이 쓰는 UI (예: `AppHeader`, `ScreenPlaceholder`) |
 | `navigation/` | 스택·탭 구성(`RootNavigator`, `MainTabs`), 하단 탭바(`TabBar`), 화면 파라미터 타입 |
 | `auth/` | 로그인 상태(`AuthContext`). 토큰 저장·재발급은 인증 API 연동 때 추가 |
+| `trips/` | 준비 중인 여행 상태(`TripContext`). 조건 입력에서 만들고 메인 티켓이 읽는다. API 연동 전에는 앱을 끄면 사라진다 |
 | `api/` | 서버 API 호출 (spec §9). 아직 없음 |
 | `theme/` | `tokens.ts` (색·타이포·간격·라운드·그림자) |
 | `assets/` | `fonts/`(Pretendard), `icons/`(Figma 아이콘 SVG), `images/`(로고 등) |

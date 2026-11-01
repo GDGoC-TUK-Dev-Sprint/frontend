@@ -9,7 +9,8 @@ import type { Theme } from '../../mocks';
 import { colors, fontFamily, typography } from '../../theme/tokens';
 import { BUDGET_PRESETS, type TripConditionForm } from './useTripCondition';
 
-// ③ 희망 예산 & 여행 테마: 1인 예산 칩·직접입력, 테마 다중 선택 (spec F1-6, F1-7)
+// ③ 희망 예산 & 여행 테마: 1인 예산 칩·상관없음·직접입력, 테마 다중 선택 (spec F1-6, F1-7)
+// TODO: 「상관없음」 칩은 Figma·spec에 없다(사용자 요청으로 추가). 서버에 보낼 값은 POST /api/trips 확정 때 정한다
 export default function BudgetThemeSection({
   form,
   themes,
@@ -38,6 +39,11 @@ export default function BudgetThemeSection({
               onPress={() => form.selectBudgetPreset(amount)}
             />
           ))}
+          <BudgetChip
+            label={t('condition.budgetAny')}
+            selected={form.anyBudget}
+            onPress={form.selectAnyBudget}
+          />
           <BudgetChip
             label={t('condition.budgetCustom')}
             icon
