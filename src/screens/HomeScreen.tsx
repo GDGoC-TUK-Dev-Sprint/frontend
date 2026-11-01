@@ -6,10 +6,13 @@ import {
   StyleSheet,
   Text,
   View,
+  type StyleProp,
+  type ViewStyle,
 } from 'react-native';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import type { CompositeScreenProps } from '@react-navigation/native';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
-import Badge from '../components/Badge';
 import Button from '../components/Button';
 import ArrowRightIcon from '../assets/icons/arrow-right.svg';
 import CalendarFillIcon from '../assets/icons/calendar-fill.svg';
@@ -17,10 +20,13 @@ import ChatIcon from '../assets/icons/chat.svg';
 import ChevronSmallIcon from '../assets/icons/chevron-small.svg';
 import FlightIcon from '../assets/icons/flight.svg';
 import MapIcon from '../assets/icons/map.svg';
+import MarkerPinIcon from '../assets/icons/marker-pin.svg';
 import TicketIcon from '../assets/icons/ticket.svg';
-import { mockFeaturedCourse, mockTrip } from '../mocks';
+import { mockFeaturedCourse, type Trip, type TripRoute } from '../mocks';
 import type { MainTabParamList } from '../navigation/MainTabs';
-import { formatMonthDay, parseDate } from '../utils/date';
+import type { RootStackParamList } from '../navigation/RootNavigator';
+import { useTrip } from '../trips/TripContext';
+import { formatMonthDay, nightsBetween, parseDate } from '../utils/date';
 import {
   colors,
   fontFamily,
@@ -29,18 +35,21 @@ import {
   typography,
 } from '../theme/tokens';
 
-type Props = BottomTabScreenProps<MainTabParamList, 'Home'>;
+// 탭 화면이지만 조건 입력(루트 스택)으로도 이동한다
+type Props = CompositeScreenProps<
+  BottomTabScreenProps<MainTabParamList, 'Home'>,
+  NativeStackScreenProps<RootStackParamList>
+>;
 
 // Figma 색 (토큰 없음)
 const TEXT_STRONG = '#0F172A';
 const TEXT_SECONDARY = '#475569';
 const STOP_COLORS = [colors.brand.primary, '#6366F1'];
 
-// Figma 「01 메인」. 서버 데이터는 src/mocks 더미
+// Figma 「01 메인」·「01a 초기 메인」. 서버 데이터는 src/mocks 더미
 export default function HomeScreen({ navigation }: Props) {
-  const { t, i18n } = useTranslation();
-  const formatDate = (date: string) =>
-    formatMonthDay(parseDate(date), i18n.language);
+  const { t } = useTranslation();
+  const { trip } = useTrip();
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
@@ -52,12 +61,13 @@ export default function HomeScreen({ navigation }: Props) {
           </Text>
         </View>
 
-        {/* TODO: 코스 상세 화면이 없어 「자세히」는 동작 없음 */}
-        <Pressable style={styles.banner} accessibilityRole="button">
-          <Image source={mockFeaturedCourse.image} style={styles.bannerImage} />
-          <View style={styles.bannerGradient} />
-          <View style={styles.bannerBadge}>
-            <Badge label={t('home.popularCourse')} tone="muted" />
+        <View style={styles.featured}>
+          <View style={styles.banner}>
+            <Image
+              source={mockFeaturedCourse.image}
+              style={styles.bannerImage}
+            />
+            <View style={styles.bannerGradient} />
           </View>
           <View style={styles.bannerFooter}>
             <View style={styles.flex}>
@@ -66,16 +76,17 @@ export default function HomeScreen({ navigation }: Props) {
                 {mockFeaturedCourse.description}
               </Text>
             </View>
-            <View style={styles.more}>
+            {/* TODO: 코스 상세 화면이 없어 「자세히」는 동작 없음 */}
+            <Pressable style={styles.more} accessibilityRole="button">
               <Text style={styles.moreText}>{t('home.detail')}</Text>
               <ChevronSmallIcon
                 width={4.933}
                 height={8}
-                color={colors.surface.default}
+                color={colors.text.base}
               />
-            </View>
+            </Pressable>
           </View>
-        </Pressable>
+        </View>
       </View>
 
       <View style={styles.chatCard}>
@@ -120,115 +131,178 @@ export default function HomeScreen({ navigation }: Props) {
           </Pressable>
         </View>
 
-        <View style={styles.ticket}>
-          <View style={styles.ticketHeader}>
-            <View style={styles.row}>
-              <View style={styles.status}>
-                <Text style={styles.statusText}>{t('home.upcoming')}</Text>
-              </View>
-              <Text style={styles.dDay}>
-                {t('home.dDay', { count: mockTrip.dDay })}
-              </Text>
-            </View>
-            <View style={styles.tripNumber}>
-              <FlightIcon
-                width={13.786}
-                height={12.1}
-                color={colors.text.subtle}
-              />
-              <Text style={styles.tripNumberText}>
-                {t('home.tripNumber', { number: mockTrip.tripNumber })}
-              </Text>
-            </View>
-          </View>
-          {/* RN은 한쪽 테두리만 점선으로 그릴 수 없어 점선 상자의 윗변만 보이게 자른다 */}
-          <View style={styles.dashClip}>
-            <View style={styles.dash} />
-          </View>
-
-          <View style={styles.ticketBody}>
-            <View style={styles.tripInfo}>
-              <Text style={styles.tripTitle}>{mockTrip.title}</Text>
-              <View style={styles.row}>
-                <CalendarFillIcon
-                  width={10.5}
-                  height={11.667}
-                  color={colors.brand.primary}
-                />
-                <Text style={styles.tripMeta}>
-                  {t('home.tripMeta', {
-                    region: mockTrip.region,
-                    period: `${formatDate(mockTrip.startDate)} - ${formatDate(
-                      mockTrip.endDate,
-                    )}`,
-                    count: mockTrip.travelers,
-                  })}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.route}>
-              {/* R-K11: Type3 이미지는 자르지 않는다. 더미는 정사각형이라 cover */}
-              <View style={styles.thumbnail}>
-                <Image
-                  source={mockTrip.thumbnail}
-                  style={StyleSheet.absoluteFill}
-                />
-                <View style={styles.thumbnailLabel}>
-                  <Text style={styles.thumbnailText}>
-                    {mockTrip.thumbnailLabel}
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.stops}>
-                <View style={styles.stopLine} />
-                {mockTrip.stops.slice(0, 2).map((stop, index) => (
-                  <View key={stop} style={styles.stop}>
-                    <View
-                      style={[
-                        styles.stopDot,
-                        { backgroundColor: STOP_COLORS[index] },
-                      ]}
-                    >
-                      <Text style={styles.stopNumber}>{index + 1}</Text>
-                    </View>
-                    <Text style={styles.stopText} numberOfLines={1}>
-                      {stop}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-
-            <View style={styles.actions}>
-              <Button
-                label={t('home.viewSchedule')}
-                onPress={() => navigation.navigate('Plan')}
-                variant="secondary"
-                size="compact"
-                style={styles.flex}
-              />
-              <Button
-                label={t('home.viewOnMap')}
-                onPress={() => navigation.navigate('Map')}
-                variant="tonal"
-                size="compact"
-                icon={MapIcon}
-                iconPosition="left"
-                style={styles.flex}
-              />
-            </View>
-          </View>
-
-          {/* 보딩패스 모양 양옆 홈 */}
-          <View style={[styles.notch, styles.notchLeft]} />
-          <View style={[styles.notch, styles.notchRight]} />
-        </View>
+        {trip ? (
+          <TripTicket
+            trip={trip}
+            onViewSchedule={() => navigation.navigate('Plan')}
+            onViewMap={() => navigation.navigate('Map')}
+          />
+        ) : (
+          <EmptyTrip onStart={() => navigation.navigate('TripCondition')} />
+        )}
       </View>
 
       {/* R-C52 출처 표시 */}
       <Text style={styles.source}>{t('home.imageSource')}</Text>
     </ScrollView>
+  );
+}
+
+// 보딩패스 모양 카드. 양옆 홈은 여행 티켓과 빈 상태가 같이 쓴다
+function TicketCard({
+  children,
+  style,
+}: {
+  children: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
+}) {
+  return (
+    <View style={[styles.ticket, style]}>
+      {children}
+      <View style={[styles.notch, styles.notchLeft]} />
+      <View style={[styles.notch, styles.notchRight]} />
+    </View>
+  );
+}
+
+function TripTicket({
+  trip,
+  onViewSchedule,
+  onViewMap,
+}: {
+  trip: Trip;
+  onViewSchedule: () => void;
+  onViewMap: () => void;
+}) {
+  const { t, i18n } = useTranslation();
+  const formatDate = (date: string) =>
+    formatMonthDay(parseDate(date), i18n.language);
+
+  return (
+    <TicketCard>
+      <View style={styles.ticketHeader}>
+        <View style={styles.row}>
+          <View style={styles.status}>
+            <Text style={styles.statusText}>{t('home.upcoming')}</Text>
+          </View>
+          <Text style={styles.dDay}>
+            {t('home.dDay', {
+              count: nightsBetween(new Date(), parseDate(trip.startDate)),
+            })}
+          </Text>
+        </View>
+        <View style={styles.tripNumber}>
+          <FlightIcon width={13.786} height={12.1} color={colors.text.subtle} />
+          <Text style={styles.tripNumberText}>
+            {t('home.tripNumber', { number: trip.tripNumber })}
+          </Text>
+        </View>
+      </View>
+      {/* RN은 한쪽 테두리만 점선으로 그릴 수 없어 점선 상자의 윗변만 보이게 자른다 */}
+      <View style={styles.dashClip}>
+        <View style={styles.dash} />
+      </View>
+
+      <View style={styles.ticketBody}>
+        <View style={styles.tripInfo}>
+          <Text style={styles.tripTitle}>{trip.title}</Text>
+          <View style={styles.row}>
+            <CalendarFillIcon
+              width={10.5}
+              height={11.667}
+              color={colors.brand.primary}
+            />
+            <Text style={styles.tripMeta}>
+              {t('home.tripMeta', {
+                region: trip.region,
+                period: `${formatDate(trip.startDate)} - ${formatDate(
+                  trip.endDate,
+                )}`,
+                count: trip.travelers,
+              })}
+            </Text>
+          </View>
+        </View>
+
+        {trip.route && <RouteSummary route={trip.route} />}
+
+        <View style={styles.actions}>
+          <Button
+            label={t('home.viewSchedule')}
+            onPress={onViewSchedule}
+            variant="secondary"
+            size="compact"
+            style={styles.flex}
+          />
+          <Button
+            label={t('home.viewOnMap')}
+            onPress={onViewMap}
+            variant="tonal"
+            size="compact"
+            icon={MapIcon}
+            iconPosition="left"
+            style={styles.flex}
+          />
+        </View>
+      </View>
+    </TicketCard>
+  );
+}
+
+// 대표 사진과 장소 순서 1·2번. 동선을 만든 뒤에만 보인다
+function RouteSummary({ route }: { route: TripRoute }) {
+  return (
+    <View style={styles.route}>
+      {/* R-K11: Type3 이미지는 자르지 않는다. 더미는 정사각형이라 cover */}
+      <View style={styles.thumbnail}>
+        <Image source={route.thumbnail} style={StyleSheet.absoluteFill} />
+        <View style={styles.thumbnailLabel}>
+          <Text style={styles.thumbnailText}>{route.thumbnailLabel}</Text>
+        </View>
+      </View>
+      <View style={styles.stops}>
+        <View style={styles.stopLine} />
+        {route.stops.slice(0, 2).map((stop, index) => (
+          <View key={stop} style={styles.stop}>
+            <View
+              style={[styles.stopDot, { backgroundColor: STOP_COLORS[index] }]}
+            >
+              <Text style={styles.stopNumber}>{index + 1}</Text>
+            </View>
+            <Text style={styles.stopText} numberOfLines={1}>
+              {stop}
+            </Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+// Figma 「01a 초기 메인」: 준비 중인 여행이 없을 때
+function EmptyTrip({ onStart }: { onStart: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <TicketCard style={styles.empty}>
+      <View style={styles.emptyIconRing}>
+        <View style={styles.emptyIcon}>
+          <MarkerPinIcon width={20} height={20} />
+        </View>
+      </View>
+      <View style={styles.emptyText}>
+        <Text style={styles.emptyTitle}>{t('home.emptyTitle')}</Text>
+        <Text style={styles.emptyDescription}>
+          {t('home.emptyDescription')}
+        </Text>
+      </View>
+      <Button
+        label={t('home.planTrip')}
+        onPress={onStart}
+        size="medium"
+        icon={ArrowRightIcon}
+        style={styles.emptyButton}
+      />
+    </TicketCard>
   );
 }
 
@@ -248,6 +322,7 @@ const styles = StyleSheet.create({
     color: colors.text.muted,
   },
 
+  featured: { gap: 10 },
   banner: {
     height: 192,
     borderRadius: 16,
@@ -261,28 +336,9 @@ const styles = StyleSheet.create({
     backgroundImage:
       'linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0.2) 50%, rgba(0,0,0,0))',
   },
-  bannerBadge: { position: 'absolute', top: 12, left: 12 },
-  bannerFooter: {
-    position: 'absolute',
-    left: 12,
-    right: 12,
-    bottom: 12,
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 8,
-  },
-  bannerTitle: {
-    fontFamily: fontFamily.medium,
-    fontSize: 16,
-    lineHeight: 20,
-    color: colors.surface.default,
-  },
-  bannerDescription: {
-    fontFamily: fontFamily.medium,
-    fontSize: 12,
-    lineHeight: 18,
-    color: '#F3F3F4', // Figma 값
-  },
+  bannerFooter: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  bannerTitle: { ...typography.titleBase, color: colors.text.base },
+  bannerDescription: { ...typography.bodySubtle, color: colors.text.muted },
   // Figma는 배경 블러(2px)가 있지만 RN에 backdrop 블러가 없어 반투명 배경만 둔다
   more: {
     flexDirection: 'row',
@@ -293,12 +349,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: 'rgba(255,255,255,0.2)',
   },
-  moreText: {
-    fontFamily: fontFamily.medium,
-    fontSize: 13,
-    lineHeight: 19.5,
-    color: colors.surface.default,
-  },
+  moreText: { ...typography.bodySubtle, color: colors.text.base },
 
   chatCard: {
     flexDirection: 'row',
@@ -496,6 +547,36 @@ const styles = StyleSheet.create({
     right: -10,
     boxShadow: 'inset 2px 0px 3px rgba(0, 0, 0, 0.04)',
   },
+
+  empty: {
+    alignItems: 'center',
+    gap: 14,
+    paddingHorizontal: 31,
+    paddingTop: 15,
+    paddingBottom: 16,
+  },
+  emptyIconRing: {
+    padding: 10,
+    borderRadius: 999,
+    backgroundColor: colors.brand.surfaceSubtle,
+  },
+  emptyIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surface.default,
+    boxShadow: '0px 0.879px 0.879px rgba(0, 0, 0, 0.05)',
+  },
+  emptyText: { alignItems: 'center', gap: 4 },
+  emptyTitle: { ...typography.titleBase, color: colors.text.base },
+  emptyDescription: {
+    ...typography.bodySubtle,
+    textAlign: 'center',
+    color: colors.text.muted,
+  },
+  emptyButton: { alignSelf: 'stretch' },
 
   // Figma는 Noto Sans KR Medium. 앱 폰트(Pretendard)로 맞춤
   source: {
