@@ -59,6 +59,13 @@ react {
  */
 def enableProguardInReleaseBuilds = false
 
+// 네이버 지도 Client ID는 Git에 올리지 않는 android/local.properties의 NAVER_MAP_CLIENT_ID에서 읽는다
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withInputStream { localProperties.load(it) }
+}
+
 /**
  * The preferred build flavor of JavaScriptCore (JSC)
  *
@@ -84,6 +91,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        manifestPlaceholders = [naverMapClientId: localProperties.getProperty("NAVER_MAP_CLIENT_ID", "")]
     }
     signingConfigs {
         debug {

@@ -80,3 +80,6 @@ yarn-error.log
 
 # Claude Code (개인 로컬 설정)
 .claude/settings.local.json
+
+# 네이버 지도 Client ID (ios/Koready/Secrets.example.xcconfig 참고)
+ios/Koready/Secrets.xcconfig
