@@ -181,23 +181,36 @@ function ScheduleCard({
 function Overview({ text }: { text: string }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
+  // 3줄을 넘을 때만 더보기를 보여준다. 줄 수는 잘리지 않은 숨은 글로 잰다
+  const [lineCount, setLineCount] = useState(0);
   return (
     <View style={styles.overview}>
       <Text style={styles.sectionTitle}>{t('placeDetail.about')}</Text>
-      <Text
-        style={styles.overviewText}
-        numberOfLines={expanded ? undefined : 3}
-      >
-        {text}
-      </Text>
-      <Pressable
-        onPress={() => setExpanded(!expanded)}
-        accessibilityRole="button"
-      >
-        <Text style={styles.more}>
-          {t(expanded ? 'placeDetail.less' : 'placeDetail.more')}
+      <View>
+        <Text
+          style={[styles.overviewText, styles.measure]}
+          onTextLayout={e => setLineCount(e.nativeEvent.lines.length)}
+          aria-hidden
+        >
+          {text}
         </Text>
-      </Pressable>
+        <Text
+          style={styles.overviewText}
+          numberOfLines={expanded ? undefined : 3}
+        >
+          {text}
+        </Text>
+      </View>
+      {lineCount > 3 && (
+        <Pressable
+          onPress={() => setExpanded(!expanded)}
+          accessibilityRole="button"
+        >
+          <Text style={styles.more}>
+            {t(expanded ? 'placeDetail.less' : 'placeDetail.more')}
+          </Text>
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -296,6 +309,7 @@ const styles = StyleSheet.create({
     textAlign: 'justify',
     color: colors.text.base,
   },
+  measure: { position: 'absolute', left: 0, right: 0, opacity: 0 },
   more: {
     fontFamily: fontFamily.medium,
     fontSize: 14,
