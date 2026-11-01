@@ -23,5 +23,9 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
+      <!-- 네이버 지도 Client ID. 값은 android/local.properties의 NAVER_MAP_CLIENT_ID -->
+      <meta-data
+        android:name="com.naver.maps.map.NCP_KEY_ID"
+        android:value="${naverMapClientId}" />
     </application>
 </manifest>

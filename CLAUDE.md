@@ -18,7 +18,7 @@ KOREADY(코레디) 프론트엔드 저장소에서 작업할 때 따르는 안�
 - 푸시 알림, 음성 인식, OCR 등 네이티브 모듈은 아직 선정하지 않았다. 임의로 설치하지 말고 먼저 질문한다.
 - 스타일링은 `StyleSheet` + `src/theme/tokens.ts`로 한다. NativeWind는 쓰지 않는다.
 - 폰트는 Pretendard, 화면 이동은 React Navigation, 아이콘·로고는 `react-native-svg`(SVG)를 쓴다.
-- 지도는 네이버 지도 SDK를 쓴다 (Q8 팀 결정, 2026-10-29). spec §7.6·§15는 아직 Google 기본으로 적혀 있다.
+- 지도는 네이버 지도 SDK(`@mj-studio/react-native-naver-map`)를 쓴다 (Q8 팀 결정, 2026-10-29). spec §7.6·§15는 아직 Google 기본으로 적혀 있다.
 - TODO: 토큰 보안 저장소 라이브러리는 아직 정해지지 않았다.
 - 서버는 Spring Boot REST API다(spec §7.2). TODO: 백엔드 저장소 위치.
 
@@ -70,6 +70,9 @@ npm run lint                # ESLint
 npm test                    # Jest
 ```
 
+- 네이버 지도 Client ID는 Git에 올리지 않는다. 빌드 전에 각자 아래 두 파일을 만든다. 없으면 지도만 인증 실패로 회색이 된다.
+  - Android: `android/local.properties`에 `NAVER_MAP_CLIENT_ID=값`
+  - iOS: `ios/Koready/Secrets.example.xcconfig`를 `ios/Koready/Secrets.xcconfig`로 복사하고 값을 넣는다
 - TODO: 릴리스 빌드 명령(Android APK·AAB, iOS 아카이브). 저장소에 스크립트가 없다.
 - TODO: 타입 체크 스크립트. 저장소에 스크립트가 없다.
 ## 6. 코드 규칙과 폴더 구조
