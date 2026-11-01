@@ -63,11 +63,15 @@ export default function NotificationSheet({ visible, onClose }: Props) {
     },
   ] as const;
 
-  // TODO: 장소 정보 보기(visit)는 장소 상세(#32), 일정 보기(schedule)는 계획 확인(#33)에서 연결
-  const openLink = (category: NotificationCategory) => {
-    if (category !== 'notice') return;
-    onClose();
-    navigation.navigate('Notices');
+  // TODO: 일정 보기(schedule)는 계획 확인(#33)에서 연결
+  const openLink = (item: AppNotification) => {
+    if (item.category === 'notice') {
+      onClose();
+      navigation.navigate('Notices');
+    } else if (item.category === 'visit' && item.placeId) {
+      onClose();
+      navigation.navigate('PlaceDetail', { placeId: item.placeId });
+    }
   };
 
   const formatTime = (createdAt: string) => {
@@ -133,7 +137,7 @@ export default function NotificationSheet({ visible, onClose }: Props) {
                     item={item}
                     time={formatTime(item.createdAt)}
                     linkLabel={t(`notifications.links.${item.category}`)}
-                    onPressLink={() => openLink(item.category)}
+                    onPressLink={() => openLink(item)}
                   />
                 ))}
               </View>

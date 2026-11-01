@@ -1,5 +1,8 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import {
+  NavigationContainer,
+  type NavigatorScreenParams,
+} from '@react-navigation/native';
 import {
   createNativeStackNavigator,
   type NativeStackHeaderProps,
@@ -11,18 +14,20 @@ import LoginScreen from '../screens/LoginScreen';
 import NoticeDetailScreen from '../screens/NoticeDetailScreen';
 import NoticeListScreen from '../screens/NoticeListScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
+import PlaceDetailScreen from '../screens/PlaceDetailScreen';
 import SignupScreen from '../screens/SignupScreen';
 import TripConditionScreen from '../screens/TripConditionScreen';
-import MainTabs from './MainTabs';
+import MainTabs, { type MainTabParamList } from './MainTabs';
 
 export type RootStackParamList = {
   Onboarding: undefined;
   Login: undefined;
   Signup: undefined;
-  Main: undefined;
+  Main: NavigatorScreenParams<MainTabParamList> | undefined;
   TripCondition: undefined;
   Notices: undefined;
   NoticeDetail: { id: string };
+  PlaceDetail: { placeId: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -53,6 +58,12 @@ export default function RootNavigator() {
             <Stack.Screen
               name="TripCondition"
               component={TripConditionScreen}
+              options={{ header: renderMainHeader }}
+            />
+            {/* Figma 「07 장소 상세」: 메인과 같은 로고 + 언어 + 알림 헤더 */}
+            <Stack.Screen
+              name="PlaceDetail"
+              component={PlaceDetailScreen}
               options={{ header: renderMainHeader }}
             />
             <Stack.Screen

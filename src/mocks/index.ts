@@ -56,6 +56,7 @@ export type NotificationCategory = 'schedule' | 'visit' | 'notice';
 export type AppNotification = {
   id: string;
   category: NotificationCategory;
+  placeId?: string; // 방문 정보(visit) 알림의 장소 상세 이동 대상
   title: string;
   message: string;
   createdAt: string; // ISO 8601
@@ -70,6 +71,7 @@ export const mockNotifications: AppNotification[] = [
   {
     id: 'n1',
     category: 'visit',
+    placeId: 'p-museum',
     title: '방문 전 확인해 주세요',
     message: '국립중앙박물관의 운영시간과 이용 정보를 확인해 보세요.',
     createdAt: ago(0),
@@ -95,6 +97,7 @@ export const mockNotifications: AppNotification[] = [
   {
     id: 'n4',
     category: 'visit',
+    placeId: 'p-museum',
     title: '방문 전 확인해 주세요',
     message: '국립중앙박물관의 운영시간과 이용 정보를 확인해 보세요.',
     createdAt: ago(24 * 60 + 30),
@@ -210,6 +213,119 @@ export const mockNotices: Notice[] = [
     ],
   },
 ];
+
+// 장소 상세 (07 장소 상세). GET /api/places/{placeId} (spec API 12, F2-3)
+// 필드는 Figma 화면 기준 임시안이다. 운영시간·휴무·요금은 TourAPI 자유 텍스트라 서버가 준 문자열을 그대로 쓴다 (R-K09)
+export type PlacePhoto = {
+  source: ImageSourcePropType;
+  copyright: 'Type1' | 'Type3'; // TourAPI cpyrhtDivCd. Type3은 자르지 않는다 (R-K11)
+};
+
+export type PlaceDetail = {
+  id: string;
+  name: string;
+  category: string; // 대분류 · 중분류 (예: 역사관광 · 고궁)
+  tagline: string; // 한 줄 소개
+  photos: PlacePhoto[];
+  // TODO: 별점·리뷰는 앱 사용자가 입력한다(팀 결정). spec F2-3은 표시하지 않는다고 되어 있고 API가 없다
+  rating?: { average: number; count: number };
+  address: string;
+  operating: { isOpen: boolean; lastEntry?: string }; // 서버가 한국 시간 기준으로 판단
+  hours?: { value: string; note?: string };
+  closedDays?: { value: string; note?: string };
+  fees?: { rows: { label: string; value: string }[]; note?: string };
+  overview: string;
+  transit?: {
+    summary: string; // 헤더 오른쪽 (예: 3호선 경복궁역 연결)
+    line: string; // 호선 번호
+    lineColor: string; // 노선 색
+    station: string;
+  };
+  lat: number;
+  lng: number;
+  isFavorite: boolean; // 상세 응답에 찜 여부가 온다 (F12-3)
+  // TODO: 지금 여행 일정에 들어 있는 장소면 그 일정. 실제로는 여행 일정(GET .../days)에서 찾는다
+  schedule?: { day: number; date: string; time: string };
+};
+
+const placeDetails: PlaceDetail[] = [
+  {
+    id: 'p-gyeongbokgung',
+    name: '경복궁',
+    category: '역사관광 · 고궁',
+    tagline: '조선 왕조 제일의 법궁',
+    photos: [
+      {
+        source: require('../assets/images/dummy-course.jpg'),
+        copyright: 'Type1',
+      },
+      {
+        source: require('../assets/images/dummy-place.jpg'),
+        copyright: 'Type3',
+      },
+      {
+        source: require('../assets/images/dummy-course.jpg'),
+        copyright: 'Type1',
+      },
+    ],
+    rating: { average: 4.7, count: 128 },
+    address: '서울 종로구 사직로 161',
+    operating: { isOpen: true, lastEntry: '17:00' },
+    hours: { value: '09:00 ~ 18:00', note: '입장마감 17:00' },
+    closedDays: { value: '매주 화요일', note: '공휴일 겹칠 시 변동' },
+    fees: {
+      rows: [
+        { label: '대인 (만 25세 ~ 64세)', value: '3,000원' },
+        { label: '만 24세 이하 / 만 65세 이상', value: '무료 입장' },
+      ],
+      note: '한복 착용자 무료',
+    },
+    overview:
+      '경복궁은 조선 왕조의 법궁으로, 1395년에 창건된 서울에서 가장 웅장하고 아름다운 궁궐입니다. 근정전, 경회루, 향원정 등 한국 전통 건축의 아름다움을 한눈에 볼 수 있으며, 수문장 교대식과 야간 특별관람 등 다양한 행사가 열립니다.',
+    transit: {
+      summary: '3호선 경복궁역 연결',
+      line: '3',
+      lineColor: '#FA841A',
+      station: '경복궁역 5번 출구 (도보 1분)',
+    },
+    lat: 37.5796,
+    lng: 126.977,
+    isFavorite: false,
+    schedule: { day: 1, date: '2026-11-13', time: '10:00' },
+  },
+  {
+    id: 'p-museum',
+    name: '국립중앙박물관',
+    category: '문화관광 · 박물관',
+    tagline: '한국의 역사와 문화를 한곳에서',
+    photos: [
+      {
+        source: require('../assets/images/dummy-place.jpg'),
+        copyright: 'Type3',
+      },
+    ],
+    address: '서울 용산구 서빙고로 137',
+    operating: { isOpen: true, lastEntry: '17:30' },
+    hours: { value: '10:00 ~ 18:00<br>수·토 ~21:00', note: '입장마감 17:30' },
+    closedDays: { value: '1월 1일, 설날·추석 당일' },
+    fees: { rows: [{ label: '상설전시', value: '무료' }] },
+    overview:
+      '국립중앙박물관은 선사시대부터 근대까지 한국의 역사와 문화를 보여주는 대표 박물관입니다.',
+    transit: {
+      summary: '4호선 이촌역 연결',
+      line: '4',
+      lineColor: '#00A5DE',
+      station: '이촌역 2번 출구 (도보 5분)',
+    },
+    lat: 37.5239,
+    lng: 126.9803,
+    isFavorite: true,
+  },
+];
+
+// TODO: GET /api/places/{placeId}로 교체
+export const findMockPlace = (id: string) =>
+  placeDetails.find(place => place.id === id);
 
 // 조건 입력 선택지 (02 조건 입력·02a 숙소 위치 검색). GET /api/meta/options (spec API 8)
 // 국적은 권역 코드로만 저장한다 (spec F1-1, §11). 권역 매핑은 서버가 한다
