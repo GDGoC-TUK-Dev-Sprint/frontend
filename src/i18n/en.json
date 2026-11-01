@@ -130,6 +130,25 @@
     "added": "Added to plan",
     "notFound": "Place not found"
   },
+  "plan": {
+    "tripMeta": "{{period}} · {{count}} travelers",
+    "editTitle": "Rename trip",
+    "dayTab": "Day {{day}}",
+    "daySchedule": "Day {{day}} plan",
+    "daySummary": "{{count}} places · {{duration}} total travel incl. hotel round trip",
+    "transitFare": "Est. transit fare today",
+    "farePerPerson": "{{amount}} per person · in budget",
+    "readOnly": "This plan is confirmed. View only.",
+    "lodgingDepart": "Leave hotel",
+    "lodgingArrive": "Back at hotel",
+    "stopTime": "{{from}} - {{to}} · Stay {{duration}}",
+    "durationHM": "{{hours}}h {{minutes}}m",
+    "durationH": "{{hours}}h",
+    "durationM": "{{minutes}}m",
+    "addPlace": "Add a place",
+    "viewRouteOnMap": "See the full route on the map",
+    "empty": "No confirmed trip yet"
+  },
   "condition": {
     "title": "Trip details",
     "badge": "Data-driven picks",
