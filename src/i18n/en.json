@@ -91,6 +91,18 @@
     },
     "empty": "No notifications"
   },
+  "notices": {
+    "title": "Notices",
+    "tabs": {
+      "all": "All",
+      "service": "Service",
+      "update": "Updates",
+      "event": "Events"
+    },
+    "listTitle": "[{{category}}] {{title}}",
+    "empty": "No notices yet",
+    "notFound": "Notice not found"
+  },
   "condition": {
     "title": "Trip details",
     "badge": "Data-driven picks",

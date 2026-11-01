@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import type { SvgProps } from 'react-native-svg';
 import BottomSheet from './BottomSheet';
@@ -12,6 +14,7 @@ import {
   type AppNotification,
   type NotificationCategory,
 } from '../mocks';
+import type { RootStackParamList } from '../navigation/RootNavigator';
 import { colors, fontFamily, typography } from '../theme/tokens';
 import { formatMonthDay, isSameDay, timeAgo } from '../utils/date';
 
@@ -30,6 +33,9 @@ type Props = { visible: boolean; onClose: () => void };
 
 export default function NotificationSheet({ visible, onClose }: Props) {
   const { t, i18n } = useTranslation();
+  // 시트는 헤더 안에 있어 탭·스택 어디서 열려도 루트 스택 화면으로 이동한다
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [tab, setTab] = useState<Tab>('all');
   // TODO: 알림 API가 생기면 읽음 처리를 서버에 보낸다
   const [items, setItems] = useState(mockNotifications);
@@ -56,6 +62,13 @@ export default function NotificationSheet({ visible, onClose }: Props) {
       ),
     },
   ] as const;
+
+  // TODO: 장소 정보 보기(visit)는 장소 상세(#32), 일정 보기(schedule)는 계획 확인(#33)에서 연결
+  const openLink = (category: NotificationCategory) => {
+    if (category !== 'notice') return;
+    onClose();
+    navigation.navigate('Notices');
+  };
 
   const formatTime = (createdAt: string) => {
     const date = new Date(createdAt);
@@ -120,6 +133,7 @@ export default function NotificationSheet({ visible, onClose }: Props) {
                     item={item}
                     time={formatTime(item.createdAt)}
                     linkLabel={t(`notifications.links.${item.category}`)}
+                    onPressLink={() => openLink(item.category)}
                   />
                 ))}
               </View>
@@ -134,10 +148,12 @@ function NotificationCard({
   item,
   time,
   linkLabel,
+  onPressLink,
 }: {
   item: AppNotification;
   time: string;
   linkLabel: string;
+  onPressLink: () => void;
 }) {
   const Icon = ICONS[item.category];
   const unread = !item.read;
@@ -164,8 +180,11 @@ function NotificationCard({
           </View>
           <Text style={styles.message}>{item.message}</Text>
         </View>
-        {/* TODO: 장소 상세·일정·공지 화면으로 이동. 알림 API에서 이동 대상이 정해지면 연결 */}
-        <Pressable style={styles.link} accessibilityRole="link">
+        <Pressable
+          style={styles.link}
+          onPress={onPressLink}
+          accessibilityRole="link"
+        >
           <Text style={styles.linkText}>{linkLabel}</Text>
           <ArrowRightIcon width={16} height={16} color={colors.brand.primary} />
         </Pressable>

@@ -102,6 +102,115 @@ export const mockNotifications: AppNotification[] = [
   },
 ];
 
+// 공지사항 (공지사항 목록·상세). 공지 API가 spec §9에 없다 (알림 F14, Q13과 함께 확인 필요)
+export type NoticeCategory = 'service' | 'update' | 'event';
+
+// 본문은 문단과 강조 상자(주요 변경 사항)를 순서대로 담는다
+// TODO: 서버가 본문을 어떤 형식(블록·HTML·마크다운)으로 줄지 정해지면 바꾼다
+export type NoticeBlock =
+  | { type: 'text'; text: string }
+  | { type: 'highlight'; title: string; lines: string[] };
+
+export type Notice = {
+  id: string;
+  category: NoticeCategory;
+  title: string;
+  summary: string;
+  date: string; // YYYY-MM-DD
+  body: NoticeBlock[];
+};
+
+const greeting: NoticeBlock = {
+  type: 'text',
+  text: '안녕하세요, KOREADY입니다.',
+};
+
+export const mockNotices: Notice[] = [
+  {
+    id: 'notice-5',
+    category: 'update',
+    title: 'KOREADY의 새로운 기능',
+    summary:
+      'KOREADY의 새로운 기능을 소개합니다. 여행에 도움이 되는 새로운 기능을 확인해보세요.',
+    date: '2024-10-02',
+    body: [
+      greeting,
+      {
+        type: 'text',
+        text: 'KOREADY의 새로운 기능을 소개합니다. 여행에 도움이 되는 새로운 기능을 확인해보세요.',
+      },
+    ],
+  },
+  {
+    id: 'notice-4',
+    category: 'service',
+    title: '일부 관광지 운영 시간 변경 안내',
+    summary: '국립중앙박물관 등 주요 관광지의 운영 시간이 변경되었습니다.',
+    date: '2024-09-28',
+    body: [
+      greeting,
+      {
+        type: 'text',
+        text: '보다 정확한 여행 정보를 제공하기 위해 일부 관광지의 운영 시간이 변경되어 안내드립니다.',
+      },
+      {
+        type: 'highlight',
+        title: '주요 변경 사항',
+        lines: [
+          '국립중앙박물관 및 고궁 야간 관람 일정 조정',
+          '/ 방문 전 공식 채널을 통한 사전 확인 권장',
+        ],
+      },
+      {
+        type: 'text',
+        text: '여행 일정 계획 시 동선과 운영 시간을 재확인해 주시기 바라며, 최신 정보를 신속히 반영하도록 최선을 다하겠습니다.',
+      },
+    ],
+  },
+  {
+    id: 'notice-3',
+    category: 'service',
+    title: '개인정보처리방침 개정 안내',
+    summary: '보다 나은 서비스 제공을 위해 개인정보처리방침이 개정되었습니다.',
+    date: '2024-09-20',
+    body: [
+      greeting,
+      {
+        type: 'text',
+        text: '보다 나은 서비스 제공을 위해 개인정보처리방침이 개정되었습니다.',
+      },
+    ],
+  },
+  {
+    id: 'notice-2',
+    category: 'event',
+    title: '가을 서울 여행 이벤트 안내',
+    summary: '가을에 떠나는 서울 여행, 특별한 혜택을 만나보세요.',
+    date: '2024-09-12',
+    body: [
+      greeting,
+      {
+        type: 'text',
+        text: '가을에 떠나는 서울 여행, 특별한 혜택을 만나보세요.',
+      },
+    ],
+  },
+  {
+    id: 'notice-1',
+    category: 'update',
+    title: '앱 업데이트 v1.2.0 안내',
+    summary: '더 나은 서비스 이용을 위해 앱이 업데이트되었습니다.',
+    date: '2024-09-01',
+    body: [
+      greeting,
+      {
+        type: 'text',
+        text: '더 나은 서비스 이용을 위해 앱이 업데이트되었습니다.',
+      },
+    ],
+  },
+];
+
 // 조건 입력 선택지 (02 조건 입력·02a 숙소 위치 검색). GET /api/meta/options (spec API 8)
 // 국적은 권역 코드로만 저장한다 (spec F1-1, §11). 권역 매핑은 서버가 한다
 export type Country = {

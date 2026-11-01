@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthContext';
 import AppHeader from '../components/AppHeader';
 import LoginScreen from '../screens/LoginScreen';
+import NoticeDetailScreen from '../screens/NoticeDetailScreen';
+import NoticeListScreen from '../screens/NoticeListScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import SignupScreen from '../screens/SignupScreen';
 import TripConditionScreen from '../screens/TripConditionScreen';
@@ -19,18 +21,17 @@ export type RootStackParamList = {
   Signup: undefined;
   Main: undefined;
   TripCondition: undefined;
+  Notices: undefined;
+  NoticeDetail: { id: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-// Figma: 로그인은 언어 버튼만, 회원가입은 뒤로가기 + 제목 + 언어 버튼
+// Figma: 로그인은 언어 버튼만, 회원가입·공지사항은 뒤로가기 + 제목 + 언어 버튼
 const renderLoginHeader = () => <AppHeader />;
 // Figma 「02 조건 입력」: 메인과 같은 로고 + 언어 + 알림 헤더
 const renderMainHeader = () => <AppHeader showLogo showBell />;
-const renderSignupHeader = ({
-  navigation,
-  options,
-}: NativeStackHeaderProps) => (
+const renderBackHeader = ({ navigation, options }: NativeStackHeaderProps) => (
   <AppHeader title={options.title} onBack={navigation.goBack} />
 );
 
@@ -54,6 +55,16 @@ export default function RootNavigator() {
               component={TripConditionScreen}
               options={{ header: renderMainHeader }}
             />
+            <Stack.Screen
+              name="Notices"
+              component={NoticeListScreen}
+              options={{ title: t('notices.title'), header: renderBackHeader }}
+            />
+            <Stack.Screen
+              name="NoticeDetail"
+              component={NoticeDetailScreen}
+              options={{ title: t('notices.title'), header: renderBackHeader }}
+            />
           </>
         ) : (
           <>
@@ -70,7 +81,7 @@ export default function RootNavigator() {
             <Stack.Screen
               name="Signup"
               component={SignupScreen}
-              options={{ title: t('auth.signup'), header: renderSignupHeader }}
+              options={{ title: t('auth.signup'), header: renderBackHeader }}
             />
           </>
         )}

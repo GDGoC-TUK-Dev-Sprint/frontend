@@ -24,6 +24,7 @@ export const colors = {
     strong: '#1A1C1C', // 조건 입력 제목·입력값
     label: '#354153', // 입력 라벨
     emphasis: '#0F172A', // 인원 숫자
+    faint: '#B4BBCB', // 공지 날짜 (디자인 시스템에 없음, 확인 필요)
   },
   // 디자인 시스템에 없음, 확인 필요
   icon: {
@@ -32,6 +33,7 @@ export const colors = {
   // 디자인 시스템에 없음, 확인 필요
   border: {
     divider: '#E8E8E8', // 조건 입력 섹션 구분선
+    light: '#EEEEEE', // 공지 상세 구분선
   },
 } as const;
 
