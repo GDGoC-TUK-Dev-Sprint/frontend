@@ -76,3 +76,12 @@ export function timeAgo(
   yesterday.setDate(now.getDate() - 1);
   return isSameDay(date, yesterday) ? { key: 'yesterday' } : { key: 'date' };
 }
+
+// "10:00" → "11:30" 사이 분. 자정을 넘기는 일정은 없다고 본다
+export function minutesBetween(from: string, to: string) {
+  const toMinutes = (time: string) => {
+    const [h, m] = time.split(':').map(Number);
+    return h * 60 + m;
+  };
+  return toMinutes(to) - toMinutes(from);
+}

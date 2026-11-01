@@ -1,5 +1,6 @@
 import {
   formatDateRange,
+  minutesBetween,
   monthGrid,
   nightsBetween,
   parseDate,
@@ -58,4 +59,9 @@ test('알림 시간 표시', () => {
   });
   expect(timeAgo(d(10, 28, 23), now)).toEqual({ key: 'yesterday' });
   expect(timeAgo(d(10, 20), now)).toEqual({ key: 'date' });
+});
+
+test('HH:mm 두 시각 사이 분을 계산한다', () => {
+  expect(minutesBetween('10:00', '11:30')).toBe(90);
+  expect(minutesBetween('09:40', '19:00')).toBe(560);
 });

@@ -327,6 +327,120 @@ const placeDetails: PlaceDetail[] = [
 export const findMockPlace = (id: string) =>
   placeDetails.find(place => place.id === id);
 
+// 일자별 일정 (계획 확인). GET /api/trips/{tripId}/days/{dayNumber} (spec API 22, F3-3·F3-7)
+// 필드는 Figma 화면 기준 임시안이다
+export type TripStop = {
+  id: string; // 일정 항목 ID (DELETE .../items/{itemId})
+  placeId: string;
+  name: string;
+  category: string; // 대분류 · 중분류
+  photo: PlacePhoto;
+  arriveAt: string; // HH:mm
+  departAt: string;
+};
+
+export type TripDay = {
+  dayNumber: number;
+  date: string; // YYYY-MM-DD
+  lodgingName: string;
+  departAt: string; // 숙소 출발 HH:mm
+  returnAt: string; // 숙소 도착 HH:mm
+  travelMinutes: number; // 숙소 왕복 포함 총 이동 시간
+  // TODO: 경비 수치는 GET /api/trips/{tripId}/cost-estimate 응답에서 가져온다 (F4-9). 서버가 표시 통화로 환산한 문자열
+  transitFarePerPerson: string;
+  stops: TripStop[];
+};
+
+const photoA: PlacePhoto = {
+  source: require('../assets/images/dummy-course.jpg'),
+  copyright: 'Type1',
+};
+const photoB: PlacePhoto = {
+  source: require('../assets/images/dummy-place.jpg'),
+  copyright: 'Type3',
+};
+
+// TODO: GET .../days/{dayNumber}로 교체. 경복궁·국립중앙박물관 외 장소는 상세 더미가 없다
+export const mockTripDays: TripDay[] = [
+  {
+    dayNumber: 1,
+    date: '2026-11-13',
+    lodgingName: '명동 센트럴 호텔',
+    departAt: '09:40',
+    returnAt: '19:00',
+    travelMinutes: 125,
+    transitFarePerPerson: '₩6,100',
+    stops: [
+      {
+        id: 'i1',
+        placeId: 'p-gyeongbokgung',
+        name: '경복궁',
+        category: '역사관광 · 고궁',
+        photo: photoA,
+        arriveAt: '10:00',
+        departAt: '11:30',
+      },
+      {
+        id: 'i2',
+        placeId: 'p-ikseondong',
+        name: '익선동 한옥거리',
+        category: '문화관광 · 골목길, 문화거리',
+        photo: photoB,
+        arriveAt: '12:00',
+        departAt: '13:30',
+      },
+      {
+        id: 'i3',
+        placeId: 'p-gwangjang',
+        name: '광장시장',
+        category: '쇼핑 · 상설시장',
+        photo: photoA,
+        arriveAt: '13:45',
+        departAt: '15:15',
+      },
+      {
+        id: 'i4',
+        placeId: 'p-namsan',
+        name: '남산 서울타워',
+        category: '역사관광 · 고궁',
+        photo: photoB,
+        arriveAt: '16:00',
+        departAt: '18:30',
+      },
+    ],
+  },
+  {
+    dayNumber: 2,
+    date: '2026-11-14',
+    lodgingName: '명동 센트럴 호텔',
+    departAt: '09:30',
+    returnAt: '17:00',
+    travelMinutes: 70,
+    transitFarePerPerson: '₩3,000',
+    stops: [
+      {
+        id: 'i5',
+        placeId: 'p-museum',
+        name: '국립중앙박물관',
+        category: '문화관광 · 박물관',
+        photo: photoB,
+        arriveAt: '10:00',
+        departAt: '13:00',
+      },
+    ],
+  },
+  {
+    dayNumber: 3,
+    date: '2026-11-15',
+    lodgingName: '명동 센트럴 호텔',
+    departAt: '10:00',
+    returnAt: '10:00',
+    travelMinutes: 0,
+    transitFarePerPerson: '₩0',
+    stops: [],
+  },
+];
+
 // 조건 입력 선택지 (02 조건 입력·02a 숙소 위치 검색). GET /api/meta/options (spec API 8)
 // 국적은 권역 코드로만 저장한다 (spec F1-1, §11). 권역 매핑은 서버가 한다
 export type Country = {
