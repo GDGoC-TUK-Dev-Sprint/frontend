@@ -14,7 +14,8 @@ export function TripSummaryCard({
   right,
 }: {
   trip: Trip;
-  title?: React.ReactNode; // 제목 자리를 바꿀 때 (계획 확인의 이름 변경)
+  // 제목 자리를 바꿀 때 (계획 확인의 이름 변경). false·null이면 여행 제목을 보여준다
+  title?: React.ReactNode;
   right: React.ReactNode;
 }) {
   const { t, i18n } = useTranslation();
@@ -26,7 +27,7 @@ export function TripSummaryCard({
         <PinIcon width={24} height={24} color={colors.brand.primary} />
       </View>
       <View style={styles.flex}>
-        {title ?? (
+        {title || (
           <Text style={[typography.bodyStrong, { color: colors.text.base }]}>
             {trip.title}
           </Text>
