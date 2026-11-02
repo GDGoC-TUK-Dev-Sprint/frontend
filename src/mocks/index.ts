@@ -344,12 +344,16 @@ export type TripStop = {
   photo: PlacePhoto;
   arriveAt: string; // HH:mm
   departAt: string;
+  lat: number;
+  lng: number;
 };
 
 export type TripDay = {
   dayNumber: number;
   date: string; // YYYY-MM-DD
   lodgingName: string;
+  lodgingLat: number;
+  lodgingLng: number;
   departAt: string; // 숙소 출발 HH:mm
   returnAt: string; // 숙소 도착 HH:mm
   travelMinutes: number; // 숙소 왕복 포함 총 이동 시간
@@ -373,6 +377,8 @@ export const mockTripDays: TripDay[] = [
     dayNumber: 1,
     date: '2026-11-13',
     lodgingName: '명동 센트럴 호텔',
+    lodgingLat: 37.564,
+    lodgingLng: 126.985,
     departAt: '09:40',
     returnAt: '19:00',
     travelMinutes: 125,
@@ -386,6 +392,8 @@ export const mockTripDays: TripDay[] = [
         photo: photoA,
         arriveAt: '10:00',
         departAt: '11:30',
+        lat: 37.5796,
+        lng: 126.977,
       },
       {
         id: 'i2',
@@ -395,6 +403,8 @@ export const mockTripDays: TripDay[] = [
         photo: photoB,
         arriveAt: '12:00',
         departAt: '13:30',
+        lat: 37.5743,
+        lng: 126.9897,
       },
       {
         id: 'i3',
@@ -404,6 +414,8 @@ export const mockTripDays: TripDay[] = [
         photo: photoA,
         arriveAt: '13:45',
         departAt: '15:15',
+        lat: 37.5701,
+        lng: 126.9996,
       },
       {
         id: 'i4',
@@ -413,6 +425,8 @@ export const mockTripDays: TripDay[] = [
         photo: photoB,
         arriveAt: '16:00',
         departAt: '18:30',
+        lat: 37.5512,
+        lng: 126.9882,
       },
     ],
   },
@@ -420,6 +434,8 @@ export const mockTripDays: TripDay[] = [
     dayNumber: 2,
     date: '2026-11-14',
     lodgingName: '명동 센트럴 호텔',
+    lodgingLat: 37.564,
+    lodgingLng: 126.985,
     departAt: '09:30',
     returnAt: '17:00',
     travelMinutes: 70,
@@ -433,6 +449,8 @@ export const mockTripDays: TripDay[] = [
         photo: photoB,
         arriveAt: '10:00',
         departAt: '13:00',
+        lat: 37.5239,
+        lng: 126.9803,
       },
     ],
   },
@@ -440,6 +458,8 @@ export const mockTripDays: TripDay[] = [
     dayNumber: 3,
     date: '2026-11-15',
     lodgingName: '명동 센트럴 호텔',
+    lodgingLat: 37.564,
+    lodgingLng: 126.985,
     departAt: '10:00',
     returnAt: '10:00',
     travelMinutes: 0,
