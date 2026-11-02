@@ -20,6 +20,10 @@ export type Trip = {
   startDate: string; // YYYY-MM-DD
   endDate: string;
   travelers: number;
+  // 장소 선택(02c) 조건 요약 카드용. GET /api/trips/{tripId} (spec API 18)
+  stayName: string; // 숙소 이름 또는 "○○ 중심"
+  budgetPerPerson?: number; // 원. 없으면 상관없음
+  themeCodes: string[];
   route?: TripRoute; // 동선을 만들기 전에는 없다. 없으면 티켓의 장소 영역을 숨긴다
 };
 
@@ -43,6 +47,9 @@ export const mockTripSample: Trip = {
   startDate: '2026-11-13',
   endDate: '2026-11-15',
   travelers: 2,
+  stayName: '명동 센트럴 호텔',
+  budgetPerPerson: 500000,
+  themeCodes: ['SH', 'FD', 'VE', 'NA'],
   route: {
     thumbnail: require('../assets/images/dummy-place.jpg'),
     thumbnailLabel: '성수동',
@@ -440,6 +447,155 @@ export const mockTripDays: TripDay[] = [
     stops: [],
   },
 ];
+
+// 추천 장소 후보 (02c 장소 선택). GET /api/trips/{tripId}/candidates (spec API 20, F2-2·F2-8)
+// 순위는 서버가 매긴다. 카테고리 탭마다 따로 순위를 매기므로(F2-6) 탭을 바꾸면 서버에 다시 요청한다
+export type Candidate = {
+  placeId: string;
+  name: string;
+  themeCode: string; // 카테고리 칩 필터용 대분류 코드
+  category: string; // 대분류 · 중분류
+  distanceKm: number; // 숙소에서 직선거리
+  reasons: string[]; // 추천 이유 태그 최대 2개 (§5A.4). 근거 통계가 있을 때만 서버가 준다 (F2-9)
+  photo: PlacePhoto;
+};
+
+const candidate = (
+  placeId: string,
+  name: string,
+  themeCode: string,
+  category: string,
+  distanceKm: number,
+  reasons: string[],
+  photo: PlacePhoto,
+): Candidate => ({
+  placeId,
+  name,
+  themeCode,
+  category,
+  distanceKm,
+  reasons,
+  photo,
+});
+
+const mockCandidates: Candidate[] = [
+  candidate(
+    'p-gwangjang',
+    '광장 시장',
+    'SH',
+    '쇼핑 · 상설시장',
+    1.3,
+    ['쇼핑 테마', '일본인 인기 지역'],
+    photoA,
+  ),
+  candidate(
+    'p-namsan',
+    '남산 타워',
+    'NA',
+    '자연관광 · 전망대',
+    0.3,
+    ['서울 전망 명소', '일본인 인기 지역'],
+    photoB,
+  ),
+  candidate(
+    'p-museum',
+    '국립중앙박물관',
+    'VE',
+    '문화관광 · 박물관',
+    0.6,
+    ['역사·문화 테마', '실내 관광 추천'],
+    photoB,
+  ),
+  candidate(
+    'p-ikseondong',
+    '익선동 한옥거리',
+    'VE',
+    '문화관광 · 골목길, 문화거리',
+    2.2,
+    ['문화관광 테마', '일본인 인기 지역'],
+    photoA,
+  ),
+  candidate(
+    'p-gyeongbokgung',
+    '경복궁',
+    'VE',
+    '역사관광 · 고궁',
+    2.1,
+    ['외국인 입장객 상위', '일본인 인기 지역'],
+    photoA,
+  ),
+  candidate(
+    'p-myeongdong',
+    '명동 거리',
+    'SH',
+    '쇼핑 · 쇼핑거리',
+    0.2,
+    ['쇼핑 테마'],
+    photoB,
+  ),
+  candidate(
+    'p-tosokchon',
+    '토속촌 삼계탕',
+    'FD',
+    '음식 · 한식',
+    2.4,
+    ['음식 테마', '일본인 인기 지역'],
+    photoA,
+  ),
+  candidate(
+    'p-seoulforest',
+    '서울숲',
+    'NA',
+    '자연관광 · 도시공원',
+    6.8,
+    ['자연관광 테마'],
+    photoB,
+  ),
+  candidate(
+    'p-gwangjang-food',
+    '광장시장 먹자골목',
+    'FD',
+    '음식 · 시장음식',
+    1.4,
+    ['음식 테마'],
+    photoA,
+  ),
+  candidate(
+    'p-insadong',
+    '인사동 쌈지길',
+    'SH',
+    '쇼핑 · 전통상점',
+    1.8,
+    ['쇼핑 테마', '외국인 입장객 상위'],
+    photoB,
+  ),
+  candidate(
+    'p-cheonggyecheon',
+    '청계천',
+    'NA',
+    '자연관광 · 하천',
+    0.9,
+    ['자연관광 테마'],
+    photoA,
+  ),
+  candidate(
+    'p-dongdaemun',
+    '동대문디자인플라자',
+    'VE',
+    '문화관광 · 전시시설',
+    2.6,
+    ['문화관광 테마'],
+    photoB,
+  ),
+];
+
+// TODO: GET .../candidates?category=&query=&page= 로 교체. 서버가 검색·카테고리·페이지를 처리한다
+export const searchMockCandidates = (query: string, themeCode?: string) =>
+  mockCandidates.filter(
+    c =>
+      (!themeCode || c.themeCode === themeCode) &&
+      c.name.includes(query.trim()),
+  );
 
 // 조건 입력 선택지 (02 조건 입력·02a 숙소 위치 검색). GET /api/meta/options (spec API 8)
 // 국적은 권역 코드로만 저장한다 (spec F1-1, §11). 권역 매핑은 서버가 한다
