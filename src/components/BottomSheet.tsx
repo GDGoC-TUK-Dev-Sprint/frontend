@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   sheet: {
     gap: 16,
     borderTopWidth: 1,
-    borderColor: '#F1F5F9', // Figma 값
+    borderColor: colors.border.subtle,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     backgroundColor: colors.surface.default,
@@ -137,6 +137,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
   },
-  title: { ...typography.titleBase, color: '#354153' }, // Figma 값
+  title: { ...typography.titleBase, color: colors.text.label }, // Figma 값
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 4 },
 });

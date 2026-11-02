@@ -1,6 +1,6 @@
 {
   "language": { "current": "English" },
-  "common": { "back": "Back", "notifications": "Notifications", "clear": "Clear", "close": "Close" },
+  "common": { "back": "Back", "notifications": "Notifications", "clear": "Clear", "close": "Close", "imageSource": "Images provided by Korea Tourism Organization." },
   "tabs": {
     "home": "Home",
     "map": "Map",
@@ -63,7 +63,6 @@
     "tripMeta": "{{region}} · {{period}} · Party of {{count}}",
     "viewSchedule": "View schedule",
     "viewOnMap": "View on map",
-    "imageSource": "Images provided by Korea Tourism Organization.",
     "emptyTitle": "No trips in the works yet",
     "emptyDescription": "Enter your trip details and\nwe'll build a plan just for you.",
     "planTrip": "Plan a trip"

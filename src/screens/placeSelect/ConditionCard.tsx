@@ -8,8 +8,6 @@ import type { Theme, Trip } from '../../mocks';
 import { colors, typography } from '../../theme/tokens';
 import { parseDate } from '../../utils/date';
 
-const ICON_BG = '#F1F5F9'; // Figma 값, 토큰에 없음
-
 // 여행 조건 요약: 숙소(기준점) · 지역 · 기간 · 인원 · 1인 예산, 선택한 테마
 export default function ConditionCard({
   trip,
@@ -125,7 +123,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: ICON_BG,
+    backgroundColor: colors.surface.iconBg,
   },
   info: { flex: 1, gap: 6 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },

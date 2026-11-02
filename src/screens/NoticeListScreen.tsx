@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
-    backgroundColor: '#F1F5F9', // Figma 값
+    backgroundColor: colors.surface.iconBg,
   },
   cardText: { flex: 1, gap: 3 },
   title: { ...typography.bodySubtle, color: colors.text.base },

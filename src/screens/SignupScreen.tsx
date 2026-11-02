@@ -13,11 +13,6 @@ import TextField from '../components/TextField';
 import { NAME_MAX, validateSignup } from '../auth/validation';
 import { colors, shadow, spacing, typography } from '../theme/tokens';
 
-// Figma 색 (토큰 없음)
-const TEXT_STRONG = '#1F242E';
-const TEXT_HELPER = '#9EA6B2';
-const TEXT_NOTICE = '#6B7380';
-
 export default function SignupScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
@@ -148,16 +143,16 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface.base },
   content: { gap: spacing.sectionGap, padding: spacing.screenPadding },
   field: { gap: 6 },
-  label: { ...typography.bodyStrong, color: TEXT_STRONG },
+  label: { ...typography.bodyStrong, color: colors.text.heading },
   helper: {
     ...typography.captionBase,
-    color: TEXT_HELPER,
+    color: colors.text.helper,
     paddingHorizontal: 14,
   },
   helperError: { color: colors.text.negative },
   notice: {
     ...typography.bodySubtle,
-    color: TEXT_NOTICE,
+    color: colors.text.notice,
     textAlign: 'center',
   },
   bottomBar: {

@@ -24,17 +24,13 @@ import type { RootStackParamList } from '../navigation/RootNavigator';
 import { useTrip } from '../trips/TripContext';
 import { colors, shadow, spacing, typography } from '../theme/tokens';
 import { regionFor } from '../utils/map';
-import { useFormatDuration } from './plan/DayTimeline';
+import { useFormatDuration } from '../components/DayTimeline';
 
 // 탭 화면이지만 마커를 누르면 장소 상세(루트 스택)로 간다
 type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, 'Map'>,
   NativeStackScreenProps<RootStackParamList>
 >;
-
-// Figma 값, 토큰에 없음
-const SUMMARY_TITLE = '#1F242E';
-const SUMMARY_TEXT = '#6B7380';
 
 const NUMBER_PIN = 20;
 const LODGING_PIN = 30;
@@ -158,7 +154,9 @@ export default function MapScreen({ navigation }: Props) {
 
         <View style={styles.summary}>
           <View style={styles.summaryText}>
-            <Text style={[typography.bodyStrong, { color: SUMMARY_TITLE }]}>
+            <Text
+              style={[typography.bodyStrong, { color: colors.text.heading }]}
+            >
               {t('map.summary', {
                 day: day.dayNumber,
                 count: day.stops.length,
@@ -166,7 +164,9 @@ export default function MapScreen({ navigation }: Props) {
                 to: day.returnAt,
               })}
             </Text>
-            <Text style={[typography.bodySubtle, { color: SUMMARY_TEXT }]}>
+            <Text
+              style={[typography.bodySubtle, { color: colors.text.notice }]}
+            >
               {t('map.routeNote', {
                 duration: formatDuration(day.travelMinutes),
               })}

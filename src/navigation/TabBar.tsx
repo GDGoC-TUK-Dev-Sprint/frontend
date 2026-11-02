@@ -13,7 +13,6 @@ import { colors, fontFamily } from '../theme/tokens';
 // Figma 「하단 네비게이션」 값. 디자인시스템 토큰에 없는 색이라 여기에 둔다
 const INACTIVE = '#99A1AD';
 const CHATBOT_LABEL = '#5C6373';
-const BORDER = '#E5E8ED';
 
 const ICONS: Record<string, React.FC<SvgProps>> = {
   Home: HomeIcon,
@@ -91,7 +90,7 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingHorizontal: 6,
     borderTopWidth: 1,
-    borderTopColor: BORDER,
+    borderTopColor: colors.border.line,
     backgroundColor: colors.surface.default,
   },
   tab: { width: 69.2, alignItems: 'center', gap: 4, paddingTop: 12 },

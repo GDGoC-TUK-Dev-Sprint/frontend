@@ -28,16 +28,13 @@ import {
   spacing,
   typography,
 } from '../theme/tokens';
-import DayTimeline, { useFormatDuration } from './plan/DayTimeline';
+import DayTimeline, { useFormatDuration } from '../components/DayTimeline';
+import ImageCredit from '../components/ImageCredit';
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, 'Plan'>,
   NativeStackScreenProps<RootStackParamList>
 >;
-
-// Figma 값, 토큰에 없음
-const TEXT_SECONDARY = '#475569';
-const SOURCE_TEXT = '#737A87';
 
 // Figma 「11 계획 확인」 (spec F3-7·F3-9). 지금 여행(GET /api/trips)의 일자 일정을 보여준다
 export default function PlanScreen({ navigation }: Props) {
@@ -114,7 +111,7 @@ export default function PlanScreen({ navigation }: Props) {
       </View>
 
       {/* R-C52 출처 표시 */}
-      <Text style={styles.source}>{t('home.imageSource')}</Text>
+      <ImageCredit />
 
       <Button
         label={t('plan.viewRouteOnMap')}
@@ -215,7 +212,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: colors.brand.primarySoft,
   },
-  timeRange: { ...typography.bodySubtle, color: TEXT_SECONDARY },
+  timeRange: { ...typography.bodySubtle, color: colors.text.secondary },
   summaryText: {
     fontFamily: fontFamily.bold,
     fontSize: 13.5,
@@ -244,5 +241,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.brand.primary,
   },
-  source: { fontFamily: fontFamily.medium, fontSize: 11, color: SOURCE_TEXT },
 });

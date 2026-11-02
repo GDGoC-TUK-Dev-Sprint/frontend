@@ -14,6 +14,7 @@ import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import Button from '../components/Button';
+import ImageCredit from '../components/ImageCredit';
 import ArrowRightIcon from '../assets/icons/arrow-right.svg';
 import CalendarFillIcon from '../assets/icons/calendar-fill.svg';
 import ChatIcon from '../assets/icons/chat.svg';
@@ -42,8 +43,6 @@ type Props = CompositeScreenProps<
 >;
 
 // Figma 색 (토큰 없음)
-const TEXT_STRONG = '#0F172A';
-const TEXT_SECONDARY = '#475569';
 const STOP_COLORS = [colors.brand.primary, '#6366F1'];
 
 // Figma 「01 메인」·「01a 초기 메인」. 서버 데이터는 src/mocks 더미
@@ -126,7 +125,7 @@ export default function HomeScreen({ navigation }: Props) {
             <ChevronSmallIcon
               width={4.625}
               height={7.5}
-              color={TEXT_SECONDARY}
+              color={colors.text.secondary}
             />
           </Pressable>
         </View>
@@ -143,7 +142,7 @@ export default function HomeScreen({ navigation }: Props) {
       </View>
 
       {/* R-C52 출처 표시 */}
-      <Text style={styles.source}>{t('home.imageSource')}</Text>
+      <ImageCredit align="right" />
     </ScrollView>
   );
 }
@@ -314,7 +313,7 @@ const styles = StyleSheet.create({
 
   intro: { gap: 12, paddingTop: 8 },
   introText: { gap: 6 },
-  heading: { ...typography.titleStrong, color: '#1A1C1C' }, // Figma 값
+  heading: { ...typography.titleStrong, color: colors.text.strong }, // Figma 값
   description: {
     fontFamily: fontFamily.medium,
     fontSize: 14,
@@ -379,14 +378,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     lineHeight: 27,
     letterSpacing: -0.45,
-    color: TEXT_STRONG,
+    color: colors.text.emphasis,
   },
   viewAll: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   viewAllText: {
     fontFamily: fontFamily.semibold,
     fontSize: 13,
     lineHeight: 19.5,
-    color: TEXT_SECONDARY,
+    color: colors.text.secondary,
   },
 
   ticket: {
@@ -454,13 +453,13 @@ const styles = StyleSheet.create({
     fontSize: 17,
     lineHeight: 25.5,
     letterSpacing: -0.425,
-    color: TEXT_STRONG,
+    color: colors.text.emphasis,
   },
   tripMeta: {
     fontFamily: fontFamily.medium,
     fontSize: 12,
     lineHeight: 18,
-    color: TEXT_SECONDARY,
+    color: colors.text.secondary,
   },
   route: {
     flexDirection: 'row',
@@ -468,7 +467,7 @@ const styles = StyleSheet.create({
     gap: 14,
     padding: 13,
     borderWidth: 1,
-    borderColor: '#F1F5F9', // Figma 값
+    borderColor: colors.border.subtle,
     borderRadius: 12,
     backgroundColor: 'rgba(248,250,252,0.9)', // Figma 값
   },
@@ -527,7 +526,7 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.bold,
     fontSize: 12.5,
     lineHeight: 18.75,
-    color: TEXT_STRONG,
+    color: colors.text.emphasis,
   },
   actions: { flexDirection: 'row', gap: 8, paddingTop: 2 },
   notch: {
@@ -579,10 +578,4 @@ const styles = StyleSheet.create({
   emptyButton: { alignSelf: 'stretch' },
 
   // Figma는 Noto Sans KR Medium. 앱 폰트(Pretendard)로 맞춤
-  source: {
-    fontFamily: fontFamily.medium,
-    fontSize: 11,
-    textAlign: 'right',
-    color: '#737A87', // Figma 값
-  },
 });

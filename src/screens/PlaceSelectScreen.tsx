@@ -10,19 +10,14 @@ import Pagination from '../components/Pagination';
 import PlaceCard from '../components/PlaceCard';
 import StateView from '../components/StateView';
 import TextField from '../components/TextField';
+import ImageCredit from '../components/ImageCredit';
 import ArrowForwardIcon from '../assets/icons/arrow-forward.svg';
 import EffectIcon from '../assets/icons/effect.svg';
 import WarningIcon from '../assets/icons/warning.svg';
 import { mockMetaOptions, searchMockCandidates } from '../mocks';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import { useTrip } from '../trips/TripContext';
-import {
-  colors,
-  fontFamily,
-  shadow,
-  spacing,
-  typography,
-} from '../theme/tokens';
+import { colors, shadow, spacing, typography } from '../theme/tokens';
 import { nightsBetween, parseDate } from '../utils/date';
 import ConditionCard from './placeSelect/ConditionCard';
 
@@ -30,9 +25,6 @@ type Props = NativeStackScreenProps<RootStackParamList, 'PlaceSelect'>;
 
 const PAGE_SIZE = 5; // spec F2-11
 const MAX_PER_DAY = 6; // spec F2-10, F3-1
-// Figma 값, 토큰에 없음
-const INFO_TEXT = '#64748B';
-const SOURCE_TEXT = '#737A87';
 
 // Figma 「02c 장소 선택」 (spec F2). 후보는 GET /api/trips/{tripId}/candidates 더미
 export default function PlaceSelectScreen({ navigation }: Props) {
@@ -133,7 +125,7 @@ export default function PlaceSelectScreen({ navigation }: Props) {
         </View>
 
         <View style={styles.info}>
-          <WarningIcon width={20} height={20} color={INFO_TEXT} />
+          <WarningIcon width={20} height={20} color={colors.text.info} />
           <Text style={styles.infoText}>
             {t('placeSelect.recommendInfo', {
               days,
@@ -144,7 +136,7 @@ export default function PlaceSelectScreen({ navigation }: Props) {
         </View>
 
         {/* R-C52 출처 표시 */}
-        <Text style={styles.source}>{t('home.imageSource')}</Text>
+        <ImageCredit align="right" style={styles.credit} />
 
         <View style={styles.list}>
           {pageItems.length === 0 && (
@@ -220,6 +212,7 @@ export default function PlaceSelectScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
+  credit: { fontSize: 12 }, // Figma: 이 화면만 12px
   screen: { flex: 1, backgroundColor: colors.surface.base },
   content: { gap: spacing.sectionGap, padding: spacing.screenPadding },
   intro: { gap: 12 },
@@ -238,13 +231,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: colors.surface.subtle,
   },
-  infoText: { ...typography.bodySubtle, flex: 1, color: INFO_TEXT },
-  source: {
-    fontFamily: fontFamily.medium,
-    fontSize: 12,
-    textAlign: 'right',
-    color: SOURCE_TEXT,
-  },
+  infoText: { ...typography.bodySubtle, flex: 1, color: colors.text.info },
   list: { gap: 12 },
   empty: {
     ...typography.bodyBase,
