@@ -74,8 +74,8 @@ export default function PlaceSelectScreen({ navigation }: Props) {
         : [...prev, placeId],
     );
 
-  // TODO: POST /api/trips/{tripId}/route 후 동선 화면(03)으로 간다. 동선 화면이 없어 계획 확인 탭으로 보낸다
-  const makeRoute = () => navigation.navigate('Main', { screen: 'Plan' });
+  // TODO: POST /api/trips/{tripId}/route(API 21)에 picked를 담아 보내고, 응답 동선으로 동선 화면을 그린다
+  const makeRoute = () => navigation.navigate('Route');
 
   return (
     <View style={styles.screen}>

@@ -16,6 +16,7 @@ import NoticeListScreen from '../screens/NoticeListScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import PlaceDetailScreen from '../screens/PlaceDetailScreen';
 import PlaceSelectScreen from '../screens/PlaceSelectScreen';
+import RouteScreen from '../screens/RouteScreen';
 import SignupScreen from '../screens/SignupScreen';
 import TripConditionScreen from '../screens/TripConditionScreen';
 import MainTabs, { type MainTabParamList } from './MainTabs';
@@ -30,6 +31,7 @@ export type RootStackParamList = {
   NoticeDetail: { id: string };
   PlaceDetail: { placeId: string };
   PlaceSelect: undefined;
+  Route: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -65,6 +67,11 @@ export default function RootNavigator() {
             <Stack.Screen
               name="PlaceSelect"
               component={PlaceSelectScreen}
+              options={{ header: renderMainHeader }}
+            />
+            <Stack.Screen
+              name="Route"
+              component={RouteScreen}
               options={{ header: renderMainHeader }}
             />
             {/* Figma 「07 장소 상세」: 메인과 같은 로고 + 언어 + 알림 헤더 */}

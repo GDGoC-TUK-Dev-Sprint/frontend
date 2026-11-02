@@ -182,6 +182,12 @@
     "backToList": "View as list",
     "lodging": "Hotel · {{name}}"
   },
+  "route": {
+    "recalcNotice": "Changing the order recalculates travel time and fares",
+    "remove": "Remove {{name}}",
+    "reorder": "Drag to reorder",
+    "estimate": "Estimate costs"
+  },
   "condition": {
     "title": "Trip details",
     "badge": "Data-driven picks",
