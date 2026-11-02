@@ -33,13 +33,13 @@ export default function TripConditionScreen({ navigation }: Props) {
   const { countries, themes, areas } = mockMetaOptions;
   const form = useTripCondition();
 
-  // TODO: spec은 POST /api/trips 후 장소 선택(02c)으로 가고, 메인 티켓에는 확정한 여행만 나온다(F4-10)
-  // 장소 선택 화면이 없어 지금은 여행을 바로 저장하고 메인으로 돌아간다
+  // POST /api/trips 후 장소 선택(02c)으로 간다. 뒤로 가면 조건 입력이 아니라 메인으로 돌아간다
+  // TODO: 메인 티켓에는 확정한 여행만 나와야 한다(F4-10). 확정 흐름이 생기기 전까지는 만든 여행을 바로 저장한다
   const submit = () => {
     const trip = form.toTrip();
     if (!trip) return;
     setTrip(trip);
-    navigation.goBack();
+    navigation.replace('PlaceSelect');
   };
 
   return (

@@ -149,6 +149,33 @@
     "viewRouteOnMap": "See the full route on the map",
     "empty": "No confirmed trip yet"
   },
+  "placeSelect": {
+    "badge": "Data-driven picks",
+    "title": "Pick the places you want to go",
+    "description": "Ranked by category, distance from your stay, and popularity.",
+    "basePoint": "Base",
+    "change": "Change",
+    "travelers": "{{count}} travelers",
+    "budget": "{{amount}} per person",
+    "conditions": "Filters",
+    "searchPlaceholder": "Search by place name",
+    "all": "All",
+    "recommendInfo": "For a {{days}}-day trip we suggest {{min}}–{{max}} places.\nYou can add up to {{perDay}} places a day.",
+    "distance": "{{km}}km from your stay · straight line",
+    "add": "Add",
+    "added": "Added",
+    "empty": "No places match. Try another category or search term.",
+    "selected": "{{count}} selected",
+    "recommendRange": "· Suggested {{min}}–{{max}}",
+    "makeRoute": "Build route with {{count}}",
+    "noTrip": "Trip not found"
+  },
+  "pagination": {
+    "first": "First page",
+    "prev": "Previous page",
+    "next": "Next page",
+    "last": "Last page"
+  },
   "condition": {
     "title": "Trip details",
     "badge": "Data-driven picks",

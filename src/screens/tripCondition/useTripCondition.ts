@@ -66,6 +66,9 @@ export function useTripCondition() {
           startDate: formatDot(dates.start, '-'),
           endDate: formatDot(dates.end, '-'),
           travelers,
+          stayName: stayTitle,
+          budgetPerPerson: anyBudget ? undefined : budget,
+          themeCodes,
         }
       : undefined;
 

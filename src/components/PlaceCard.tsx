@@ -1,5 +1,12 @@
 import React from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type ImageSourcePropType,
+} from 'react-native';
 import PinIcon from '../assets/icons/pin.svg';
 import PlusIcon from '../assets/icons/plus.svg';
 import CheckIcon from '../assets/icons/check.svg';
@@ -19,7 +26,7 @@ type Props = {
   category: string; // "대분류 · 중분류"
   distance: string; // "숙소에서 1.3km · 직선거리"
   reasons: string[]; // 추천 이유 태그, 최대 2개 (spec §5A.4)
-  imageUri?: string;
+  image?: ImageSourcePropType;
   // R-K11: Type3 이미지는 자르지 않는다. Type1처럼 잘라도 되는 이미지만 true
   cropImage?: boolean;
   added: boolean;
@@ -35,7 +42,7 @@ export default function PlaceCard({
   category,
   distance,
   reasons,
-  imageUri,
+  image,
   cropImage,
   added,
   addLabel,
@@ -47,9 +54,9 @@ export default function PlaceCard({
     <Pressable onPress={onPress} style={styles.card}>
       <View style={styles.row}>
         <View style={styles.image}>
-          {imageUri && (
+          {image && (
             <Image
-              source={{ uri: imageUri }}
+              source={image}
               resizeMode={cropImage ? 'cover' : 'contain'}
               style={StyleSheet.absoluteFill}
             />
@@ -88,6 +95,7 @@ export default function PlaceCard({
           size="small"
           icon={added ? CheckIcon : PlusIcon}
           iconPosition="left"
+          style={!added && styles.add}
         />
       </View>
     </Pressable>
@@ -139,4 +147,5 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   reasons: { flexDirection: 'row', gap: 6, flexShrink: 1, overflow: 'hidden' },
+  add: { backgroundColor: colors.brand.surfaceSubtle }, // Figma 담기 버튼
 });
