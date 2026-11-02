@@ -19,6 +19,8 @@ KOREADY(코레디) 프론트엔드 저장소에서 작업할 때 따르는 안�
 - 스타일링은 `StyleSheet` + `src/theme/tokens.ts`로 한다. NativeWind는 쓰지 않는다.
 - 폰트는 Pretendard, 화면 이동은 React Navigation, 아이콘·로고는 `react-native-svg`(SVG)를 쓴다.
 - 지도는 네이버 지도 SDK(`@mj-studio/react-native-naver-map`)를 쓴다 (Q8 팀 결정, 2026-10-29). spec §7.6·§15는 아직 Google 기본으로 적혀 있다.
+- 동선 순서 변경(드래그)은 `react-native-sortables`(순수 JS)를 쓴다(2026-11-02 결정). `react-native-gesture-handler` 2.x + `react-native-reanimated` 4 + `react-native-worklets` 위에서 동작한다. `react-native-draggable-flatlist`는 React 19·reanimated 4·New Architecture에서 놓은 카드가 사라지는 문제가 있어 쓰지 않는다.
+- 네이버 지도 `Region`의 `latitude`·`longitude`는 중심이 아니라 남서쪽 모서리다(`src/utils/map.ts`). 커스텀 뷰 마커는 `width`·`height`를 주지 않으면 보이지 않는다.
 - TODO: 토큰 보안 저장소 라이브러리는 아직 정해지지 않았다.
 - 서버는 Spring Boot REST API다(spec §7.2). TODO: 백엔드 저장소 위치.
 

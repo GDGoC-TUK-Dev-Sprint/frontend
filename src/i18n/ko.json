@@ -187,6 +187,12 @@
     "backToList": "목록으로 보기",
     "lodging": "숙소 · {{name}}"
   },
+  "route": {
+    "recalcNotice": "순서를 바꾸면 이동시간과 운임을 다시 계산해요",
+    "remove": "{{name}} 빼기",
+    "reorder": "끌어서 순서 바꾸기",
+    "estimate": "경비 예측하기"
+  },
   "condition": {
     "title": "조건 입력",
     "badge": "데이터 기반 맞춤 추천",

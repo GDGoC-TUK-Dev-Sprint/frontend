@@ -7,7 +7,7 @@ import { colors, typography } from '../../theme/tokens';
 import { minutesBetween } from '../../utils/date';
 
 // Figma 값, 토큰에 없음
-const TIMELINE = '#BCD3F5';
+export const TIMELINE_COLOR = '#BCD3F5';
 const CATEGORY_TEXT = '#475569';
 
 // 분 → "1시간 30분" · "1h 30m"
@@ -56,7 +56,7 @@ export default function DayTimeline({
   );
 }
 
-function LodgingCard({
+export function LodgingCard({
   label,
   time,
   name,
@@ -91,14 +91,17 @@ function LodgingCard({
   );
 }
 
-function StopCard({
+// actions: 동선 화면의 삭제·드래그 버튼 자리
+export function StopCard({
   stop,
   order,
   onPress,
+  actions,
 }: {
   stop: TripStop;
   order: number;
   onPress: () => void;
+  actions?: React.ReactNode;
 }) {
   const { t } = useTranslation();
   const formatDuration = useFormatDuration();
@@ -139,6 +142,7 @@ function StopCard({
           })}
         </Text>
       </View>
+      {actions}
     </Pressable>
   );
 }
@@ -151,7 +155,7 @@ const styles = StyleSheet.create({
     top: 35,
     bottom: 35,
     width: 2,
-    backgroundColor: TIMELINE,
+    backgroundColor: TIMELINE_COLOR,
   },
   row: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   lodging: {
