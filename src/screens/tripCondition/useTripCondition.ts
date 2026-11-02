@@ -66,7 +66,13 @@ export function useTripCondition() {
           startDate: formatDot(dates.start, '-'),
           endDate: formatDot(dates.end, '-'),
           travelers,
-          stayName: stayTitle,
+          // 숙소·지역을 모두 안 고르면 입력 안내 문구 대신 "서울 중심"으로 저장한다 (spec F1-3 ②)
+          stayName:
+            stay?.kind === 'undecided' && !stay.area
+              ? t('condition.areaCenter', {
+                  area: t('condition.tripRegion'),
+                })
+              : stayTitle,
           budgetPerPerson: anyBudget ? undefined : budget,
           themeCodes,
         }
