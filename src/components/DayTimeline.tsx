@@ -1,14 +1,13 @@
 import React from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import HouseIcon from '../../assets/icons/house.svg';
-import type { TripDay, TripStop } from '../../mocks';
-import { colors, typography } from '../../theme/tokens';
-import { minutesBetween } from '../../utils/date';
+import HouseIcon from '../assets/icons/house.svg';
+import type { TripDay, TripStop } from '../mocks';
+import { colors, typography } from '../theme/tokens';
+import { minutesBetween } from '../utils/date';
 
 // Figma 값, 토큰에 없음
-export const TIMELINE_COLOR = '#BCD3F5';
-const CATEGORY_TEXT = '#475569';
+const TIMELINE_COLOR = '#BCD3F5';
 
 // 분 → "1시간 30분" · "1h 30m"
 export function useFormatDuration() {
@@ -23,12 +22,15 @@ export function useFormatDuration() {
 }
 
 // 동선 타임라인: 숙소 출발 → 장소 1~N → 숙소 도착. 세로선은 첫·마지막 숙소 카드 가운데를 잇는다
+// 계획 확인은 장소 카드를 그대로 쓰고, 동선 화면은 순서를 바꿀 수 있는 목록을 stops로 넘긴다
 export default function DayTimeline({
   day,
   onPressStop,
+  stops,
 }: {
   day: TripDay;
   onPressStop: (stop: TripStop) => void;
+  stops?: React.ReactNode;
 }) {
   const { t } = useTranslation();
   return (
@@ -39,14 +41,15 @@ export default function DayTimeline({
         time={day.departAt}
         name={day.lodgingName}
       />
-      {day.stops.map((stop, index) => (
-        <StopCard
-          key={stop.id}
-          stop={stop}
-          order={index + 1}
-          onPress={() => onPressStop(stop)}
-        />
-      ))}
+      {stops ??
+        day.stops.map((stop, index) => (
+          <StopCard
+            key={stop.id}
+            stop={stop}
+            order={index + 1}
+            onPress={() => onPressStop(stop)}
+          />
+        ))}
       <LodgingCard
         label={t('plan.lodgingArrive')}
         time={day.returnAt}
@@ -56,7 +59,7 @@ export default function DayTimeline({
   );
 }
 
-export function LodgingCard({
+function LodgingCard({
   label,
   time,
   name,
@@ -122,7 +125,9 @@ export function StopCard({
       </View>
       <View style={styles.info}>
         <View style={styles.category}>
-          <Text style={[typography.captionBase, { color: CATEGORY_TEXT }]}>
+          <Text
+            style={[typography.captionBase, { color: colors.text.secondary }]}
+          >
             {stop.category}
           </Text>
         </View>

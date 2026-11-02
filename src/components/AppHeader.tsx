@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   side: { flexDirection: 'row', alignItems: 'center', minWidth: 76 },
   right: { justifyContent: 'flex-end', gap: 6 },
   back: { transform: [{ rotate: '180deg' }] },
-  title: { ...typography.titleBase, color: '#1F242E' },
+  title: { ...typography.titleBase, color: colors.text.heading },
   language: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.regular,
     fontSize: 11,
     lineHeight: 17.6,
-    color: '#475569',
+    color: colors.text.secondary,
   },
   bell: {
     width: 36,

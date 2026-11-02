@@ -37,10 +37,6 @@ const ICONS: Record<LodgingType, React.FC<SvgProps>> = {
   hanok: HanokIcon,
 };
 
-// Figma 값 (토큰 없음)
-const HEADING = '#354153';
-const DIVIDER = '#F1F5F9';
-
 export default function LodgingSearchSheet({
   visible,
   onClose,
@@ -201,7 +197,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  heading: { ...typography.bodyStrong, color: HEADING },
+  heading: { ...typography.bodyStrong, color: colors.text.label },
   results: { gap: 8 },
   card: {
     flexDirection: 'row',
@@ -248,9 +244,13 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.medium,
     fontSize: 12,
     lineHeight: 18,
-    color: '#64748B', // Figma 값
+    color: colors.text.info,
   },
-  divider: { height: 1, marginVertical: 16, backgroundColor: DIVIDER },
+  divider: {
+    height: 1,
+    marginVertical: 16,
+    backgroundColor: colors.border.subtle,
+  },
   mapCard: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -17,7 +17,6 @@ import { colors, typography } from '../theme/tokens';
 // Figma 「Sortable Card」(02c 장소 선택). 표시 항목은 spec F2-8
 // Figma 값, 토큰에 없음
 const TITLE = '#191F28';
-const CATEGORY_TEXT = '#475569';
 const RANK_BG = 'rgba(26,28,28,0.85)';
 
 type Props = {
@@ -69,7 +68,9 @@ export default function PlaceCard({
         </View>
         <View style={styles.info}>
           <View style={styles.category}>
-            <Text style={[typography.captionBase, { color: CATEGORY_TEXT }]}>
+            <Text
+              style={[typography.captionBase, { color: colors.text.secondary }]}
+            >
               {category}
             </Text>
           </View>

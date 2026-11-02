@@ -21,10 +21,6 @@ import { colors, fontFamily, spacing, typography } from '../theme/tokens';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
-// Figma 색 (토큰 없음)
-const TEXT_STRONG = '#1F242E';
-const TEXT_NOTICE = '#6B7380';
-
 export default function LoginScreen({ navigation }: Props) {
   const { signIn } = useAuth();
   const { t } = useTranslation();
@@ -90,7 +86,7 @@ export default function LoginScreen({ navigation }: Props) {
             icon={GoogleIcon}
             label={t('auth.google')}
             style={styles.google}
-            textColor={TEXT_STRONG}
+            textColor={colors.text.heading}
           />
           <SocialButton
             icon={AppleIcon}
@@ -132,9 +128,13 @@ const styles = StyleSheet.create({
   },
   stretch: { alignSelf: 'stretch' },
   // Figma는 Noto Sans KR Bold 26. 앱 폰트(Pretendard)로 맞춤
-  welcome: { fontFamily: fontFamily.bold, fontSize: 26, color: TEXT_STRONG },
+  welcome: {
+    fontFamily: fontFamily.bold,
+    fontSize: 26,
+    color: colors.text.heading,
+  },
   fields: { alignSelf: 'stretch', gap: 12 },
-  notice: { ...typography.bodySubtle, color: TEXT_NOTICE },
+  notice: { ...typography.bodySubtle, color: colors.text.notice },
   signup: { flexDirection: 'row', gap: 6 },
   signupLink: { color: colors.brand.primary },
   divider: {
@@ -144,8 +144,12 @@ const styles = StyleSheet.create({
     width: 326,
     paddingVertical: 8,
   },
-  line: { flex: 1, height: 1, backgroundColor: '#E5E8ED' }, // Figma 값
-  or: { fontFamily: fontFamily.medium, fontSize: 12, color: '#9EA6B2' }, // Figma 값
+  line: { flex: 1, height: 1, backgroundColor: colors.border.line }, // Figma 값
+  or: {
+    fontFamily: fontFamily.medium,
+    fontSize: 12,
+    color: colors.text.helper,
+  }, // Figma 값
   social: { alignSelf: 'stretch', gap: 8 },
   socialButton: {
     flexDirection: 'row',

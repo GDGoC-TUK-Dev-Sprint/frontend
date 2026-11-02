@@ -14,6 +14,7 @@ export const colors = {
     subtle: '#F2F3F8',
     negativeSoft: '#FFF2F2',
     negativeSubtle: '#FFEAEA',
+    iconBg: '#F1F5F9', // 아이콘 배경 (알림·공지·조건 카드) — 디자인 시스템에 없음, 확인 필요
   },
   text: {
     base: '#383838',
@@ -22,9 +23,16 @@ export const colors = {
     negative: '#FA5252',
     // 아래 세 값은 디자인 시스템에 없음, 확인 필요 (Figma 화면에 직접 쓰인 값)
     strong: '#1A1C1C', // 조건 입력 제목·입력값
-    label: '#354153', // 입력 라벨
+    label: '#354153', // 입력 라벨, 시트·알림 제목
     emphasis: '#0F172A', // 인원 숫자
     faint: '#B4BBCB', // 공지 날짜 (디자인 시스템에 없음, 확인 필요)
+    // 아래 값도 디자인 시스템에 없음, 확인 필요 (여러 화면의 Figma에 반복해 쓰인 값)
+    heading: '#1F242E', // 헤더·로그인 제목, 지도 요약 제목
+    secondary: '#475569', // 분류 태그, 시간대, 언어 버튼
+    info: '#64748B', // 안내 상자 글자
+    notice: '#6B7380', // 로그인 안내, 지도 요약 설명
+    caption: '#737A87', // 이미지 출처 문구 (R-C52)
+    helper: '#9EA6B2', // 회원가입 도움말, 로그인 "또는"
   },
   // 디자인 시스템에 없음, 확인 필요
   icon: {
@@ -34,6 +42,8 @@ export const colors = {
   border: {
     divider: '#E8E8E8', // 조건 입력 섹션 구분선
     light: '#EEEEEE', // 공지 상세 구분선
+    subtle: '#F1F5F9', // 시트·카드 테두리, 숙소 검색 구분선
+    line: '#E5E8ED', // 하단 탭바 테두리, 로그인 "또는" 구분선
   },
 } as const;
 

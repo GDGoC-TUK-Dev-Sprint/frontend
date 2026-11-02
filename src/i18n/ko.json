@@ -4,7 +4,8 @@
     "back": "뒤로 가기",
     "notifications": "알림",
     "clear": "지우기",
-    "close": "닫기"
+    "close": "닫기",
+    "imageSource": "한국관광공사 이미지를 사용하였습니다."
   },
   "tabs": {
     "home": "홈",
@@ -68,7 +69,6 @@
     "tripMeta": "{{region}} 여행 · {{period}} · {{count}}명",
     "viewSchedule": "일정 자세히 보기",
     "viewOnMap": "지도에서 보기",
-    "imageSource": "한국관광공사 이미지를 사용하였습니다.",
     "emptyTitle": "아직 준비 중인 여행이 없어요",
     "emptyDescription": "여행 조건을 입력하면\n나만의 맞춤 여행 일정을 만들어드려요.",
     "planTrip": "여행 계획 세우기"

@@ -26,18 +26,13 @@ import {
   spacing,
   typography,
 } from '../theme/tokens';
-import {
-  LodgingCard,
+import DayTimeline, {
   StopCard,
-  TIMELINE_COLOR,
   useFormatDuration,
-} from './plan/DayTimeline';
+} from '../components/DayTimeline';
+import ImageCredit from '../components/ImageCredit';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Route'>;
-
-// Figma 값, 토큰에 없음
-const TEXT_SECONDARY = '#475569';
-const SOURCE_TEXT = '#737A87';
 
 // Figma 「03 동선」 (spec F3). 장소 선택에서 만든 동선을 일자별로 확인하고 순서 변경·삭제한다
 export default function RouteScreen({ navigation }: Props) {
@@ -62,14 +57,15 @@ export default function RouteScreen({ navigation }: Props) {
       prev.map(d => (d.dayNumber === day.dayNumber ? { ...d, stops } : d)),
     );
 
+  const openPlace = (stop: TripStop) =>
+    navigation.navigate('PlaceDetail', { placeId: stop.placeId });
+
   // 핸들로만 끌 수 있게 해서(customHandle) 카드 누르기·스크롤과 겹치지 않게 한다
   const renderStop: SortableGridRenderItem<TripStop> = ({ item, index }) => (
     <StopCard
       stop={item}
       order={index + 1}
-      onPress={() =>
-        navigation.navigate('PlaceDetail', { placeId: item.placeId })
-      }
+      onPress={() => openPlace(item)}
       actions={
         <View style={styles.actions}>
           <Pressable
@@ -101,31 +97,24 @@ export default function RouteScreen({ navigation }: Props) {
         <RouteSummary day={day} />
 
         <View style={styles.group}>
-          <View style={styles.timeline}>
-            <View style={styles.line} />
-            <LodgingCard
-              label={t('plan.lodgingDepart')}
-              time={day.departAt}
-              name={day.lodgingName}
-            />
-            {/* key: 일차를 바꾸면 그 일차의 목록으로 새로 그린다 */}
-            <Sortable.Grid
-              key={day.dayNumber}
-              data={day.stops}
-              keyExtractor={stop => stop.id}
-              renderItem={renderStop}
-              onDragEnd={({ data }) => setStops(data)}
-              columns={1}
-              rowGap={16}
-              customHandle
-              scrollableRef={scrollRef}
-            />
-            <LodgingCard
-              label={t('plan.lodgingArrive')}
-              time={day.returnAt}
-              name={day.lodgingName}
-            />
-          </View>
+          <DayTimeline
+            day={day}
+            onPressStop={openPlace}
+            stops={
+              // key: 일차를 바꾸면 그 일차의 목록으로 새로 그린다
+              <Sortable.Grid
+                key={day.dayNumber}
+                data={day.stops}
+                keyExtractor={stop => stop.id}
+                renderItem={renderStop}
+                onDragEnd={({ data }) => setStops(data)}
+                columns={1}
+                rowGap={16}
+                customHandle
+                scrollableRef={scrollRef}
+              />
+            }
+          />
           <Button
             label={t('plan.addPlace')}
             onPress={() => navigation.navigate('PlaceSelect')}
@@ -143,7 +132,7 @@ export default function RouteScreen({ navigation }: Props) {
         />
 
         {/* R-C52 출처 표시 */}
-        <Text style={styles.source}>{t('home.imageSource')}</Text>
+        <ImageCredit />
       </Animated.ScrollView>
 
       <View
@@ -177,7 +166,9 @@ function RouteSummary({ day }: { day: TripDay }) {
             {t('plan.daySchedule', { day: day.dayNumber })}
           </Text>
         </View>
-        <Text style={[typography.captionBase, { color: TEXT_SECONDARY }]}>
+        <Text
+          style={[typography.captionBase, { color: colors.text.secondary }]}
+        >
           {`${day.departAt} - ${day.returnAt}`}
         </Text>
       </View>
@@ -210,15 +201,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   group: { gap: spacing.groupGap },
-  timeline: { gap: 16 },
-  line: {
-    position: 'absolute',
-    left: 27,
-    top: 35,
-    bottom: 35,
-    width: 2,
-    backgroundColor: TIMELINE_COLOR,
-  },
   actions: { alignItems: 'center', gap: 13 },
   summary: {
     gap: 9,
@@ -253,9 +235,8 @@ const styles = StyleSheet.create({
   pillText: {
     fontFamily: fontFamily.regular,
     fontSize: 11.5,
-    color: TEXT_SECONDARY,
+    color: colors.text.secondary,
   },
-  source: { fontFamily: fontFamily.medium, fontSize: 11, color: SOURCE_TEXT },
   footer: {
     padding: spacing.screenPadding,
     backgroundColor: colors.surface.default,

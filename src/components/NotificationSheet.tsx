@@ -27,7 +27,6 @@ const ICONS: Record<NotificationCategory, React.FC<SvgProps>> = {
   visit: WarningIcon,
   notice: WarningIcon,
 };
-const HEADING = '#354153'; // Figma 값
 
 type Props = { visible: boolean; onClose: () => void };
 
@@ -214,7 +213,11 @@ const styles = StyleSheet.create({
     color: colors.text.muted,
   },
   group: { gap: 8 },
-  groupTitle: { ...typography.bodyStrong, marginBottom: 4, color: HEADING },
+  groupTitle: {
+    ...typography.bodyStrong,
+    marginBottom: 4,
+    color: colors.text.label,
+  },
   card: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -235,7 +238,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
-    backgroundColor: '#F1F5F9', // Figma 값
+    backgroundColor: colors.surface.iconBg,
   },
   iconUnread: { backgroundColor: colors.brand.primarySoft },
   cardBody: { flex: 1, gap: 8 },

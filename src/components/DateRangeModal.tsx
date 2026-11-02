@@ -26,9 +26,6 @@ type Props = {
   onClose: () => void;
 };
 
-// Figma 값 (토큰 없음)
-const TEXT_STRONG = '#1A1C1C';
-
 export default function DateRangeModal({
   visible,
   initial,
@@ -77,7 +74,9 @@ export default function DateRangeModal({
         <View style={styles.card}>
           <View style={styles.header}>
             <View style={styles.headerText}>
-              <Text style={[typography.bodyBase, { color: TEXT_STRONG }]}>
+              <Text
+                style={[typography.bodyBase, { color: colors.text.strong }]}
+              >
                 {t('condition.dateTitle')}
               </Text>
               <Text style={styles.subtitle}>{t('condition.dateSubtitle')}</Text>
@@ -98,7 +97,9 @@ export default function DateRangeModal({
 
           <View style={styles.selected}>
             <DateBox label={t('condition.startDate')} date={start} />
-            <Text style={[typography.bodyBase, { color: TEXT_STRONG }]}>~</Text>
+            <Text style={[typography.bodyBase, { color: colors.text.strong }]}>
+              ~
+            </Text>
             <DateBox label={t('condition.endDate')} date={end} />
           </View>
 
@@ -305,7 +306,7 @@ const styles = StyleSheet.create({
     borderRadius: 9,
     backgroundColor: colors.surface.default,
   },
-  dateValue: { ...typography.bodySubtle, color: TEXT_STRONG },
+  dateValue: { ...typography.bodySubtle, color: colors.text.strong },
   calendar: { gap: 5 },
   monthRow: {
     flexDirection: 'row',

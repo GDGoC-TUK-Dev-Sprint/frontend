@@ -10,6 +10,7 @@ import {
   type NativeSyntheticEvent,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import ImageCredit from '../../components/ImageCredit';
 import CameraIcon from '../../assets/icons/camera.svg';
 import type { PlacePhoto } from '../../mocks';
 import { colors, fontFamily } from '../../theme/tokens';
@@ -68,12 +69,13 @@ export default function PhotoSwiper({ photos }: { photos: PlacePhoto[] }) {
         )}
       </View>
       {/* Figma는 Noto Sans KR Medium. 앱 폰트(Pretendard)로 맞춤 */}
-      <Text style={styles.source}>{t('home.imageSource')}</Text>
+      <ImageCredit align="right" style={styles.credit} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  credit: { paddingTop: 6, paddingHorizontal: 16 },
   visual: { height: HEIGHT, backgroundColor: '#EEEEEE' }, // Figma 값
   gradient: {
     ...StyleSheet.absoluteFill,
@@ -119,13 +121,5 @@ const styles = StyleSheet.create({
     width: 16,
     backgroundColor: colors.surface.default,
     boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.05)',
-  },
-  source: {
-    paddingTop: 6,
-    paddingHorizontal: 16,
-    textAlign: 'right',
-    fontFamily: fontFamily.medium,
-    fontSize: 11,
-    color: '#737A87', // Figma 값 (메인 출처 문구와 같음)
   },
 });

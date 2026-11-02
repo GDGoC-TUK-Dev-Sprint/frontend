@@ -83,19 +83,19 @@ npm test                    # Jest
 
 | 폴더 | 넣는 것 |
 |---|---|
-| `screens/` | 화면 1개 = 파일 1개, 이름은 `○○Screen.tsx` (예: `LoginScreen.tsx`). 화면이 커지면 구역 파일과 상태 훅을 `screens/<화면 이름>/` 하위 폴더에 둔다 (예: `screens/tripCondition/`) |
-| `components/` | 여러 화면에서 같이 쓰는 UI (예: `AppHeader`, `ScreenPlaceholder`) |
+| `screens/` | 화면 1개 = 파일 1개, 이름은 `○○Screen.tsx` (예: `LoginScreen.tsx`). 화면이 커지면 구역 파일과 상태 훅을 `screens/<화면 이름>/` 하위 폴더에 둔다 (예: `screens/tripCondition/`, `screens/placeDetail/`, `screens/placeSelect/`) |
+| `components/` | 여러 화면에서 같이 쓰는 UI (예: `AppHeader`, `Button`, `PlaceCard`). 여행 화면 공통: `TripHeader`(여행 요약 카드·일차 탭), `DayTimeline`(숙소~장소 타임라인), `ImageCredit`(이미지 출처, R-C52), `Pagination` |
 | `navigation/` | 스택·탭 구성(`RootNavigator`, `MainTabs`), 하단 탭바(`TabBar`), 화면 파라미터 타입 |
 | `auth/` | 로그인 상태(`AuthContext`). 토큰 저장·재발급은 인증 API 연동 때 추가 |
-| `trips/` | 준비 중인 여행 상태(`TripContext`). 조건 입력에서 만들고 메인 티켓이 읽는다. API 연동 전에는 앱을 끄면 사라진다 |
+| `trips/` | 준비 중인 여행 상태(`TripContext`). 조건 입력에서 만들고 메인 티켓·장소 선택·계획 확인·지도·동선이 읽는다. API 연동 전에는 앱을 끄면 사라진다 |
 | `api/` | 서버 API 호출 (spec §9). 아직 없음 |
 | `theme/` | `tokens.ts` (색·타이포·간격·라운드·그림자) |
 | `assets/` | `fonts/`(Pretendard), `icons/`(Figma 아이콘 SVG), `images/`(로고 등) |
-| `utils/` | 화면과 무관한 순수 함수 (예: `date.ts` 날짜 계산). 테스트는 `__tests__/`에 둔다 |
+| `utils/` | 화면과 무관한 순수 함수 (`date.ts` 날짜, `text.ts` HTML 태그 제거, `map.ts` 지도 영역, `pagination.ts` 페이지 번호). 테스트는 `__tests__/`에 둔다 |
 | `mocks/` | API 연동 전 더미 데이터와 그 타입. 더미는 모든 화면이 이 한 곳에서 가져온다 |
-| `__tests__/` | Jest 테스트 |
+| `__tests__/` | Jest 테스트. 네이티브 모듈 대체(네이버 지도 등)는 루트 `jest.setup.js`, SVG 대체는 루트 `__mocks__/svgMock.js` |
 
-- 색·글자·간격 값은 `src/theme/tokens.ts`에서 가져온다. 디자인 시스템에 없는 Figma 색은 `tokens.ts`에 Figma 값 그대로 넣고 "디자인 시스템에 없음, 확인 필요" 주석을 단다. 예전 화면에는 아직 파일 안 상수로 남은 값이 있다. `tokens.ts`의 `TODO` 값(`primarySoft`, `text.muted`, 그림자 불투명도)은 Figma 확인 전이다 (spec §10.2).
+- 색·글자·간격 값은 `src/theme/tokens.ts`에서 가져온다. 디자인 시스템에 없는 Figma 색은 `tokens.ts`에 Figma 값 그대로 넣고 "디자인 시스템에 없음, 확인 필요" 주석을 단다. 여러 화면에 반복되는 값은 `tokens.ts`로 옮겼고(`text.secondary`·`text.caption` 등), 한 화면에서만 쓰는 값은 아직 파일 안 상수로 남아 있다. `tokens.ts`의 `TODO` 값(`primarySoft`, `text.muted`, 그림자 불투명도)은 Figma 확인 전이다 (spec §10.2).
 - 굵기는 `fontWeight`가 아니라 `fontFamily`(Pretendard 굵기별 파일)로 지정한다. 폰트를 추가하면 `src/assets/fonts`와 `android/app/src/main/assets/fonts`에 넣고 iOS `Info.plist`·Xcode 리소스에 등록한다.
 - 아이콘·로고는 Figma에서 받은 SVG를 `src/assets/`에 두고 `react-native-svg-transformer`로 컴포넌트처럼 import한다. 상태에 따라 색이 바뀌는 아이콘은 선 색을 `currentColor`로 바꾸고 `color` prop으로 지정한다.
 - 한 화면에서만 쓰는 구역 컴포넌트와 상태 훅은 `screens/<화면 이름>/`에 둔다. 여러 화면이 쓸 수 있는 UI는 `components/`에 둔다.
