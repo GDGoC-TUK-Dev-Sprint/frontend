@@ -36,6 +36,17 @@ type Props = CompositeScreenProps<
 const SUMMARY_TITLE = '#1F242E';
 const SUMMARY_TEXT = '#6B7380';
 
+const NUMBER_PIN = 20;
+const LODGING_PIN = 30;
+// 마커 오른쪽에 붙는 이름 (지도 SDK 캡션)
+const caption = (text: string) => ({
+  text,
+  align: 'Right' as const,
+  textSize: 11,
+  color: colors.text.base,
+  haloColor: colors.surface.default,
+});
+
 const dayPoints = (day: TripDay) => [
   { lat: day.lodgingLat, lng: day.lodgingLng },
   ...day.stops,
@@ -97,20 +108,21 @@ export default function MapScreen({ navigation }: Props) {
               color={colors.brand.primary}
             />
           )}
+          {/* 커스텀 뷰 마커는 width·height를 주지 않으면 크기 0으로 안 보인다. 이름표는 지도 SDK 캡션으로 그린다
+              TODO: Figma는 흰 상자 이름표. 길이가 바뀌는 상자를 마커 뷰로 그리려면 글자 폭을 재야 해서 캡션으로 대신한다 */}
           <NaverMapMarkerOverlay
             latitude={day.lodgingLat}
             longitude={day.lodgingLng}
-            anchor={{ x: 0.1, y: 0.5 }}
+            width={LODGING_PIN}
+            height={LODGING_PIN}
+            caption={caption(t('map.lodging', { name: day.lodgingName }))}
           >
-            <View style={styles.marker}>
-              <View style={styles.lodgingPin}>
-                <HouseIcon
-                  width={16}
-                  height={16}
-                  color={colors.brand.primary}
-                />
-              </View>
-              <MarkerLabel text={t('map.lodging', { name: day.lodgingName })} />
+            <View
+              key="lodging"
+              collapsable={false}
+              style={[styles.pin, styles.lodgingPin]}
+            >
+              <HouseIcon width={16} height={16} color={colors.brand.primary} />
             </View>
           </NaverMapMarkerOverlay>
           {day.stops.map((stop, index) => (
@@ -118,23 +130,27 @@ export default function MapScreen({ navigation }: Props) {
               key={stop.id}
               latitude={stop.lat}
               longitude={stop.lng}
-              anchor={{ x: 0.1, y: 0.5 }}
+              width={NUMBER_PIN}
+              height={NUMBER_PIN}
+              caption={caption(stop.name)}
               onTap={() =>
                 navigation.navigate('PlaceDetail', { placeId: stop.placeId })
               }
             >
-              <View style={styles.marker}>
-                <View style={styles.numberPin}>
-                  <Text
-                    style={[
-                      typography.captionBase,
-                      { color: colors.surface.default },
-                    ]}
-                  >
-                    {index + 1}
-                  </Text>
-                </View>
-                <MarkerLabel text={stop.name} />
+              {/* key: 순번이 바뀌면 마커 그림을 다시 만든다 */}
+              <View
+                key={`${stop.id}/${index}`}
+                collapsable={false}
+                style={[styles.pin, styles.numberPin]}
+              >
+                <Text
+                  style={[
+                    typography.captionBase,
+                    { color: colors.surface.default },
+                  ]}
+                >
+                  {index + 1}
+                </Text>
               </View>
             </NaverMapMarkerOverlay>
           ))}
@@ -167,16 +183,6 @@ export default function MapScreen({ navigation }: Props) {
   );
 }
 
-function MarkerLabel({ text }: { text: string }) {
-  return (
-    <View style={styles.label}>
-      <Text style={[typography.captionBase, { color: colors.text.base }]}>
-        {text}
-      </Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface.base },
   top: {
@@ -185,32 +191,21 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sectionGap,
   },
   mapArea: { flex: 1 },
-  marker: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  pin: { alignItems: 'center', justifyContent: 'center' },
   numberPin: {
-    width: 20,
-    height: 20,
+    width: NUMBER_PIN,
+    height: NUMBER_PIN,
     borderRadius: 999,
     borderWidth: 1,
     borderColor: colors.surface.default,
-    alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: colors.brand.primary,
   },
   lodgingPin: {
-    width: 30,
-    height: 30,
+    width: LODGING_PIN,
+    height: LODGING_PIN,
     borderRadius: 8,
     borderWidth: 2,
     borderColor: colors.brand.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surface.default,
-  },
-  label: {
-    height: 20,
-    justifyContent: 'center',
-    paddingHorizontal: 6,
-    borderRadius: 4,
     backgroundColor: colors.surface.default,
   },
   summary: {
