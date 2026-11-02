@@ -127,9 +127,10 @@ export default function PlanScreen({ navigation }: Props) {
             navigation.navigate('PlaceDetail', { placeId: stop.placeId })
           }
         />
-        {/* TODO: 장소 추가는 API가 없다 (spec F3-3, §2.2). 동작 없음 */}
+        {/* TODO: 장소 추가 API가 없다 (spec F3-3, §2.2). 고른 장소를 이 일정에 넣는 방식은 동선 연동 때 정한다 */}
         <Button
           label={t('plan.addPlace')}
+          onPress={() => navigation.navigate('PlaceSelect')}
           variant="outline"
           size="medium"
           icon={CalendarIcon}
