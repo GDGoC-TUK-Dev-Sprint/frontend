@@ -16,8 +16,8 @@ import StateView from '../components/StateView';
 import CalendarIcon from '../assets/icons/calendar.svg';
 import CheckIcon from '../assets/icons/check.svg';
 import PenIcon from '../assets/icons/pen.svg';
-import PinIcon from '../assets/icons/pin.svg';
 import { mockTripDays, type TripDay } from '../mocks';
+import { DayTabs, TripSummaryCard } from '../components/TripHeader';
 import type { MainTabParamList } from '../navigation/MainTabs';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import { useTrip } from '../trips/TripContext';
@@ -28,7 +28,6 @@ import {
   spacing,
   typography,
 } from '../theme/tokens';
-import { formatMonthDay, parseDate } from '../utils/date';
 import DayTimeline, { useFormatDuration } from './plan/DayTimeline';
 
 type Props = CompositeScreenProps<
@@ -42,7 +41,7 @@ const SOURCE_TEXT = '#737A87';
 
 // Figma 「11 계획 확인」 (spec F3-7·F3-9). 지금 여행(GET /api/trips)의 일자 일정을 보여준다
 export default function PlanScreen({ navigation }: Props) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { trip, setTrip } = useTrip();
   const [editingTitle, setEditingTitle] = useState(false);
   // TODO: GET /api/trips/{tripId}/days/{dayNumber}로 교체. 지금은 여행과 상관없이 같은 더미
@@ -54,9 +53,6 @@ export default function PlanScreen({ navigation }: Props) {
     return <StateView type="empty" message={t('plan.empty')} />;
   }
 
-  const formatDate = (date: string) =>
-    formatMonthDay(parseDate(date), i18n.language);
-
   // 빈 이름은 저장하지 않는다
   // TODO: 이름 변경 API가 spec §9에 없다. PUT /api/trips/{tripId}(API 19)에 title을 넣을지 백엔드 확인 필요
   const saveTitle = (text: string) => {
@@ -67,12 +63,10 @@ export default function PlanScreen({ navigation }: Props) {
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <View style={styles.tripCard}>
-        <View style={styles.tripIcon}>
-          <PinIcon width={24} height={24} color={colors.brand.primary} />
-        </View>
-        <View style={styles.flex}>
-          {editingTitle ? (
+      <TripSummaryCard
+        trip={trip}
+        title={
+          editingTitle && (
             <TextInput
               defaultValue={trip.title}
               autoFocus
@@ -82,41 +76,22 @@ export default function PlanScreen({ navigation }: Props) {
               style={[styles.titleInput, { color: colors.text.base }]}
               accessibilityLabel={t('plan.editTitle')}
             />
-          ) : (
-            <Text style={[typography.bodyStrong, { color: colors.text.base }]}>
-              {trip.title}
-            </Text>
-          )}
-          <Text style={[typography.captionBase, { color: colors.text.subtle }]}>
-            {t('plan.tripMeta', {
-              period: `${formatDate(trip.startDate)} - ${formatDate(
-                trip.endDate,
-              )}`,
-              count: trip.travelers,
-            })}
-          </Text>
-        </View>
-        {/* 여행 이름 변경. Figma에 편집 UI가 없어 제목 자리에서 바로 고친다 */}
-        <Pressable
-          hitSlop={8}
-          onPress={() => setEditingTitle(true)}
-          accessibilityRole="button"
-          accessibilityLabel={t('plan.editTitle')}
-        >
-          <PenIcon width={20} height={20} color={colors.text.muted} />
-        </Pressable>
-      </View>
+          )
+        }
+        right={
+          // 여행 이름 변경. Figma에 편집 UI가 없어 제목 자리에서 바로 고친다
+          <Pressable
+            hitSlop={8}
+            onPress={() => setEditingTitle(true)}
+            accessibilityRole="button"
+            accessibilityLabel={t('plan.editTitle')}
+          >
+            <PenIcon width={20} height={20} color={colors.text.muted} />
+          </Pressable>
+        }
+      />
 
-      <View style={styles.dayTabs}>
-        {days.map(d => (
-          <DayTab
-            key={d.dayNumber}
-            day={d}
-            selected={d.dayNumber === day.dayNumber}
-            onPress={() => setDayNumber(d.dayNumber)}
-          />
-        ))}
-      </View>
+      <DayTabs days={days} selected={day.dayNumber} onSelect={setDayNumber} />
 
       <DaySummary day={day} />
 
@@ -150,48 +125,6 @@ export default function PlanScreen({ navigation }: Props) {
   );
 }
 
-function DayTab({
-  day,
-  selected,
-  onPress,
-}: {
-  day: TripDay;
-  selected: boolean;
-  onPress: () => void;
-}) {
-  const { t, i18n } = useTranslation();
-  const date = parseDate(day.date);
-  const weekday = date.toLocaleDateString(i18n.language, { weekday: 'short' });
-  return (
-    <Pressable
-      style={[styles.dayTab, selected && styles.dayTabSelected]}
-      onPress={onPress}
-      accessibilityRole="tab"
-      accessibilityState={{ selected }}
-    >
-      <Text
-        style={
-          selected
-            ? [typography.bodyStrong, { color: colors.surface.default }]
-            : [typography.bodyBase, { color: colors.text.muted }]
-        }
-      >
-        {t('plan.dayTab', { day: day.dayNumber })}
-      </Text>
-      <Text
-        style={[
-          styles.dayTabDate,
-          {
-            color: selected ? colors.brand.primarySoft : colors.text.subtle,
-          },
-        ]}
-      >
-        {`${date.getMonth() + 1}.${date.getDate()} (${weekday})`}
-      </Text>
-    </Pressable>
-  );
-}
-
 function DaySummary({ day }: { day: TripDay }) {
   const { t } = useTranslation();
   const formatDuration = useFormatDuration();
@@ -222,7 +155,9 @@ function DaySummary({ day }: { day: TripDay }) {
           <Text style={[typography.bodyBase, { color: colors.text.base }]}>
             {t('plan.transitFare')}
           </Text>
-          <Text style={[typography.bodyStrong, { color: colors.brand.primary }]}>
+          <Text
+            style={[typography.bodyStrong, { color: colors.brand.primary }]}
+          >
             {t('plan.farePerPerson', { amount: day.transitFarePerPerson })}
           </Text>
         </View>
@@ -256,24 +191,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   group: { gap: spacing.groupGap },
-  tripCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 15,
-    borderWidth: 1,
-    borderColor: colors.surface.subtle,
-    borderRadius: 12,
-    backgroundColor: colors.surface.default,
-  },
-  tripIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.brand.surfaceSubtle,
-  },
   // 편집 중에도 줄 높이가 그대로이게 글자 스타일만 쓰고 기본 여백을 없앤다
   titleInput: {
     ...typography.bodyStrong,
@@ -281,25 +198,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: colors.brand.primary,
   },
-  dayTabs: {
-    flexDirection: 'row',
-    padding: 8,
-    borderWidth: 1,
-    borderColor: colors.surface.subtle,
-    borderRadius: 12,
-    backgroundColor: colors.surface.default,
-  },
-  dayTab: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  dayTabSelected: {
-    backgroundColor: colors.brand.primary,
-    boxShadow: '0px 1px 1px rgba(0, 0, 0, 0.05)',
-  },
-  dayTabDate: { fontFamily: fontFamily.regular, fontSize: 10.5 },
   summary: {
     gap: 16,
     padding: 16,

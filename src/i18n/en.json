@@ -176,6 +176,12 @@
     "next": "Next page",
     "last": "Last page"
   },
+  "map": {
+    "summary": "Day {{day}} · {{count}} places · {{from}} - {{to}}",
+    "routeNote": "{{duration}} total travel incl. hotel round trip · Connected in visit order",
+    "backToList": "View as list",
+    "lodging": "Hotel · {{name}}"
+  },
   "condition": {
     "title": "Trip details",
     "badge": "Data-driven picks",

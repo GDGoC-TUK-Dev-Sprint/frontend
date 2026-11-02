@@ -181,6 +181,12 @@
     "next": "다음 페이지",
     "last": "마지막 페이지"
   },
+  "map": {
+    "summary": "{{day}}일차 · 장소 {{count}}곳 · {{from}} - {{to}}",
+    "routeNote": "숙소 왕복 포함 총 이동 {{duration}} · 방문 순서대로 이었어요",
+    "backToList": "목록으로 보기",
+    "lodging": "숙소 · {{name}}"
+  },
   "condition": {
     "title": "조건 입력",
     "badge": "데이터 기반 맞춤 추천",
