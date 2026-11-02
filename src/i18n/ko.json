@@ -135,6 +135,25 @@
     "added": "일정에 담았어요",
     "notFound": "장소를 찾을 수 없어요"
   },
+  "plan": {
+    "tripMeta": "{{period}} · 여행자 {{count}}명",
+    "editTitle": "여행 이름 변경",
+    "dayTab": "{{day}}일차",
+    "daySchedule": "{{day}}일차 일정",
+    "daySummary": "장소 {{count}}곳 · 숙소 왕복 포함 총 이동 {{duration}}",
+    "transitFare": "이 날 대중교통비 예상",
+    "farePerPerson": "1인 {{amount}} · 경비에 반영",
+    "readOnly": "이미 확정한 일정이에요. 보기만 할 수 있어요.",
+    "lodgingDepart": "숙소 출발",
+    "lodgingArrive": "숙소 도착",
+    "stopTime": "{{from}} - {{to}} · 체류 {{duration}}",
+    "durationHM": "{{hours}}시간 {{minutes}}분",
+    "durationH": "{{hours}}시간",
+    "durationM": "{{minutes}}분",
+    "addPlace": "장소 추가하기",
+    "viewRouteOnMap": "지도에서 전체 동선 한눈에 보기",
+    "empty": "아직 확정한 여행이 없어요"
+  },
   "condition": {
     "title": "조건 입력",
     "badge": "데이터 기반 맞춤 추천",

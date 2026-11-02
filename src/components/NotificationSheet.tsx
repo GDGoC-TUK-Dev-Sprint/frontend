@@ -63,9 +63,11 @@ export default function NotificationSheet({ visible, onClose }: Props) {
     },
   ] as const;
 
-  // TODO: 일정 보기(schedule)는 계획 확인(#33)에서 연결
   const openLink = (item: AppNotification) => {
-    if (item.category === 'notice') {
+    if (item.category === 'schedule') {
+      onClose();
+      navigation.navigate('Main', { screen: 'Plan' });
+    } else if (item.category === 'notice') {
       onClose();
       navigation.navigate('Notices');
     } else if (item.category === 'visit' && item.placeId) {
