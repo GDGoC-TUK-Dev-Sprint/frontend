@@ -19,7 +19,10 @@
     "or": "or",
     "google": "Continue with Google",
     "apple": "Continue with Apple",
-    "tempLogout": "Temp log out"
+    "tempLogout": "Temp log out",
+    "loginFailed": "Incorrect ID or password",
+    "loginIdTaken": "This ID is already taken",
+    "networkError": "Connection problem. Please try again in a moment."
   },
   "signup": {
     "name": "Name",

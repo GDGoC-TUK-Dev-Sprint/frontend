@@ -16,6 +16,7 @@ import Logo from '../assets/images/logo.svg';
 import GoogleIcon from '../assets/icons/google.svg';
 import AppleIcon from '../assets/icons/apple.svg';
 import { useAuth } from '../auth/AuthContext';
+import { ApiError } from '../api/client';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import { colors, fontFamily, spacing, typography } from '../theme/tokens';
 
@@ -26,6 +27,21 @@ export default function LoginScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  // 오류 문구는 Figma에 없어 초안 (TODO: Figma 확인 필요)
+  const submit = async () => {
+    setSubmitting(true);
+    setError(null);
+    try {
+      await signIn(loginId, password);
+    } catch (e) {
+      const failed = e instanceof ApiError && e.status === 401;
+      setError(t(failed ? 'auth.loginFailed' : 'auth.networkError'));
+      setSubmitting(false);
+    }
+  };
 
   // 키보드가 열려도 로그인 버튼까지 스크롤할 수 있게 한다 (SignupScreen과 같은 방식)
   return (
@@ -57,10 +73,11 @@ export default function LoginScreen({ navigation }: Props) {
             textContentType="password"
           />
         </View>
-        {/* TODO: POST /api/auth/login 연동 전까지는 바로 로그인 상태로 바꾼다 */}
+        {error && <Text style={styles.error}>{error}</Text>}
         <Button
           label={t('auth.login')}
-          onPress={signIn}
+          onPress={submit}
+          disabled={submitting || !loginId || !password}
           shadow
           style={styles.stretch}
         />
@@ -135,6 +152,7 @@ const styles = StyleSheet.create({
   },
   fields: { alignSelf: 'stretch', gap: 12 },
   notice: { ...typography.bodySubtle, color: colors.text.notice },
+  error: { ...typography.bodySubtle, color: colors.text.negative },
   signup: { flexDirection: 'row', gap: 6 },
   signupLink: { color: colors.brand.primary },
   divider: {

@@ -46,13 +46,18 @@ const renderBackHeader = ({ navigation, options }: NativeStackHeaderProps) => (
 
 // 로그인 필수, 게스트 모드 없음 (spec F8-1): 로그인 전에는 온보딩·인증 화면만, 로그인 후에는 메인 탭만 등록한다
 export default function RootNavigator() {
-  const { isSignedIn } = useAuth();
+  const { status } = useAuth();
   const { t } = useTranslation();
+
+  // 저장된 토큰을 확인하는 동안에는 아무 화면도 보여주지 않는다 (로그인 화면이 잠깐 보였다 사라지지 않게)
+  if (status === 'loading') {
+    return null;
+  }
 
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        {isSignedIn ? (
+        {status === 'signedIn' ? (
           <>
             <Stack.Screen
               name="Main"
