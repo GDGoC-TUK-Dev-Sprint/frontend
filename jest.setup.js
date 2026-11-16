@@ -15,3 +15,22 @@ console.warn = (message, ...rest) => {
   if (String(message).includes('DrawerLayoutAndroid is deprecated')) return;
   warn(message, ...rest);
 };
+
+// 보안 저장소(Keychain·Keystore)는 네이티브 모듈이라 테스트에서는 메모리로 바꾼다
+jest.mock('react-native-keychain', () => {
+  let saved = false;
+  return {
+    ACCESSIBLE: {
+      AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY: 'AfterFirstUnlockThisDeviceOnly',
+    },
+    getGenericPassword: jest.fn(async () => saved),
+    setGenericPassword: jest.fn(async (username, password) => {
+      saved = { username, password };
+      return true;
+    }),
+    resetGenericPassword: jest.fn(async () => {
+      saved = false;
+      return true;
+    }),
+  };
+});

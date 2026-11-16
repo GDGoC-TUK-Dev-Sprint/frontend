@@ -11,6 +11,9 @@ import { useTranslation } from 'react-i18next';
 import Button from '../components/Button';
 import TextField from '../components/TextField';
 import { NAME_MAX, validateSignup } from '../auth/validation';
+import { useAuth } from '../auth/AuthContext';
+import { ApiError } from '../api/client';
+import { isLoginIdAvailable } from '../api/auth';
 import { colors, shadow, spacing, typography } from '../theme/tokens';
 
 export default function SignupScreen() {
@@ -20,14 +23,39 @@ export default function SignupScreen() {
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+  const { signUp } = useAuth();
+  // 중복으로 확인된 아이디. 아이디를 고치면 안내가 사라진다
+  const [takenId, setTakenId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const valid = validateSignup({ name, loginId, password, passwordConfirm });
   const clear = t('common.clear');
+  const idTaken = takenId !== null && takenId === loginId;
 
-  const submit = () => {
+  // Figma에 중복 확인 버튼이 없어 가입하기를 누를 때 확인한다. 가입이 끝나면 바로 로그인한다
+  // 오류 문구는 Figma에 없어 초안 (TODO: Figma 확인 필요)
+  const submit = async () => {
     if (!Object.values(valid).every(Boolean)) {
       return;
     }
-    // TODO: 아이디 중복 확인(GET /api/auth/login-id/availability)과 가입(POST /api/auth/signup) 연동
+    setSubmitting(true);
+    setError(null);
+    try {
+      if (!(await isLoginIdAvailable(loginId))) {
+        setTakenId(loginId);
+        setSubmitting(false);
+        return;
+      }
+      await signUp({ name: name.trim(), loginId, password });
+    } catch (e) {
+      // 확인과 가입 사이에 같은 아이디가 먼저 가입한 경우 409
+      if (e instanceof ApiError && e.status === 409) {
+        setTakenId(loginId);
+      } else {
+        setError(t('auth.networkError'));
+      }
+      setSubmitting(false);
+    }
   };
 
   // 키보드가 열리면 하단 버튼을 키보드 위로 올린다
@@ -51,8 +79,8 @@ export default function SignupScreen() {
         </Field>
         <Field
           label={t('auth.loginId')}
-          helper={t('signup.loginIdRule')}
-          error={loginId.length > 0 && !valid.loginId}
+          helper={idTaken ? t('auth.loginIdTaken') : t('signup.loginIdRule')}
+          error={idTaken || (loginId.length > 0 && !valid.loginId)}
         >
           <TextField
             value={loginId}
@@ -108,7 +136,13 @@ export default function SignupScreen() {
           { paddingBottom: spacing.screenPadding + insets.bottom },
         ]}
       >
-        <Button label={t('signup.submit')} onPress={submit} shadow />
+        {error && <Text style={styles.error}>{error}</Text>}
+        <Button
+          label={t('signup.submit')}
+          onPress={submit}
+          disabled={submitting}
+          shadow
+        />
       </View>
     </KeyboardAvoidingView>
   );
@@ -154,6 +188,12 @@ const styles = StyleSheet.create({
     ...typography.bodySubtle,
     color: colors.text.notice,
     textAlign: 'center',
+  },
+  error: {
+    ...typography.bodySubtle,
+    color: colors.text.negative,
+    textAlign: 'center',
+    marginBottom: 8,
   },
   bottomBar: {
     backgroundColor: colors.surface.default,
