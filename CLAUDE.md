@@ -21,25 +21,31 @@ KOREADY(코레디) 프론트엔드 저장소에서 작업할 때 따르는 안�
 - 지도는 네이버 지도 SDK(`@mj-studio/react-native-naver-map`)를 쓴다 (Q8 팀 결정, 2026-10-29). spec §7.6·§15는 아직 Google 기본으로 적혀 있다.
 - 동선 순서 변경(드래그)은 `react-native-sortables`(순수 JS)를 쓴다(2026-11-02 결정). `react-native-gesture-handler` 2.x + `react-native-reanimated` 4 + `react-native-worklets` 위에서 동작한다. `react-native-draggable-flatlist`는 React 19·reanimated 4·New Architecture에서 놓은 카드가 사라지는 문제가 있어 쓰지 않는다.
 - 네이버 지도 `Region`의 `latitude`·`longitude`는 중심이 아니라 남서쪽 모서리다(`src/utils/map.ts`). 커스텀 뷰 마커는 `width`·`height`를 주지 않으면 보이지 않는다.
-- TODO: 토큰 보안 저장소 라이브러리는 아직 정해지지 않았다.
-- 서버는 Spring Boot REST API다(spec §7.2). TODO: 백엔드 저장소 위치.
+- 토큰 보안 저장소는 `react-native-keychain`을 쓴다(2026-11-16 결정, `src/auth/tokenStorage.ts`).
+- 서버는 Spring Boot REST API다(spec §7.2). 백엔드는 같은 조직의 `backend` 저장소이고 `develop` 브랜치가 최신이다.
 
 ## 2. 문서 안내 (읽는 순서)
 
-1. @docs/spec.md: 기준 문서(v1.6). 기능(§4), 경비 로직(§5), API 32개(§9), 화면 대응표와 Figma 수정 항목(§10), 미결정 사항(§15). §9와 §10은 Figma를 따른다.
+**기준은 팀 설계 문서다 (2026-11-16 대조).** 기능 목록·DB 설계·API 명세의 원본은 팀이 따로 관리하는 비공개 설계 문서(노션 "KOREADY 기능 목록"·"KOREADY DB 설계"·"KOREADY API 명세")이고, 아래 `docs/` 문서는 2026-10-28에 들여온 사본이다. 서로 다르면 팀 설계 문서가 맞다. 이 저장소는 공개 저장소라 팀 설계 문서의 경로·링크·본문을 옮겨 적지 않고, 구현에 필요한 결과만 적는다. `docs/` 문서 중 팀 결정으로 바뀐 부분은 spec.md 맨 위 "0. 팀 설계 결정과 다른 부분"에 모았다.
+
+1. @docs/spec.md: 프론트 명세(v1.7). 팀 결정과 다른 부분(§0), 기능(§4), 경비 로직(§5), API 32개·인증 요청·응답·에러 코드(§9), 화면 대응표와 Figma 수정 항목(§10), 미결정 사항(§15). §9와 §10은 Figma를 따른다.
 2. @docs/api_schema_core.md: 핵심 외부 API(TourAPI `KorService2`, ODsay)의 필드. 앱이 직접 부르지 않으며, 화면에 나오는 데이터가 어디서 오는지 이해하는 데 쓴다.
 3. @docs/api_schema.md: 나머지 외부 API(환율, Papago 등) 전체 스키마.
-4. @docs/recommendation_design.md: 추천 순위·동선 알고리즘 상세(서버 로직).
-5. @docs/rule.md: TourAPI 계열 호출·저장·표시 규칙(R-xx 번호). 대부분 서버용이고, 프론트 관련 규칙은 6절에 요약했다.
-6. @docs/theme_map.json: 테마 ↔ TourAPI 분류체계 매핑 초안.
+4. @docs/recommendation_design.md: 추천 순위·동선 알고리즘 상세(서버 로직). **순위식과 추천 모드는 팀 결정으로 바뀌었다** (spec §0).
+5. @docs/rule.md: TourAPI 계열 호출·저장·표시 규칙(R-xx 번호). 대부분 서버용이고, 프론트 관련 규칙은 6절에 요약했다. 연관 관광지·지역별 방문자 수는 적재하지 않기로 했다 (spec §0).
+6. @docs/theme_map.json: 테마 ↔ TourAPI 분류체계 매핑 초안. **쓰지 않는다.** 카테고리가 TourAPI 대분류 8개 그대로라 매핑이 필요 없다 (spec §0).
 
 ## 3. 확정된 결정사항 (어기면 안 됨)
 
 - **숙박·항공은 경비에서 제외한다.** 경비 화면과 희망 예산 모두 "숙박·항공 제외" 기준이다 (spec §2.2, §5.1, F1-6).
-- **경비는 범위로 표시한다.** 중간값을 크게 보여주고, 범위(알뜰/보통/여유)와 항목별 근거 배지·출처 시트를 함께 둔다 (spec F4-1, F4-2, F4-5, F4-6).
+- **경비는 범위(최소~최대)로 표시하고 데이터 한계를 함께 보여준다.** 총액·항목·일자 금액이 모두 범위다. 응답에 1인 기준과 전체 기준이 둘 다 오므로 전환할 때 다시 요청하지 않는다. 근거 출처와 데이터 한계 문장도 응답에 온다. 알뜰/보통/여유 3단계와 중간값 강조는 팀 설계에 없다 (spec §0, 2026-11-16 수정. 이전 문장은 spec F4-1·F4-2 기준이었다).
 - 경비 화면의 모든 수치는 `GET /api/trips/{tripId}/cost-estimate` 응답 하나에서 나온다. 화면마다 따로 계산하지 않는다 (spec F4-9).
 - **로그인이 필수이고 게스트 모드는 없다.** 앱 시작 때 `GET /api/users/me`로 토큰을 확인하고, 실패하면 재발급을 시도한 뒤 로그인 화면으로 보낸다 (spec F8-1, F11).
-- 401 응답은 한 곳에서 토큰 재발급(`POST /api/auth/refresh`) 후 재시도한다. 토큰은 기기 보안 저장소에 둔다 (spec F11-4, F11-7).
+- 401 응답은 한 곳(`src/api/client.ts`)에서 토큰 재발급(`POST /api/auth/refresh`) 후 재시도한다. 명세는 `401 TOKEN_EXPIRED`일 때만 재발급하고 `401 UNAUTHORIZED`면 바로 로그인 화면이다. 리프레시 토큰은 한 번만 쓸 수 있어 재발급은 한 번에 하나만 부른다. 토큰은 기기 보안 저장소에 둔다 (spec F11-4, F11-7).
+- 오류 응답은 `{code, message, fields}`다. `message`는 개발 확인용이고 화면 문구는 앱이 `code`로 정한다 (spec §9.1).
+- **확정한 여행은 편집할 수 없다.** 여행 상태는 `DRAFT`·`CONFIRMED` 두 값이고, 진행 예정·진행 중·완료는 서버가 날짜로 계산해 준다. 끝나지 않은 확정 여행은 사용자마다 하나다 (새로 만들면 `409 ACTIVE_TRIP_EXISTS`).
+- **출처 없는 정보(외부 평점·대기시간·예약 가능)는 시안에 있어도 표시하지 않는다.**
+- 장소 사진이 나오는 곳에는 "한국관광공사 이미지를 사용하였습니다." 문구를 둔다 (`components/ImageCredit`).
 - **표시 통화는 한 가지만 쓴다.** KRW·JPY·USD·EUR 중 하나를 고르고, 환산은 서버가 한다 (spec F4-8, F7-3).
 - **앱 언어는 영어·한국어 2개다.** 기본값은 기기 로케일이고, 지원하지 않는 언어면 영어를 쓴다 (spec F7-1, F7-2).
 - 모든 요청에 `Accept-Language: ko | en`과 `X-Currency`를 보낸다. 언어·통화 설정은 서버가 아니라 기기에만 저장한다 (spec F7-4, F7-5, §9.1).
@@ -49,12 +55,15 @@ KOREADY(코레디) 프론트엔드 저장소에서 작업할 때 따르는 안�
 
 | # | 내용 | 근거 |
 |---|---|---|
-| Q12 | 비밀번호 찾기·재설정: Figma에 화면이 없고, 이메일을 받지 않아 복구 수단이 없음 | spec §15, F11-9 |
-| Q13 | 알림(01a)을 MVP에 넣을지 여부: 화면만 있고 API는 없음 | spec §15, F14 |
-| Q14 | 추천 모드 "상관없음"을 화면에 둘지 여부: Figma 조건 입력에 모드 토글이 없음 | spec §15, recommendation_design §12 |
-| Q15 | 챗봇 장소 카드의 별점·대기시간·예약 가능 표시: 데이터 소스가 없음 | spec §15, F13-3 |
-| Q16 | 번역(F9)과 지도 앱 길 안내 버튼(F10)을 MVP에 유지할지 여부: Figma에 화면·API가 없음 | spec §15 |
-| - | 행사/축제 테마(`EV`) 포함 여부: rule.md R-ID02·R-K15는 MVP에서 제외, spec은 테마 8종에 포함 | rule.md §2.1·§3.3, spec F1-7 |
+| Q12 | 비밀번호 찾기·재설정: Figma에 화면이 없고, 이메일을 받지 않아 복구 수단이 없음. 팀 설계 문서에도 없음 | spec §15, F11-9 |
+| Q13 | 알림(01a)을 서비스 범위에 넣을지: 화면만 있고 API·DB는 없음. 팀에서도 미정 | spec §15, F14 |
+| Q16 | 번역(F9)·지도 앱 길 안내(F10)·오프라인 열람(F8): 팀 설계 문서(기능 목록·API)에 없다. spec에만 남은 기능이라 구현하지 않고 먼저 묻는다 | spec §15 |
+| - | 기본 표시 통화(국적 통화 / KRW): 팀 미정. 앱은 임시로 KRW를 보낸다 | spec §0 |
+| - | 로그인·가입 뒤 이동할 화면, 아이디 중복 확인을 부르는 때와 결과 문구: 시안에 없음. 앱은 임시로 가입 뒤 바로 로그인해 메인으로 가고, 가입하기를 누를 때 중복을 확인한다 | spec §0 |
+| - | 경비 세부 규칙(서울 보정, 업종 → 항목, 통계 없는 국적, 범위 기준)과 "기타" 항목: 팀 미정. 응답에 `OTHER`가 없을 수 있다 | spec §0 |
+| - | 국적 목록, LLM 제공자(정해지기 전에는 여행 제목·안내 문구가 템플릿이고 챗봇은 동작하지 않음) | spec §0 |
+
+해결된 것: Q14 추천 모드 토글은 두지 않는다(카테고리 필터 + 인기도 순위 한 가지). Q15 챗봇 카드의 별점·대기시간·예약 가능은 표시하지 않는다. 행사/축제(`EV`)는 카테고리 8개에 포함하고 여행 기간과 겹치는 행사만 후보다.
 
 이 밖에 spec에 `[결정 필요]`·`[확인 필요]`로 표시된 항목도 같은 방식으로 다룬다.
 
@@ -86,9 +95,9 @@ npm test                    # Jest
 | `screens/` | 화면 1개 = 파일 1개, 이름은 `○○Screen.tsx` (예: `LoginScreen.tsx`). 화면이 커지면 구역 파일과 상태 훅을 `screens/<화면 이름>/` 하위 폴더에 둔다 (예: `screens/tripCondition/`, `screens/placeDetail/`, `screens/placeSelect/`) |
 | `components/` | 여러 화면에서 같이 쓰는 UI (예: `AppHeader`, `Button`, `PlaceCard`). 여행 화면 공통: `TripHeader`(여행 요약 카드·일차 탭), `DayTimeline`(숙소~장소 타임라인), `ImageCredit`(이미지 출처, R-C52), `Pagination` |
 | `navigation/` | 스택·탭 구성(`RootNavigator`, `MainTabs`), 하단 탭바(`TabBar`), 화면 파라미터 타입 |
-| `auth/` | 로그인 상태(`AuthContext`). 토큰 저장·재발급은 인증 API 연동 때 추가 |
+| `auth/` | 로그인 상태(`AuthContext`: 앱 시작 때 토큰 확인, 로그인·가입·로그아웃), 토큰 보안 저장(`tokenStorage`), 가입 입력 규칙(`validation`) |
 | `trips/` | 준비 중인 여행 상태(`TripContext`). 조건 입력에서 만들고 메인 티켓·장소 선택·계획 확인·지도·동선이 읽는다. API 연동 전에는 앱을 끄면 사라진다 |
-| `api/` | 서버 API 호출 (spec §9). 아직 없음 |
+| `api/` | 서버 API 호출 (spec §9). `client.ts`가 서버 주소·공통 헤더·오류(`ApiError`)·401 재발급을 맡고, 기능별 파일(`auth.ts`)이 그것을 쓴다 |
 | `theme/` | `tokens.ts` (색·타이포·간격·라운드·그림자) |
 | `assets/` | `fonts/`(Pretendard), `icons/`(Figma 아이콘 SVG), `images/`(로고 등) |
 | `utils/` | 화면과 무관한 순수 함수 (`date.ts` 날짜, `text.ts` HTML 태그 제거, `map.ts` 지도 영역, `pagination.ts` 페이지 번호). 테스트는 `__tests__/`에 둔다 |
@@ -99,7 +108,7 @@ npm test                    # Jest
 - 굵기는 `fontWeight`가 아니라 `fontFamily`(Pretendard 굵기별 파일)로 지정한다. 폰트를 추가하면 `src/assets/fonts`와 `android/app/src/main/assets/fonts`에 넣고 iOS `Info.plist`·Xcode 리소스에 등록한다.
 - 아이콘·로고는 Figma에서 받은 SVG를 `src/assets/`에 두고 `react-native-svg-transformer`로 컴포넌트처럼 import한다. 상태에 따라 색이 바뀌는 아이콘은 선 색을 `currentColor`로 바꾸고 `color` prop으로 지정한다.
 - 한 화면에서만 쓰는 구역 컴포넌트와 상태 훅은 `screens/<화면 이름>/`에 둔다. 여러 화면이 쓸 수 있는 UI는 `components/`에 둔다.
-- TODO: 상태 관리, API 클라이언트 구조. 화면을 구현하면서 정한다.
+- API 호출은 `src/api/client.ts`의 `request()`를 거친다. 화면에서 `fetch`를 직접 부르지 않는다. TODO: 상태 관리.
 
 ### rule.md 중 프론트에 해당하는 규칙
 
@@ -114,8 +123,9 @@ npm test                    # Jest
 ## 7. 작업 방식 규칙
 
 - 모르는 API, 응답 필드, 색상, 문구는 추측해서 만들지 않는다. `docs/`에서 찾고, 없으면 사용자에게 질문한다.
-- spec §9의 API 요청·응답 필드는 초안이다(Figma에 정의되어 있지 않음). 확정되지 않은 필드에 의존하는 코드를 쓰기 전에 확인한다.
-- 문서끼리 충돌하면 spec.md가 우선한다(단, 1절에서 폐기한 개발 환경 내용은 CLAUDE.md가 우선). 충돌을 발견하면 사용자에게 알린다.
+- API 요청·응답 필드는 팀 API 명세가 기준이고 spec §9.6의 예시는 옛 초안이다. 백엔드 구현이 명세와 다를 수 있으니, 연동 전에 `backend` 저장소 `develop`의 컨트롤러·DTO를 함께 확인한다.
+- 문서끼리 충돌하면 팀 설계 문서 > spec.md 순서다(단, 1절에서 폐기한 개발 환경 내용은 CLAUDE.md가 우선). 충돌을 발견하면 사용자에게 알린다.
+- 이 저장소는 공개 저장소다. 팀 설계 문서의 경로·링크·본문, Figma 링크를 파일·커밋·이슈·PR에 쓰지 않는다.
 - Figma는 읽기만 하고 수정하지 않는다.
 - 키, 시크릿, 토큰을 코드, 문서, 커밋, 로그에 넣지 않는다 (spec §11, rule.md R-C10).
 - 한 번에 큰 변경을 하지 않는다. 작은 단위로 나눠 진행한다.

@@ -1,5 +1,7 @@
 # KOREADY 추천 알고리즘 상세 설계 (recommendation_design.md)
 
+> **2026-11-16**: 이 문서의 가중치 점수식과 추천 모드(숙소 근처/상관없음), 테마 매핑은 팀 결정으로 대체됐다. 지금 순위는 "인기도 신호 개수 × 3km − 숙소 직선거리"이고 카테고리는 필터다 (`spec.md` §0.1). 아래는 옛 설계 기록이다.
+
 버전 v0.2 · 2026-10-28 · `spec.md` v1.6 §5A를 구체화한 초안이다. v0.2는 Figma 최신본(2026-10-28)에 맞춰 테마 8종, 숙소 모드, 화면 표시를 고쳤다 (원본: `_backup_20261028/recommendation_design.md`).
 참조 구현: `koready-data/recommend.py`, 설정: `koready-data/config/ranking.json` (아래 수치는 이 구현을 실제로 실행한 결과다).
 
