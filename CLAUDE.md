@@ -32,6 +32,7 @@ KOREADY(코레디) 프론트엔드 저장소에서 작업할 때 따르는 안�
 4. @docs/recommendation_design.md: 추천 순위·동선 알고리즘 상세(서버 로직).
 5. @docs/rule.md: TourAPI 계열 호출·저장·표시 규칙(R-xx 번호). 대부분 서버용이고, 프론트 관련 규칙은 6절에 요약했다.
 6. @docs/theme_map.json: 테마 ↔ TourAPI 분류체계 매핑 초안.
+7. @docs/db_schema.md: 백엔드 DB 설계(Figma ERD, 2026-10-17판, 테이블 21개). spec §8보다 최신이다. 8절에 spec과 다른 점(경비 min/max만 저장 등)을 정리했다.
 
 ## 3. 확정된 결정사항 (어기면 안 됨)
 
