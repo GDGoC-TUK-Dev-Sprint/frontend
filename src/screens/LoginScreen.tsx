@@ -14,7 +14,6 @@ import Button from '../components/Button';
 import TextField from '../components/TextField';
 import Logo from '../assets/images/logo.svg';
 import GoogleIcon from '../assets/icons/google.svg';
-import AppleIcon from '../assets/icons/apple.svg';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
 import type { RootStackParamList } from '../navigation/RootNavigator';
@@ -61,6 +60,7 @@ export default function LoginScreen({ navigation }: Props) {
             autoCapitalize="none"
             autoCorrect={false}
             autoComplete="username"
+            keyboardType="ascii-capable" // 아이디는 영문 소문자·숫자·_ (iOS는 영문 키보드로 연다)
             textContentType="username"
           />
           <TextField
@@ -97,19 +97,13 @@ export default function LoginScreen({ navigation }: Props) {
           <Text style={styles.or}>{t('auth.or')}</Text>
           <View style={styles.line} />
         </View>
-        {/* TODO: Google·Apple 로그인(POST /api/auth/oauth/{provider})은 별도 이슈 */}
+        {/* TODO: Google 로그인(POST /api/auth/oauth/google)은 별도 이슈. Apple 로그인은 넣지 않는다 (2026-11-18) */}
         <View style={styles.social}>
           <SocialButton
             icon={GoogleIcon}
             label={t('auth.google')}
             style={styles.google}
             textColor={colors.text.heading}
-          />
-          <SocialButton
-            icon={AppleIcon}
-            label={t('auth.apple')}
-            style={styles.apple}
-            textColor={colors.surface.default}
           />
         </View>
       </ScrollView>
@@ -182,5 +176,4 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.brand.surfaceSubtle,
   },
-  apple: { backgroundColor: '#000000' },
 });

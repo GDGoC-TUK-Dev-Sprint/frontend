@@ -90,6 +90,7 @@ export default function SignupScreen() {
             autoCapitalize="none"
             autoCorrect={false}
             autoComplete="username-new"
+            keyboardType="ascii-capable" // 아이디는 영문 소문자·숫자·_ (iOS는 영문 키보드로 연다)
             textContentType="username"
           />
         </Field>
