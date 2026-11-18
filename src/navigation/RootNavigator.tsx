@@ -16,6 +16,7 @@ import NoticeListScreen from '../screens/NoticeListScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import PlaceDetailScreen from '../screens/PlaceDetailScreen';
 import PlaceSelectScreen from '../screens/PlaceSelectScreen';
+import CostEstimateScreen from '../screens/CostEstimateScreen';
 import RouteScreen from '../screens/RouteScreen';
 import SignupScreen from '../screens/SignupScreen';
 import TripConditionScreen from '../screens/TripConditionScreen';
@@ -32,6 +33,7 @@ export type RootStackParamList = {
   PlaceDetail: { placeId: string };
   PlaceSelect: undefined;
   Route: undefined;
+  CostEstimate: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -77,6 +79,12 @@ export default function RootNavigator() {
             <Stack.Screen
               name="Route"
               component={RouteScreen}
+              options={{ header: renderMainHeader }}
+            />
+            {/* Figma 「04 예상 경비」: 메인과 같은 로고 + 언어 + 알림 헤더 */}
+            <Stack.Screen
+              name="CostEstimate"
+              component={CostEstimateScreen}
               options={{ header: renderMainHeader }}
             />
             {/* Figma 「07 장소 상세」: 메인과 같은 로고 + 언어 + 알림 헤더 */}

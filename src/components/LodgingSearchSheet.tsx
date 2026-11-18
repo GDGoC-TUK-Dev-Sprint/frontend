@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { SvgProps } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
@@ -12,12 +12,7 @@ import HotelIcon from '../assets/icons/hotel.svg';
 import HouseIcon from '../assets/icons/house.svg';
 import PinIcon from '../assets/icons/pin.svg';
 import WarningIcon from '../assets/icons/warning.svg';
-import {
-  searchMockLodgings,
-  type Area,
-  type Lodging,
-  type LodgingType,
-} from '../mocks';
+import { searchLodgings, type Area, type Lodging } from '../api/trips';
 import { colors, fontFamily, typography } from '../theme/tokens';
 
 // Figma 「02a 숙소 위치 검색」. 숙소 검색, 지도에서 선택, 숙소 미정 시 지역 선택 (spec F1-3)
@@ -25,17 +20,21 @@ type Props = {
   visible: boolean;
   onClose: () => void;
   areas: Area[];
-  selectedLodgingId?: string;
+  selectedLodgingId?: number;
   selectedAreaCode?: string;
   onSelectLodging: (lodging: Lodging) => void;
   onSelectArea: (area: Area) => void;
 };
 
-const ICONS: Record<LodgingType, React.FC<SvgProps>> = {
-  hotel: HotelIcon,
-  guesthouse: HouseIcon,
-  hanok: HanokIcon,
-};
+// 유형 아이콘은 분류체계 소분류 코드로 고른다: 한옥스테이 / 펜션·민박·호스텔(게스트하우스) / 그 밖(호텔·모텔·콘도)
+const iconFor = (code: string): React.FC<SvgProps> =>
+  code === 'AC030200'
+    ? HanokIcon
+    : code.startsWith('AC03') || code.startsWith('AC06')
+    ? HouseIcon
+    : HotelIcon;
+
+const SEARCH_DELAY_MS = 300;
 
 export default function LodgingSearchSheet({
   visible,
@@ -48,8 +47,36 @@ export default function LodgingSearchSheet({
 }: Props) {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
-  // TODO: GET /api/lodgings 연동 시 입력이 멈춘 뒤 요청하도록 바꾼다
-  const results = searchMockLodgings(query);
+  const [results, setResults] = useState<Lodging[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [failed, setFailed] = useState(false);
+
+  // 입력이 멈춘 뒤 GET /api/lodgings를 부른다. 앞서 보낸 요청의 늦은 응답은 버린다
+  // ponytail: 첫 페이지(20곳)만 보여준다. 결과가 더 많으면 검색어를 좁혀야 한다
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) {
+      setResults([]);
+      setTotalCount(0);
+      setFailed(false);
+      return;
+    }
+    let stale = false;
+    const timer = setTimeout(() => {
+      searchLodgings(q)
+        .then(page => {
+          if (stale) return;
+          setResults(page.items);
+          setTotalCount(page.totalCount);
+          setFailed(false);
+        })
+        .catch(() => !stale && setFailed(true));
+    }, SEARCH_DELAY_MS);
+    return () => {
+      stale = true;
+      clearTimeout(timer);
+    };
+  }, [query]);
 
   return (
     <BottomSheet visible={visible} title={t('lodging.title')} onClose={onClose}>
@@ -70,19 +97,26 @@ export default function LodgingSearchSheet({
 
         <View style={styles.resultHeader}>
           <Text style={styles.heading}>
-            {t('lodging.resultCount', { count: results.length })}
+            {t('lodging.resultCount', { count: totalCount })}
           </Text>
           {/* R-C52, spec F1-3b 출처 표시 */}
           <Text style={[typography.captionBase, { color: colors.text.subtle }]}>
             {t('lodging.source')}
           </Text>
         </View>
+        {failed && (
+          <Text
+            style={[typography.bodySubtle, { color: colors.text.negative }]}
+          >
+            {t('auth.networkError')}
+          </Text>
+        )}
         <View style={styles.results}>
           {results.map(lodging => (
             <LodgingCard
-              key={lodging.id}
+              key={lodging.placeId}
               lodging={lodging}
-              selected={lodging.id === selectedLodgingId}
+              selected={lodging.placeId === selectedLodgingId}
               onPress={() => onSelectLodging(lodging)}
             />
           ))}
@@ -147,7 +181,7 @@ function LodgingCard({
   selected: boolean;
   onPress: () => void;
 }) {
-  const Icon = ICONS[lodging.type];
+  const Icon = iconFor(lodging.lodgingType.code);
   return (
     <Pressable
       onPress={onPress}
@@ -166,9 +200,12 @@ function LodgingCard({
         <Text style={[typography.bodyStrong, { color: colors.text.base }]}>
           {lodging.name}
         </Text>
-        <Text style={[typography.bodySubtle, { color: colors.text.muted }]}>
-          {lodging.nameEn}
-        </Text>
+        {/* 영어로 보면 국문명을 함께 보여준다 (장소 이름 병기) */}
+        {lodging.nameKo !== lodging.name && (
+          <Text style={[typography.bodySubtle, { color: colors.text.muted }]}>
+            {lodging.nameKo}
+          </Text>
+        )}
         <Text style={[typography.captionBase, { color: colors.text.subtle }]}>
           {lodging.address}
         </Text>
@@ -178,11 +215,11 @@ function LodgingCard({
           <Text
             style={[typography.bodySubtle, { color: colors.brand.primary }]}
           >
-            {lodging.typeName}
+            {lodging.lodgingType.name}
           </Text>
         </View>
       ) : (
-        <Badge label={lodging.typeName} tone="neutral" />
+        <Badge label={lodging.lodgingType.name} tone="neutral" />
       )}
     </Pressable>
   );

@@ -5,7 +5,7 @@ import BudgetChip from '../../components/BudgetChip';
 import CheckCircle from '../../components/CheckCircle';
 import Section from '../../components/Section';
 import TextField from '../../components/TextField';
-import type { Theme } from '../../mocks';
+import type { Code as Theme } from '../../api/trips';
 import { colors, fontFamily, typography } from '../../theme/tokens';
 import { BUDGET_PRESETS, type TripConditionForm } from './useTripCondition';
 

@@ -254,7 +254,9 @@ function RouteSummary({ route }: { route: TripRoute }) {
     <View style={styles.route}>
       {/* R-K11: Type3 이미지는 자르지 않는다. 더미는 정사각형이라 cover */}
       <View style={styles.thumbnail}>
-        <Image source={route.thumbnail} style={StyleSheet.absoluteFill} />
+        {route.thumbnail && (
+          <Image source={route.thumbnail} style={StyleSheet.absoluteFill} />
+        )}
         <View style={styles.thumbnailLabel}>
           <Text style={styles.thumbnailText}>{route.thumbnailLabel}</Text>
         </View>

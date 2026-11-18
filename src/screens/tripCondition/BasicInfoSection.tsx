@@ -10,6 +10,7 @@ import HelpIcon from '../../assets/icons/help.svg';
 import PinIcon from '../../assets/icons/pin.svg';
 import PlaneIcon from '../../assets/icons/plane.svg';
 import { colors, typography } from '../../theme/tokens';
+import { flagEmoji } from '../../utils/text';
 import type { TripConditionForm } from './useTripCondition';
 
 // ① 기본 정보: 출발 국가, 서울 고정 표시, 숙소 선택 / 숙소 미정 (spec F1-1~F1-3)
@@ -33,12 +34,10 @@ export default function BasicInfoSection({
         >
           <View style={styles.row}>
             {form.country && (
-              <Text style={styles.flag}>{form.country.flag}</Text>
+              <Text style={styles.flag}>{flagEmoji(form.country.code)}</Text>
             )}
             <Text style={[styles.selectText, !form.country && styles.muted]}>
-              {form.country
-                ? `${form.country.name} (${form.country.nameEn})`
-                : t('condition.countryPlaceholder')}
+              {form.country?.name ?? t('condition.countryPlaceholder')}
             </Text>
           </View>
           <ChevronRightIcon
@@ -106,11 +105,12 @@ export default function BasicInfoSection({
           />
         </Pressable>
 
+        {/* 숙소를 정하지 못했으면 02a 시트에서 지역을 고른다 */}
         <Pressable
           style={styles.undecided}
-          onPress={form.chooseUndecided}
+          onPress={() => form.openPicker('lodging')}
           accessibilityRole="radio"
-          accessibilityState={{ checked: form.stay?.kind === 'undecided' }}
+          accessibilityState={{ checked: form.stay?.kind === 'area' }}
         >
           <View style={styles.helpIcon}>
             <HelpIcon width={24} height={24} color={colors.text.muted} />
@@ -126,7 +126,7 @@ export default function BasicInfoSection({
             </Text>
           </View>
           <CheckCircle
-            checked={form.stay?.kind === 'undecided'}
+            checked={form.stay?.kind === 'area'}
             emptyColor={colors.text.subtle}
           />
         </Pressable>

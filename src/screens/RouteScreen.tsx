@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import Sortable, { type SortableGridRenderItem } from 'react-native-sortables';
@@ -16,9 +16,11 @@ import ArrowForwardIcon from '../assets/icons/arrow-forward.svg';
 import CalendarIcon from '../assets/icons/calendar.svg';
 import CloseIcon from '../assets/icons/close.svg';
 import DragIcon from '../assets/icons/drag.svg';
-import { mockTripDays, type TripDay, type TripStop } from '../mocks';
+import { deleteTripItem, reorderDay } from '../api/trips';
+import type { TripDay, TripStop } from '../mocks';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import { useTrip } from '../trips/TripContext';
+import { useTripDay } from '../trips/useTripDay';
 import {
   colors,
   fontFamily,
@@ -41,20 +43,47 @@ export default function RouteScreen({ navigation }: Props) {
   const { trip } = useTrip();
   // 끄는 동안 화면 끝에 닿으면 자동 스크롤한다
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
-  // TODO: POST .../route 응답과 GET .../days/{dayNumber}로 교체. 지금은 계획 확인과 같은 더미를 고쳐 쓴다
-  const [days, setDays] = useState<TripDay[]>(mockTripDays);
-  const [dayNumber, setDayNumber] = useState(1);
-  const day = days.find(d => d.dayNumber === dayNumber) ?? days[0];
+  const { days, dayNumber, selectDay, day, failed, reload, apply, setDay } =
+    useTripDay(trip);
 
-  if (!trip) {
+  if (!trip?.tripId) {
     return <StateView type="empty" message={t('placeSelect.noTrip')} />;
   }
+  const tripId = trip.tripId;
+  if (!day) {
+    return failed ? (
+      <StateView
+        type="error"
+        message={t('auth.networkError')}
+        retryLabel={t('common.retry')}
+        onRetry={reload}
+      />
+    ) : (
+      <StateView type="loading" />
+    );
+  }
 
-  // TODO: 순서 변경은 PUT .../days/{dayNumber}/order(API 23), 삭제는 DELETE .../items/{itemId}(API 24)
-  // 서버가 이동시간·운임·도착 시각을 다시 계산해 돌려준다. 지금은 순서만 바뀌고 시각은 그대로다
+  // 순서 변경(PUT .../order)·삭제(DELETE .../items/{itemId})는 화면에 먼저 반영하고,
+  // 서버가 다시 계산한 도착 시각·이동시간·운임으로 바꾼다. 실패하면 서버 상태로 다시 불러온다
+  const update = (
+    stops: TripStop[],
+    call: () => ReturnType<typeof reorderDay>,
+  ) => {
+    setDay({ ...day, stops });
+    call().then(apply).catch(reload);
+  };
   const setStops = (stops: TripStop[]) =>
-    setDays(prev =>
-      prev.map(d => (d.dayNumber === day.dayNumber ? { ...d, stops } : d)),
+    update(stops, () =>
+      reorderDay(
+        tripId,
+        day.dayNumber,
+        stops.map(s => Number(s.id)),
+      ),
+    );
+  const removeStop = (stop: TripStop) =>
+    update(
+      day.stops.filter(s => s.id !== stop.id),
+      () => deleteTripItem(tripId, Number(stop.id)),
     );
 
   const openPlace = (stop: TripStop) =>
@@ -70,7 +99,7 @@ export default function RouteScreen({ navigation }: Props) {
         <View style={styles.actions}>
           <Pressable
             hitSlop={8}
-            onPress={() => setStops(day.stops.filter(s => s.id !== item.id))}
+            onPress={() => removeStop(item)}
             accessibilityRole="button"
             accessibilityLabel={t('route.remove', { name: item.name })}
           >
@@ -93,7 +122,7 @@ export default function RouteScreen({ navigation }: Props) {
         contentContainerStyle={styles.content}
       >
         <TripSummaryCard trip={trip} right={<TripStatusBadge trip={trip} />} />
-        <DayTabs days={days} selected={day.dayNumber} onSelect={setDayNumber} />
+        <DayTabs days={days} selected={dayNumber} onSelect={selectDay} />
         <RouteSummary day={day} />
 
         <View style={styles.group}>
@@ -141,9 +170,9 @@ export default function RouteScreen({ navigation }: Props) {
           { paddingBottom: Math.max(insets.bottom, spacing.screenPadding) },
         ]}
       >
-        {/* TODO: 예상 경비 화면(04)이 아직 없어 동작 없음 */}
         <Button
           label={t('route.estimate')}
+          onPress={() => navigation.navigate('CostEstimate')}
           icon={ArrowForwardIcon}
           iconSize={12}
           shadow

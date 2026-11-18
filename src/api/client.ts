@@ -1,11 +1,9 @@
-import { Platform } from 'react-native';
 import i18n from '../i18n';
 import { clearTokens, saveTokens, type Tokens } from '../auth/tokenStorage';
 
-// 개발 서버(맥에서 띄운 백엔드). Android 에뮬레이터에서 맥의 localhost는 10.0.2.2다
-// TODO: 실기기 테스트·배포 서버 주소가 정해지면 빌드별로 나눈다
-export const API_BASE_URL =
-  Platform.OS === 'android' ? 'http://10.0.2.2:8080' : 'http://localhost:8080';
+// 배포 서버 (backend develop이 자동 배포된다)
+// 맥에서 띄운 백엔드를 쓸 때는 iOS 'http://localhost:8080', Android 에뮬레이터 'http://10.0.2.2:8080'으로 바꾼다
+export const API_BASE_URL = 'https://api.koready.store';
 
 // TODO: 설정 팝업(10)을 만들면 기기에 저장한 표시 통화로 바꾼다 (spec F7-3, F7-5)
 const currency = 'KRW';

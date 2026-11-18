@@ -16,11 +16,12 @@ import StateView from '../components/StateView';
 import CalendarIcon from '../assets/icons/calendar.svg';
 import CheckIcon from '../assets/icons/check.svg';
 import PenIcon from '../assets/icons/pen.svg';
-import { mockTripDays, type TripDay } from '../mocks';
+import type { TripDay } from '../mocks';
 import { DayTabs, TripSummaryCard } from '../components/TripHeader';
 import type { MainTabParamList } from '../navigation/MainTabs';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import { useTrip } from '../trips/TripContext';
+import { useTripDay } from '../trips/useTripDay';
 import {
   colors,
   fontFamily,
@@ -41,13 +42,23 @@ export default function PlanScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const { trip, setTrip } = useTrip();
   const [editingTitle, setEditingTitle] = useState(false);
-  // TODO: GET /api/trips/{tripId}/days/{dayNumber}로 교체. 지금은 여행과 상관없이 같은 더미
-  const days = mockTripDays;
-  const [dayNumber, setDayNumber] = useState(1);
-  const day = days.find(d => d.dayNumber === dayNumber) ?? days[0];
+  const { days, dayNumber, selectDay, day, failed, reload } = useTripDay(trip);
 
-  if (!trip) {
+  // 동선을 만든 여행만 일정이 있다
+  if (!trip?.days) {
     return <StateView type="empty" message={t('plan.empty')} />;
+  }
+  if (!day) {
+    return failed ? (
+      <StateView
+        type="error"
+        message={t('auth.networkError')}
+        retryLabel={t('common.retry')}
+        onRetry={reload}
+      />
+    ) : (
+      <StateView type="loading" />
+    );
   }
 
   // 빈 이름은 저장하지 않는다
@@ -88,7 +99,7 @@ export default function PlanScreen({ navigation }: Props) {
         }
       />
 
-      <DayTabs days={days} selected={day.dayNumber} onSelect={setDayNumber} />
+      <DayTabs days={days} selected={dayNumber} onSelect={selectDay} />
 
       <DaySummary day={day} />
 

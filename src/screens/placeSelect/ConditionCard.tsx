@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import ChevronRightIcon from '../../assets/icons/chevron-right.svg';
 import HotelIcon from '../../assets/icons/hotel.svg';
 import SliderIcon from '../../assets/icons/slider.svg';
-import type { Theme, Trip } from '../../mocks';
+import type { Code as Theme } from '../../api/trips';
+import type { Trip } from '../../mocks';
 import { colors, typography } from '../../theme/tokens';
 import { parseDate } from '../../utils/date';
 

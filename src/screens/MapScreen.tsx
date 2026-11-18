@@ -1,5 +1,11 @@
-import React, { useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import {
+  PermissionsAndroid,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {
   NaverMapMarkerOverlay,
   NaverMapPolylineOverlay,
@@ -18,10 +24,11 @@ import {
   TripSummaryCard,
 } from '../components/TripHeader';
 import HouseIcon from '../assets/icons/house.svg';
-import { mockTripDays, type TripDay } from '../mocks';
+import type { TripDay } from '../mocks';
 import type { MainTabParamList } from '../navigation/MainTabs';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import { useTrip } from '../trips/TripContext';
+import { useTripDay } from '../trips/useTripDay';
 import { colors, shadow, spacing, typography } from '../theme/tokens';
 import { regionFor } from '../utils/map';
 import { useFormatDuration } from '../components/DayTimeline';
@@ -48,56 +55,89 @@ const dayPoints = (day: TripDay) => [
   ...day.stops,
 ];
 
+// 여행이 없을 때 현위치를 받기 전(또는 위치 권한이 없을 때) 보여줄 영역: 서울시청을 중심으로 시내가 보이는 크기 (Region은 남서쪽 모서리 기준)
+const SEOUL = { lat: 37.5665, lng: 126.978 };
+const SEOUL_REGION = {
+  latitude: SEOUL.lat - 0.1,
+  longitude: SEOUL.lng - 0.125,
+  latitudeDelta: 0.2,
+  longitudeDelta: 0.25,
+};
+
 // Figma 「03a 지도로 보기」 (spec F3-8·F3-9). 지금 여행의 일자 동선을 네이버 지도에 그린다
+// 동선을 만든 여행이 없으면 지도만 보여준다
 // Client ID가 없으면 지도만 인증 실패로 회색이 된다 (CLAUDE.md 5절)
 export default function MapScreen({ navigation }: Props) {
   const { t, i18n } = useTranslation();
   const formatDuration = useFormatDuration();
   const { trip } = useTrip();
   const mapRef = useRef<NaverMapViewRef>(null);
-  // TODO: GET /api/trips/{tripId}/days/{dayNumber}로 교체 (계획 확인과 같은 더미)
-  const days = mockTripDays;
-  const [dayNumber, setDayNumber] = useState(1);
-  const day = days.find(d => d.dayNumber === dayNumber) ?? days[0];
+  const { days, dayNumber, selectDay, day, failed, reload } = useTripDay(trip);
 
-  if (!trip) {
-    return <StateView type="empty" message={t('plan.empty')} />;
-  }
-
-  // 일차를 바꾸면 그날 동선이 다 보이게 카메라를 옮긴다
-  const selectDay = (next: number) => {
-    setDayNumber(next);
-    const target = days.find(d => d.dayNumber === next);
-    if (target) mapRef.current?.animateRegionTo(regionFor(dayPoints(target)));
+  // 현위치 점을 띄운다. 여행이 없으면 카메라도 현위치로 옮긴다 (Follow), 있으면 동선 화면을 그대로 둔다 (NoFollow)
+  // iOS는 지도 SDK가 권한을 묻고, Android는 SDK가 권한 결과를 받지 못해 여기서 먼저 묻는다
+  const showMyLocation = async () => {
+    if (Platform.OS === 'android') {
+      const result = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      );
+      if (result !== PermissionsAndroid.RESULTS.GRANTED) return;
+    }
+    mapRef.current?.setLocationTrackingMode(trip?.days ? 'NoFollow' : 'Follow');
   };
+
+  // 일차를 바꿔 그날 일정을 받으면 동선이 다 보이게 카메라를 옮긴다
+  useEffect(() => {
+    if (day) mapRef.current?.animateRegionTo(regionFor(dayPoints(day)));
+  }, [day]);
+
+  // 동선이 있는 여행인데 일정을 받지 못했으면 다시 시도. 받는 동안에는 지도만 보인다
+  if (trip?.days && !day && failed) {
+    return (
+      <StateView
+        type="error"
+        message={t('auth.networkError')}
+        retryLabel={t('common.retry')}
+        onRetry={reload}
+      />
+    );
+  }
 
   // 숙소 → 장소 1~N → 숙소를 방문 순서대로 직선으로 잇는다
   // TODO: Figma는 점선. 라이브러리 2.9.1의 Polyline이 pattern을 네이티브로 넘기지 않아 실선으로 그린다
-  const route = [
-    { latitude: day.lodgingLat, longitude: day.lodgingLng },
-    ...day.stops.map(s => ({ latitude: s.lat, longitude: s.lng })),
-    { latitude: day.lodgingLat, longitude: day.lodgingLng },
-  ];
+  const route = day
+    ? [
+        { latitude: day.lodgingLat, longitude: day.lodgingLng },
+        ...day.stops.map(s => ({ latitude: s.lat, longitude: s.lng })),
+        { latitude: day.lodgingLat, longitude: day.lodgingLng },
+      ]
+    : [];
 
   return (
     <View style={styles.screen}>
-      <View style={styles.top}>
-        <TripSummaryCard trip={trip} right={<TripStatusBadge trip={trip} />} />
-        <DayTabs days={days} selected={day.dayNumber} onSelect={selectDay} />
-      </View>
+      {trip?.days && (
+        <View style={styles.top}>
+          <TripSummaryCard
+            trip={trip}
+            right={<TripStatusBadge trip={trip} />}
+          />
+          <DayTabs days={days} selected={dayNumber} onSelect={selectDay} />
+        </View>
+      )}
 
       <View style={styles.mapArea}>
         <NaverMapView
           ref={mapRef}
           style={StyleSheet.absoluteFill}
-          initialRegion={regionFor(dayPoints(day))}
+          initialRegion={day ? regionFor(dayPoints(day)) : SEOUL_REGION}
           locale={i18n.language}
           isShowZoomControls={false}
           isShowScaleBar={false}
           isShowIndoorLevelPicker={false}
-          isShowLocationButton={false}
+          isShowLocationButton
+          onInitialized={showMyLocation}
         >
-          {day.stops.length > 0 && (
+          {day && day.stops.length > 0 && (
             <NaverMapPolylineOverlay
               coords={route}
               width={3}
@@ -106,78 +146,90 @@ export default function MapScreen({ navigation }: Props) {
           )}
           {/* 커스텀 뷰 마커는 width·height를 주지 않으면 크기 0으로 안 보인다. 이름표는 지도 SDK 캡션으로 그린다
               TODO: Figma는 흰 상자 이름표. 길이가 바뀌는 상자를 마커 뷰로 그리려면 글자 폭을 재야 해서 캡션으로 대신한다 */}
-          <NaverMapMarkerOverlay
-            latitude={day.lodgingLat}
-            longitude={day.lodgingLng}
-            width={LODGING_PIN}
-            height={LODGING_PIN}
-            caption={caption(t('map.lodging', { name: day.lodgingName }))}
-          >
-            <View
-              key="lodging"
-              collapsable={false}
-              style={[styles.pin, styles.lodgingPin]}
-            >
-              <HouseIcon width={16} height={16} color={colors.brand.primary} />
-            </View>
-          </NaverMapMarkerOverlay>
-          {day.stops.map((stop, index) => (
-            <NaverMapMarkerOverlay
-              key={stop.id}
-              latitude={stop.lat}
-              longitude={stop.lng}
-              width={NUMBER_PIN}
-              height={NUMBER_PIN}
-              caption={caption(stop.name)}
-              onTap={() =>
-                navigation.navigate('PlaceDetail', { placeId: stop.placeId })
-              }
-            >
-              {/* key: 순번이 바뀌면 마커 그림을 다시 만든다 */}
-              <View
-                key={`${stop.id}/${index}`}
-                collapsable={false}
-                style={[styles.pin, styles.numberPin]}
+          {day && (
+            <>
+              <NaverMapMarkerOverlay
+                latitude={day.lodgingLat}
+                longitude={day.lodgingLng}
+                width={LODGING_PIN}
+                height={LODGING_PIN}
+                caption={caption(t('map.lodging', { name: day.lodgingName }))}
               >
-                <Text
-                  style={[
-                    typography.captionBase,
-                    { color: colors.surface.default },
-                  ]}
+                <View
+                  key="lodging"
+                  collapsable={false}
+                  style={[styles.pin, styles.lodgingPin]}
                 >
-                  {index + 1}
-                </Text>
-              </View>
-            </NaverMapMarkerOverlay>
-          ))}
+                  <HouseIcon
+                    width={16}
+                    height={16}
+                    color={colors.brand.primary}
+                  />
+                </View>
+              </NaverMapMarkerOverlay>
+              {day.stops.map((stop, index) => (
+                <NaverMapMarkerOverlay
+                  key={stop.id}
+                  latitude={stop.lat}
+                  longitude={stop.lng}
+                  width={NUMBER_PIN}
+                  height={NUMBER_PIN}
+                  caption={caption(stop.name)}
+                  onTap={() =>
+                    navigation.navigate('PlaceDetail', {
+                      placeId: stop.placeId,
+                    })
+                  }
+                >
+                  {/* key: 순번이 바뀌면 마커 그림을 다시 만든다 */}
+                  <View
+                    key={`${stop.id}/${index}`}
+                    collapsable={false}
+                    style={[styles.pin, styles.numberPin]}
+                  >
+                    <Text
+                      style={[
+                        typography.captionBase,
+                        { color: colors.surface.default },
+                      ]}
+                    >
+                      {index + 1}
+                    </Text>
+                  </View>
+                </NaverMapMarkerOverlay>
+              ))}
+            </>
+          )}
         </NaverMapView>
 
-        <View style={styles.summary}>
-          <View style={styles.summaryText}>
-            <Text
-              style={[typography.bodyStrong, { color: colors.text.heading }]}
-            >
-              {t('map.summary', {
-                day: day.dayNumber,
-                count: day.stops.length,
-                from: day.departAt,
-                to: day.returnAt,
-              })}
-            </Text>
-            <Text
-              style={[typography.bodySubtle, { color: colors.text.notice }]}
-            >
-              {t('map.routeNote', {
-                duration: formatDuration(day.travelMinutes),
-              })}
-            </Text>
+        {day && (
+          <View style={styles.summary}>
+            <View style={styles.summaryText}>
+              <Text
+                style={[typography.bodyStrong, { color: colors.text.heading }]}
+              >
+                {t('map.summary', {
+                  day: day.dayNumber,
+                  count: day.stops.length,
+                  from: day.departAt,
+                  to: day.returnAt,
+                })}
+              </Text>
+              <Text
+                style={[typography.bodySubtle, { color: colors.text.notice }]}
+              >
+                {t('map.routeNote', {
+                  duration: formatDuration(day.travelMinutes),
+                })}
+              </Text>
+            </View>
+            <Button
+              label={t('map.backToList')}
+              variant="secondary"
+              onPress={() => navigation.navigate('Plan')}
+            />
           </View>
-          <Button
-            label={t('map.backToList')}
-            variant="secondary"
-            onPress={() => navigation.navigate('Plan')}
-          />
-        </View>
+        )}
       </View>
     </View>
   );

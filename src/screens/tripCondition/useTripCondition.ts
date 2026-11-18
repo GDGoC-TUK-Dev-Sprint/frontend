@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DateRange } from '../../components/DateRangeModal';
-import type { Area, Country, Lodging, Trip } from '../../mocks';
+import type {
+  Area,
+  Code,
+  Lodging,
+  TripRequest,
+  TripSummary,
+} from '../../api/trips';
+import type { Trip } from '../../mocks';
 import { formatDot, nightsBetween } from '../../utils/date';
 
 // 조건 입력 화면(Figma 「02 조건 입력」, spec F1)의 입력 상태와 규칙
@@ -12,17 +19,17 @@ export const BUDGET_PRESETS = [300000, 500000, 1000000];
 export const MIN_TRAVELERS = 1;
 export const MAX_TRAVELERS = 10;
 
-// 숙소는 검색으로 고른 숙소 또는 "아직 못 정함"(지역 선택은 선택 사항)
+// 숙소는 검색으로 고른 숙소 또는 숙소를 정하지 못했을 때 고른 지역 (API는 둘 중 하나를 꼭 요구한다)
 export type Stay =
   | { kind: 'lodging'; lodging: Lodging }
-  | { kind: 'undecided'; area?: Area };
+  | { kind: 'area'; area: Area };
 
 // 한 번에 하나만 열리는 선택 창: 국적 시트, 숙소 검색 시트, 날짜 선택
 export type Picker = 'country' | 'lodging' | 'dates';
 
 export function useTripCondition() {
   const { t } = useTranslation();
-  const [country, setCountry] = useState<Country>();
+  const [country, setCountry] = useState<Code>();
   const [stay, setStay] = useState<Stay>();
   const [dates, setDates] = useState<DateRange>();
   const [travelers, setTravelers] = useState(MIN_TRAVELERS);
@@ -47,36 +54,59 @@ export function useTripCondition() {
     ? t('condition.nights', { nights, days: nights + 1 })
     : t('condition.dayTrip');
 
-  // 숙소 카드 제목: 고른 숙소 이름, 지역만 고르면 "○○ 중심", 아무것도 안 고르면 안내 문구
+  // 숙소 카드 제목: 고른 숙소 이름, 지역을 고르면 "○○ 중심", 아무것도 안 고르면 안내 문구
   const stayTitle =
     stay?.kind === 'lodging'
       ? stay.lodging.name
-      : stay?.area
+      : stay?.kind === 'area'
       ? t('condition.areaCenter', { area: stay.area.name })
       : t('condition.lodgingPlaceholder');
 
-  // 입력한 조건으로 만든 여행. 동선 전이라 장소(route)는 없다
-  // TODO: POST /api/trips 응답으로 교체. 여행 번호·제목은 서버가 정한다
-  const toTrip = (): Trip | undefined =>
-    canSubmit && dates
+  // 여행 만들기(POST /api/trips) 요청 본문. 예산은 원으로 입력받는다 (표시 통화 설정 전까지 KRW)
+  const toRequest = (): TripRequest | undefined =>
+    canSubmit && country && stay && dates
       ? {
-          tripNumber: String(Date.now()).slice(-4),
-          title: t('condition.tripTitle', { period: nightsLabel }),
-          region: t('condition.tripRegion'),
+          nationality: country.code,
           startDate: formatDot(dates.start, '-'),
           endDate: formatDot(dates.end, '-'),
-          travelers,
-          // 숙소·지역을 모두 안 고르면 입력 안내 문구 대신 "서울 중심"으로 저장한다 (spec F1-3 ②)
-          stayName:
-            stay?.kind === 'undecided' && !stay.area
-              ? t('condition.areaCenter', {
-                  area: t('condition.tripRegion'),
-                })
-              : stayTitle,
-          budgetPerPerson: anyBudget ? undefined : budget,
-          themeCodes,
+          partySize: travelers,
+          budgetPerPerson:
+            anyBudget || !budget
+              ? undefined
+              : { amount: budget, currency: 'KRW' },
+          categories: themeCodes,
+          stay:
+            stay.kind === 'lodging'
+              ? { type: 'PLACE', placeId: stay.lodging.placeId }
+              : { type: 'AREA', areaCode: stay.area.code },
         }
       : undefined;
+
+  // 서버가 만든 여행을 메인 티켓·장소 선택이 쓰는 모양으로 바꾼다. 제목은 동선을 만든 뒤 서버가 정한다
+  const toTrip = (summary: TripSummary): Trip => ({
+    tripId: summary.tripId,
+    tripNumber: summary.ticketNo,
+    title:
+      summary.title ??
+      t('condition.tripTitle', {
+        period: summary.nights
+          ? t('condition.nights', {
+              nights: summary.nights,
+              days: summary.days,
+            })
+          : t('condition.dayTrip'),
+      }),
+    region: t('condition.tripRegion'),
+    startDate: summary.startDate,
+    endDate: summary.endDate,
+    travelers: summary.partySize,
+    stayName:
+      summary.stay.type === 'AREA'
+        ? t('condition.areaCenter', { area: summary.stay.name })
+        : summary.stay.name,
+    budgetPerPerson: summary.budgetPerPerson?.amount,
+    themes: summary.categories,
+  });
 
   return {
     country,
@@ -91,15 +121,14 @@ export function useTripCondition() {
     canSubmit,
     nightsLabel,
     stayTitle,
+    toRequest,
     toTrip,
 
     openPicker: setPicker,
     closePicker,
     setTravelers,
-    chooseUndecided: () => setStay({ kind: 'undecided' }),
-
     // 선택 창에서 고르면 값을 넣고 창을 닫는다
-    selectCountry: (value: Country) => {
+    selectCountry: (value: Code) => {
       setCountry(value);
       closePicker();
     },
@@ -108,7 +137,7 @@ export function useTripCondition() {
       closePicker();
     },
     selectArea: (area: Area) => {
-      setStay({ kind: 'undecided', area });
+      setStay({ kind: 'area', area });
       closePicker();
     },
     applyDates: (range: DateRange) => {
