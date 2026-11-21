@@ -25,7 +25,6 @@
     "loginNotice": "로그인하면 여행 계획을 저장하고 언제든 다시 볼 수 있어요",
     "or": "또는",
     "google": "Google로 계속하기",
-    "tempLogout": "임시 로그아웃",
     "loginFailed": "아이디 또는 비밀번호가 맞지 않아요",
     "loginIdTaken": "이미 사용 중인 아이디예요",
     "networkError": "연결이 원활하지 않아요. 잠시 후 다시 시도해 주세요."
@@ -113,6 +112,7 @@
   },
   "placeDetail": {
     "photoCount": "{{index}} / {{total}}",
+    "detailPending": "상세 정보(이용시간·요금·소개)는 아직 준비 중이에요",
     "rating": "★ {{average}} · 리뷰 {{count}}개",
     "copy": "복사",
     "inPlan": "현재 {{day}}일차 일정에 포함되어 있어요",
@@ -155,7 +155,8 @@
     "durationM": "{{minutes}}분",
     "addPlace": "장소 추가하기",
     "viewRouteOnMap": "지도에서 전체 동선 한눈에 보기",
-    "empty": "아직 확정한 여행이 없어요"
+    "empty": "아직 확정한 여행이 없어요",
+    "noRoute": "아직 동선을 만들지 않았어요. 홈 티켓의 「일정 자세히 보기」에서 장소를 골라 주세요"
   },
   "placeSelect": {
     "badge": "데이터 기반 맞춤 추천",
@@ -192,6 +193,7 @@
     "summary": "{{day}}일차 · 장소 {{count}}곳 · {{from}} - {{to}}",
     "routeNote": "숙소 왕복 포함 총 이동 {{duration}} · 방문 순서대로 이었어요",
     "backToList": "목록으로 보기",
+    "backToRoute": "동선으로 돌아가기",
     "lodging": "숙소 · {{name}}"
   },
   "route": {
@@ -253,6 +255,19 @@
     "apply": "적용하기",
     "activeTripExists": "지금 여행을 삭제해야 새 여행을 만들 수 있습니다"
   },
+  "myPage": {
+    "idLogin": "아이디로 로그인",
+    "favorites": "찜한 장소",
+    "noFavorites": "아직 찜한 장소가 없어요",
+    "pastTrips": "이전 여행 기록",
+    "noPastTrips": "아직 다녀온 여행이 없어요",
+    "settings": "설정",
+    "languageCurrency": "언어 및 통화",
+    "account": "계정 관리",
+    "logout": "로그아웃",
+    "withdraw": "회원 탈퇴",
+    "withdrawPending": "회원 탈퇴는 아직 준비 중이에요"
+  },
   "lodging": {
     "title": "숙소 위치",
     "searchPlaceholder": "장소 이름으로 검색",
@@ -261,6 +276,11 @@
     "privateNotice": "에어비앤비 같은 개인 숙소는 검색되지 않을 수 있어요.\n아래에서 지도로 직접 선택해주세요.",
     "mapTitle": "지도에서 위치 직접 선택",
     "mapSubtitle": "핀을 움직여 숙소 위치를 정해요",
+    "mapSearchPlaceholder": "주소나 장소 이름으로 검색",
+    "mapChecking": "주소를 확인하는 중이에요",
+    "mapNoAddress": "주소가 없는 위치예요. 핀을 옮겨 주세요",
+    "mapOutsideSeoul": "지금은 서울 안에서만 고를 수 있어요",
+    "mapConfirm": "이 위치로 정하기",
     "undecidedTitle": "아직 숙소를 정하지 못했나요?",
     "undecidedSubtitle": "지역을 고르면 그 지역 중심을 숙소로 보고 추천해요."
   },

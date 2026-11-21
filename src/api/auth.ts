@@ -25,3 +25,11 @@ export async function isLoginIdAvailable(loginId: string) {
   );
   return res.available;
 }
+
+// 이 기기의 리프레시 토큰을 서버에서 폐기한다. 이미 없는 토큰이어도 204
+export function logout(refreshToken: string) {
+  return request<void>('POST', '/api/auth/logout', {
+    body: { refreshToken },
+    auth: false,
+  });
+}

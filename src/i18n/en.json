@@ -18,7 +18,6 @@
     "loginNotice": "Log in to save your trip plans and view them anytime",
     "or": "or",
     "google": "Continue with Google",
-    "tempLogout": "Temp log out",
     "loginFailed": "Incorrect ID or password",
     "loginIdTaken": "This ID is already taken",
     "networkError": "Connection problem. Please try again in a moment."
@@ -106,6 +105,7 @@
   },
   "placeDetail": {
     "photoCount": "{{index}} / {{total}}",
+    "detailPending": "Details (hours, fees, overview) are coming soon",
     "rating": "★ {{average}} · {{count}} reviews",
     "copy": "Copy",
     "inPlan": "Included in Day {{day}} of your trip",
@@ -148,7 +148,8 @@
     "durationM": "{{minutes}}m",
     "addPlace": "Add a place",
     "viewRouteOnMap": "See the full route on the map",
-    "empty": "No confirmed trip yet"
+    "empty": "No confirmed trip yet",
+    "noRoute": "No route yet. Tap “View schedule” on your Home ticket to pick places"
   },
   "placeSelect": {
     "badge": "Data-driven picks",
@@ -185,6 +186,7 @@
     "summary": "Day {{day}} · {{count}} places · {{from}} - {{to}}",
     "routeNote": "{{duration}} total travel incl. hotel round trip · Connected in visit order",
     "backToList": "View as list",
+    "backToRoute": "Back to route",
     "lodging": "Hotel · {{name}}"
   },
   "route": {
@@ -246,6 +248,19 @@
     "apply": "Apply",
     "activeTripExists": "Delete your current trip to create a new one."
   },
+  "myPage": {
+    "idLogin": "Signed in with ID",
+    "favorites": "Saved places",
+    "noFavorites": "No saved places yet",
+    "pastTrips": "Past trips",
+    "noPastTrips": "No past trips yet",
+    "settings": "Settings",
+    "languageCurrency": "Language & currency",
+    "account": "Account",
+    "logout": "Log out",
+    "withdraw": "Delete account",
+    "withdrawPending": "Account deletion is coming soon"
+  },
   "lodging": {
     "title": "Your stay",
     "searchPlaceholder": "Search by name",
@@ -254,6 +269,11 @@
     "privateNotice": "Private stays like Airbnb may not appear.\nPick the location on the map below instead.",
     "mapTitle": "Pick a location on the map",
     "mapSubtitle": "Move the pin to set your stay",
+    "mapSearchPlaceholder": "Search an address or place",
+    "mapChecking": "Checking the address",
+    "mapNoAddress": "No address here. Move the pin",
+    "mapOutsideSeoul": "Only locations in Seoul are supported for now",
+    "mapConfirm": "Use this location",
     "undecidedTitle": "No stay booked yet?",
     "undecidedSubtitle": "Pick an area and we will use its center as your base."
   },
