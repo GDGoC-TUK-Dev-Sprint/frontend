@@ -38,6 +38,20 @@ export default function PlaceDetailScreen({ route, navigation }: Props) {
   // TODO: 담기는 장소 선택(02c)의 담기 목록과 같다 (F2-12). 장소 선택 화면이 생기면 그 상태로 옮긴다
   const [added, setAdded] = useState(false);
 
+  // 서버 장소는 더미에 없다. 상세 API가 생기기 전까지 목록에서 받은 사진·이름·분류만 보여준다
+  const preview = route.params.preview;
+  if (!place && preview) {
+    return (
+      <ScrollView contentContainerStyle={styles.scroll}>
+        {preview.photo && <PhotoSwiper photos={[preview.photo]} />}
+        <View style={[styles.content, styles.titleBlock]}>
+          <Text style={styles.category}>{preview.category}</Text>
+          <Text style={styles.name}>{preview.name}</Text>
+          <Text style={styles.pending}>{t('placeDetail.detailPending')}</Text>
+        </View>
+      </ScrollView>
+    );
+  }
   if (!place) {
     return <StateView type="empty" message={t('placeDetail.notFound')} />;
   }
@@ -222,6 +236,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
 
   titleBlock: { gap: 4 },
+  pending: { ...typography.bodySubtle, color: colors.text.notice },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   // Figma는 Noto Sans KR Medium. 앱 폰트로 맞춤
   category: {

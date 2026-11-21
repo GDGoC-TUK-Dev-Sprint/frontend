@@ -87,7 +87,10 @@ export default function RouteScreen({ navigation }: Props) {
     );
 
   const openPlace = (stop: TripStop) =>
-    navigation.navigate('PlaceDetail', { placeId: stop.placeId });
+    navigation.navigate('PlaceDetail', {
+      placeId: stop.placeId,
+      preview: stop,
+    });
 
   // 핸들로만 끌 수 있게 해서(customHandle) 카드 누르기·스크롤과 겹치지 않게 한다
   const renderStop: SortableGridRenderItem<TripStop> = ({ item, index }) => (
@@ -157,7 +160,7 @@ export default function RouteScreen({ navigation }: Props) {
         <Button
           label={t('plan.viewRouteOnMap')}
           variant="secondary"
-          onPress={() => navigation.navigate('Main', { screen: 'Map' })}
+          onPress={() => navigation.navigate('RouteMap')}
         />
 
         {/* R-C52 출처 표시 */}

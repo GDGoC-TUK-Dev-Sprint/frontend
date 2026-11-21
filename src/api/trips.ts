@@ -38,10 +38,37 @@ export function searchLodgings(query: string) {
   );
 }
 
-// 숙소 지정 방식: 검색한 숙소(PLACE) / 숙소 미정일 때 고른 지역(AREA). 지도 핀(PIN)은 02b를 만들 때 붙인다
+// 02b 지도에서 선택: 주소·장소명 검색과 핀 위치의 주소·서울 여부 (로그인 없이 부른다)
+export type GeoItem = {
+  type: 'ADDRESS' | 'PLACE';
+  label: string;
+  address: string;
+  location: LatLng;
+  inSeoul: boolean;
+};
+
+export function searchGeo(query: string) {
+  return request<{ items: GeoItem[] }>(
+    'GET',
+    `/api/geo/search?query=${encodeURIComponent(query)}`,
+    { auth: false },
+  );
+}
+
+// address는 바다처럼 주소가 없는 곳이면 null
+export function reverseGeo({ lat, lng }: LatLng) {
+  return request<{ address: string | null; inSeoul: boolean }>(
+    'GET',
+    `/api/geo/reverse?lat=${lat}&lng=${lng}`,
+    { auth: false },
+  );
+}
+
+// 숙소 지정 방식: 검색한 숙소(PLACE) / 숙소 미정일 때 고른 지역(AREA) / 지도 핀(PIN)
 export type StayRequest =
   | { type: 'PLACE'; placeId: number }
-  | { type: 'AREA'; areaCode: string };
+  | { type: 'AREA'; areaCode: string }
+  | { type: 'PIN'; location: LatLng };
 
 export type TripRequest = {
   nationality: string;
@@ -228,10 +255,14 @@ export function confirmTrip(tripId: number) {
 
 // ── 서버 응답을 화면이 쓰는 모양으로 ──
 
+// 목록·타임라인은 작은 사진이라 썸네일을 쓴다 (원본은 수 MB라 목록에서 늦게 뜬다)
+// iOS는 http 이미지를 막는다. TourAPI가 http로 줄 수 있어(R-K12) https로 바꾼다
 const toPhoto = (image: PlaceSummary['image']): PlacePhoto | undefined =>
   image
     ? {
-        source: { uri: image.url },
+        source: {
+          uri: (image.thumbnailUrl || image.url).replace(/^http:/, 'https:'),
+        },
         copyright: image.license === 'TYPE3' ? 'Type3' : 'Type1',
       }
     : undefined;

@@ -40,7 +40,7 @@ test('일자: 변경 금지 사진(TYPE3)은 Type3, 운임을 못 받으면 "-"'
         seq: 1,
         place: place({
           url: 'https://x/a.jpg',
-          thumbnailUrl: '',
+          thumbnailUrl: 'http://x/a_s.jpg',
           license: 'TYPE3',
         }),
         origin: 'SELECTED',
@@ -55,7 +55,7 @@ test('일자: 변경 금지 사진(TYPE3)은 Type3, 운임을 못 받으면 "-"'
   expect(day.transitFarePerPerson).toBe('-');
   expect(day.stops[0]).toMatchObject({ id: '7', placeId: '1273' });
   expect(day.stops[0].photo).toEqual({
-    source: { uri: 'https://x/a.jpg' },
+    source: { uri: 'https://x/a_s.jpg' }, // 썸네일, http는 https로
     copyright: 'Type3',
   });
 });

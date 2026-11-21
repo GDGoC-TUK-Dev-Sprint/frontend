@@ -34,10 +34,12 @@ import { regionFor } from '../utils/map';
 import { useFormatDuration } from '../components/DayTimeline';
 
 // 탭 화면이지만 마커를 누르면 장소 상세(루트 스택)로 간다
-type Props = CompositeScreenProps<
+// 동선 화면의 "지도로 보기"는 같은 화면을 루트 스택(RouteMap)에 올린다. 탭으로 가면 동선 화면이 닫혀 예상 경비로 못 간다
+type TabProps = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, 'Map'>,
   NativeStackScreenProps<RootStackParamList>
 >;
+type Props = TabProps | NativeStackScreenProps<RootStackParamList, 'RouteMap'>;
 
 const NUMBER_PIN = 20;
 const LODGING_PIN = 30;
@@ -67,7 +69,9 @@ const SEOUL_REGION = {
 // Figma 「03a 지도로 보기」 (spec F3-8·F3-9). 지금 여행의 일자 동선을 네이버 지도에 그린다
 // 동선을 만든 여행이 없으면 지도만 보여준다
 // Client ID가 없으면 지도만 인증 실패로 회색이 된다 (CLAUDE.md 5절)
-export default function MapScreen({ navigation }: Props) {
+export default function MapScreen({ navigation, route: screen }: Props) {
+  const fromRoute = screen.name === 'RouteMap';
+  const nav = navigation as TabProps['navigation'];
   const { t, i18n } = useTranslation();
   const formatDuration = useFormatDuration();
   const { trip } = useTrip();
@@ -176,8 +180,9 @@ export default function MapScreen({ navigation }: Props) {
                   height={NUMBER_PIN}
                   caption={caption(stop.name)}
                   onTap={() =>
-                    navigation.navigate('PlaceDetail', {
+                    nav.navigate('PlaceDetail', {
                       placeId: stop.placeId,
+                      preview: stop,
                     })
                   }
                 >
@@ -224,9 +229,9 @@ export default function MapScreen({ navigation }: Props) {
               </Text>
             </View>
             <Button
-              label={t('map.backToList')}
+              label={t(fromRoute ? 'map.backToRoute' : 'map.backToList')}
               variant="secondary"
-              onPress={() => navigation.navigate('Plan')}
+              onPress={() => (fromRoute ? nav.goBack() : nav.navigate('Plan'))}
             />
           </View>
         )}

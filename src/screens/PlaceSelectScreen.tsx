@@ -260,6 +260,7 @@ export default function PlaceSelectScreen({ navigation }: Props) {
                 onPress={() =>
                   navigation.navigate('PlaceDetail', {
                     placeId: place.placeId,
+                    preview: place,
                   })
                 }
               />

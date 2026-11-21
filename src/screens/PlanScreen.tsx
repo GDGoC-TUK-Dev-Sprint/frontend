@@ -46,7 +46,12 @@ export default function PlanScreen({ navigation }: Props) {
 
   // 동선을 만든 여행만 일정이 있다
   if (!trip?.days) {
-    return <StateView type="empty" message={t('plan.empty')} />;
+    return (
+      <StateView
+        type="empty"
+        message={t(trip ? 'plan.noRoute' : 'plan.empty')}
+      />
+    );
   }
   if (!day) {
     return failed ? (
@@ -107,7 +112,10 @@ export default function PlanScreen({ navigation }: Props) {
         <DayTimeline
           day={day}
           onPressStop={stop =>
-            navigation.navigate('PlaceDetail', { placeId: stop.placeId })
+            navigation.navigate('PlaceDetail', {
+              placeId: stop.placeId,
+              preview: stop,
+            })
           }
         />
         {/* TODO: 장소 추가 API가 없다 (spec F3-3, §2.2). 고른 장소를 이 일정에 넣는 방식은 동선 연동 때 정한다 */}

@@ -20,7 +20,9 @@ import CostEstimateScreen from '../screens/CostEstimateScreen';
 import RouteScreen from '../screens/RouteScreen';
 import SignupScreen from '../screens/SignupScreen';
 import TripConditionScreen from '../screens/TripConditionScreen';
+import MapScreen from '../screens/MapScreen';
 import MainTabs, { type MainTabParamList } from './MainTabs';
+import type { PlacePhoto } from '../mocks';
 
 export type RootStackParamList = {
   Onboarding: undefined;
@@ -30,9 +32,14 @@ export type RootStackParamList = {
   TripCondition: undefined;
   Notices: undefined;
   NoticeDetail: { id: string };
-  PlaceDetail: { placeId: string };
+  // preview: 상세 API(GET /api/places/{placeId})가 생기기 전까지 목록에서 아는 정보로 먼저 그린다
+  PlaceDetail: {
+    placeId: string;
+    preview?: { name: string; category: string; photo?: PlacePhoto };
+  };
   PlaceSelect: undefined;
   Route: undefined;
+  RouteMap: undefined;
   CostEstimate: undefined;
 };
 
@@ -80,6 +87,12 @@ export default function RootNavigator() {
               name="Route"
               component={RouteScreen}
               options={{ header: renderMainHeader }}
+            />
+            {/* 동선 화면에서 연 지도. 지도 탭과 같은 화면이고, 돌아가면 동선 화면이 남아 있다 */}
+            <Stack.Screen
+              name="RouteMap"
+              component={MapScreen}
+              options={{ title: t('tabs.map'), header: renderBackHeader }}
             />
             {/* Figma 「04 예상 경비」: 메인과 같은 로고 + 언어 + 알림 헤더 */}
             <Stack.Screen
