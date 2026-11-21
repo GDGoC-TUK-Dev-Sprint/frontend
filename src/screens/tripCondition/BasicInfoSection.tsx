@@ -66,8 +66,11 @@ export default function BasicInfoSection({
           <Text style={[typography.bodySubtle, { color: colors.text.label }]}>
             {t('condition.lodgingQuestion')}
           </Text>
-          {/* TODO: 지도에서 선택(02b). 네이버 지도 SDK 연동 이슈에서 구현 */}
-          <Pressable style={styles.mapLink} accessibilityRole="button">
+          <Pressable
+            style={styles.mapLink}
+            onPress={() => form.openPicker('map')}
+            accessibilityRole="button"
+          >
             <PlaneIcon width={16} height={16} color={colors.brand.primary} />
             <Text
               style={[typography.bodySubtle, { color: colors.brand.primary }]}

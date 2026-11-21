@@ -4,6 +4,7 @@ import type { DateRange } from '../../components/DateRangeModal';
 import type {
   Area,
   Code,
+  LatLng,
   Lodging,
   TripRequest,
   TripSummary,
@@ -22,10 +23,11 @@ export const MAX_TRAVELERS = 10;
 // 숙소는 검색으로 고른 숙소 또는 숙소를 정하지 못했을 때 고른 지역 (API는 둘 중 하나를 꼭 요구한다)
 export type Stay =
   | { kind: 'lodging'; lodging: Lodging }
-  | { kind: 'area'; area: Area };
+  | { kind: 'area'; area: Area }
+  | { kind: 'pin'; location: LatLng; address: string };
 
 // 한 번에 하나만 열리는 선택 창: 국적 시트, 숙소 검색 시트, 날짜 선택
-export type Picker = 'country' | 'lodging' | 'dates';
+export type Picker = 'country' | 'lodging' | 'map' | 'dates';
 
 export function useTripCondition() {
   const { t } = useTranslation();
@@ -60,6 +62,8 @@ export function useTripCondition() {
       ? stay.lodging.name
       : stay?.kind === 'area'
       ? t('condition.areaCenter', { area: stay.area.name })
+      : stay?.kind === 'pin'
+      ? stay.address
       : t('condition.lodgingPlaceholder');
 
   // 여행 만들기(POST /api/trips) 요청 본문. 예산은 원으로 입력받는다 (표시 통화 설정 전까지 KRW)
@@ -78,7 +82,9 @@ export function useTripCondition() {
           stay:
             stay.kind === 'lodging'
               ? { type: 'PLACE', placeId: stay.lodging.placeId }
-              : { type: 'AREA', areaCode: stay.area.code },
+              : stay.kind === 'area'
+              ? { type: 'AREA', areaCode: stay.area.code }
+              : { type: 'PIN', location: stay.location },
         }
       : undefined;
 
@@ -134,6 +140,10 @@ export function useTripCondition() {
     },
     selectLodging: (lodging: Lodging) => {
       setStay({ kind: 'lodging', lodging });
+      closePicker();
+    },
+    selectPin: (location: LatLng, address: string) => {
+      setStay({ kind: 'pin', location, address });
       closePicker();
     },
     selectArea: (area: Area) => {

@@ -24,6 +24,7 @@ type Props = {
   selectedAreaCode?: string;
   onSelectLodging: (lodging: Lodging) => void;
   onSelectArea: (area: Area) => void;
+  onPickOnMap: () => void;
 };
 
 // 유형 아이콘은 분류체계 소분류 코드로 고른다: 한옥스테이 / 펜션·민박·호스텔(게스트하우스) / 그 밖(호텔·모텔·콘도)
@@ -44,6 +45,7 @@ export default function LodgingSearchSheet({
   selectedAreaCode,
   onSelectLodging,
   onSelectArea,
+  onPickOnMap,
 }: Props) {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
@@ -129,8 +131,11 @@ export default function LodgingSearchSheet({
 
         <View style={styles.divider} />
 
-        {/* TODO: 지도에서 선택(02b). 네이버 지도 SDK 연동 이슈에서 구현 */}
-        <Pressable style={styles.mapCard} accessibilityRole="button">
+        <Pressable
+          style={styles.mapCard}
+          onPress={onPickOnMap}
+          accessibilityRole="button"
+        >
           <View style={styles.mapIcon}>
             <PinIcon width={24} height={24} color={colors.brand.primary} />
           </View>

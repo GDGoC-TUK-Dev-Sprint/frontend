@@ -7,6 +7,7 @@ import BottomSheet from '../components/BottomSheet';
 import Button from '../components/Button';
 import DateRangeModal from '../components/DateRangeModal';
 import LodgingSearchSheet from '../components/LodgingSearchSheet';
+import StayMapPicker from './tripCondition/StayMapPicker';
 import StateView from '../components/StateView';
 import ArrowForwardIcon from '../assets/icons/arrow-forward.svg';
 import CheckIcon from '../assets/icons/check.svg';
@@ -153,6 +154,14 @@ export default function TripConditionScreen({ navigation }: Props) {
         }
         onSelectLodging={form.selectLodging}
         onSelectArea={form.selectArea}
+        onPickOnMap={() => form.openPicker('map')}
+      />
+
+      <StayMapPicker
+        visible={form.picker === 'map'}
+        initial={form.stay?.kind === 'pin' ? form.stay.location : undefined}
+        onClose={form.closePicker}
+        onSelect={form.selectPin}
       />
 
       <DateRangeModal
