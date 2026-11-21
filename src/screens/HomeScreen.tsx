@@ -133,7 +133,10 @@ export default function HomeScreen({ navigation }: Props) {
         {trip ? (
           <TripTicket
             trip={trip}
-            onViewSchedule={() => navigation.navigate('Plan')}
+            // 동선을 아직 만들지 않은 여행은 장소 선택으로 이어서 간다
+            onViewSchedule={() =>
+              navigation.navigate(trip.days ? 'Plan' : 'PlaceSelect')
+            }
             onViewMap={() => navigation.navigate('Map')}
           />
         ) : (
@@ -254,7 +257,9 @@ function RouteSummary({ route }: { route: TripRoute }) {
     <View style={styles.route}>
       {/* R-K11: Type3 이미지는 자르지 않는다. 더미는 정사각형이라 cover */}
       <View style={styles.thumbnail}>
-        <Image source={route.thumbnail} style={StyleSheet.absoluteFill} />
+        {route.thumbnail && (
+          <Image source={route.thumbnail} style={StyleSheet.absoluteFill} />
+        )}
         <View style={styles.thumbnailLabel}>
           <Text style={styles.thumbnailText}>{route.thumbnailLabel}</Text>
         </View>

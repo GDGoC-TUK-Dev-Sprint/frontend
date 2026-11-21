@@ -14,8 +14,8 @@ import Button from '../components/Button';
 import TextField from '../components/TextField';
 import Logo from '../assets/images/logo.svg';
 import GoogleIcon from '../assets/icons/google.svg';
-import AppleIcon from '../assets/icons/apple.svg';
 import { useAuth } from '../auth/AuthContext';
+import { ApiError } from '../api/client';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import { colors, fontFamily, spacing, typography } from '../theme/tokens';
 
@@ -26,6 +26,21 @@ export default function LoginScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  // 오류 문구는 Figma에 없어 초안 (TODO: Figma 확인 필요)
+  const submit = async () => {
+    setSubmitting(true);
+    setError(null);
+    try {
+      await signIn(loginId, password);
+    } catch (e) {
+      const failed = e instanceof ApiError && e.status === 401;
+      setError(t(failed ? 'auth.loginFailed' : 'auth.networkError'));
+      setSubmitting(false);
+    }
+  };
 
   // 키보드가 열려도 로그인 버튼까지 스크롤할 수 있게 한다 (SignupScreen과 같은 방식)
   return (
@@ -45,6 +60,7 @@ export default function LoginScreen({ navigation }: Props) {
             autoCapitalize="none"
             autoCorrect={false}
             autoComplete="username"
+            keyboardType="ascii-capable" // 아이디는 영문 소문자·숫자·_ (iOS는 영문 키보드로 연다)
             textContentType="username"
           />
           <TextField
@@ -57,10 +73,11 @@ export default function LoginScreen({ navigation }: Props) {
             textContentType="password"
           />
         </View>
-        {/* TODO: POST /api/auth/login 연동 전까지는 바로 로그인 상태로 바꾼다 */}
+        {error && <Text style={styles.error}>{error}</Text>}
         <Button
           label={t('auth.login')}
-          onPress={signIn}
+          onPress={submit}
+          disabled={submitting || !loginId || !password}
           shadow
           style={styles.stretch}
         />
@@ -80,19 +97,13 @@ export default function LoginScreen({ navigation }: Props) {
           <Text style={styles.or}>{t('auth.or')}</Text>
           <View style={styles.line} />
         </View>
-        {/* TODO: Google·Apple 로그인(POST /api/auth/oauth/{provider})은 별도 이슈 */}
+        {/* TODO: Google 로그인(POST /api/auth/oauth/google)은 별도 이슈. Apple 로그인은 넣지 않는다 (2026-11-18) */}
         <View style={styles.social}>
           <SocialButton
             icon={GoogleIcon}
             label={t('auth.google')}
             style={styles.google}
             textColor={colors.text.heading}
-          />
-          <SocialButton
-            icon={AppleIcon}
-            label={t('auth.apple')}
-            style={styles.apple}
-            textColor={colors.surface.default}
           />
         </View>
       </ScrollView>
@@ -135,6 +146,7 @@ const styles = StyleSheet.create({
   },
   fields: { alignSelf: 'stretch', gap: 12 },
   notice: { ...typography.bodySubtle, color: colors.text.notice },
+  error: { ...typography.bodySubtle, color: colors.text.negative },
   signup: { flexDirection: 'row', gap: 6 },
   signupLink: { color: colors.brand.primary },
   divider: {
@@ -164,5 +176,4 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.brand.surfaceSubtle,
   },
-  apple: { backgroundColor: '#000000' },
 });

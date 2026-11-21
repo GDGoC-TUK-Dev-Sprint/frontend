@@ -67,7 +67,7 @@ export function DayTabs({
   selected,
   onSelect,
 }: {
-  days: TripDay[];
+  days: Pick<TripDay, 'dayNumber' | 'date'>[];
   selected: number;
   onSelect: (dayNumber: number) => void;
 }) {
@@ -90,7 +90,7 @@ function DayTab({
   selected,
   onPress,
 }: {
-  day: TripDay;
+  day: Pick<TripDay, 'dayNumber' | 'date'>;
   selected: boolean;
   onPress: () => void;
 }) {

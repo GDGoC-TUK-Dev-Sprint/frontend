@@ -12,3 +12,10 @@ export function stripHtml(text: string): string {
     .replace(/&amp;/g, '&')
     .trim();
 }
+
+// ISO 3166-1 국가 코드("JP")를 국기 이모지로 바꾼다. 서버는 국기 이미지를 주지 않는다
+// TODO: Figma는 국기 SVG. 디자인 확인 후 교체
+export const flagEmoji = (code: string) =>
+  String.fromCodePoint(
+    ...[...code.toUpperCase()].map(c => 0x1f1a5 + c.charCodeAt(0)),
+  );
