@@ -17,6 +17,10 @@ end
 target 'Koready' do
   config = use_native_modules!
 
+  # 구글 로그인(GoogleSignIn → AppCheckCore, Swift)이 정적 라이브러리로 쓰려면 이 둘의 모듈 맵이 필요하다
+  pod 'GoogleUtilities', :modular_headers => true
+  pod 'RecaptchaInterop', :modular_headers => true
+
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
@@ -30,5 +34,13 @@ target 'Koready' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+    # Xcode 27은 iOS 15 미만 대상을 빌드 오류로 낸다. 구글 로그인 의존 pod(GoogleUtilities·Promises 등)가 9.0·12.0이라 앱 최소 버전으로 올린다
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |build|
+        if build.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < min_ios_version_supported.to_f
+          build.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = min_ios_version_supported
+        end
+      end
+    end
   end
 end

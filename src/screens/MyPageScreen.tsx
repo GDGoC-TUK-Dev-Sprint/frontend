@@ -17,7 +17,7 @@ import { colors, fontFamily, spacing, typography } from '../theme/tokens';
 // TODO: 언어·통화 변경 화면이 없다. 지금 값만 보여준다 (통화는 설정 화면 전까지 KRW 고정, api/client.ts)
 export default function MyPageScreen() {
   const { t } = useTranslation();
-  const { loginId, signOut } = useAuth();
+  const { profile, signOut } = useAuth();
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
@@ -26,12 +26,18 @@ export default function MyPageScreen() {
       <View style={[styles.card, styles.profile]}>
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>
-            {(loginId ?? '?').charAt(0).toUpperCase()}
+            {(profile?.name ?? '?').charAt(0).toUpperCase()}
           </Text>
         </View>
         <View style={styles.gap2}>
-          <Text style={styles.title}>{loginId ?? '-'}</Text>
-          <Text style={styles.sub}>{t('myPage.idLogin')}</Text>
+          <Text style={styles.title}>{profile?.name ?? '-'}</Text>
+          <Text style={styles.sub}>
+            {t(
+              profile?.method === 'GOOGLE'
+                ? 'myPage.googleLogin'
+                : 'myPage.idLogin',
+            )}
+          </Text>
         </View>
       </View>
 

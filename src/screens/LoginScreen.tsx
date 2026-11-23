@@ -16,13 +16,19 @@ import Logo from '../assets/images/logo.svg';
 import GoogleIcon from '../assets/icons/google.svg';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../api/client';
+import {
+  GoogleSignin,
+  isErrorWithCode,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
+import { GOOGLE_IOS_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from '../config/google';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import { colors, fontFamily, spacing, typography } from '../theme/tokens';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 export default function LoginScreen({ navigation }: Props) {
-  const { signIn } = useAuth();
+  const { signIn, signInWithGoogle } = useAuth();
   const { t } = useTranslation();
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
@@ -40,6 +46,38 @@ export default function LoginScreen({ navigation }: Props) {
       setError(t(failed ? 'auth.loginFailed' : 'auth.networkError'));
       setSubmitting(false);
     }
+  };
+
+  // Google 계정을 고르면 받은 ID 토큰을 서버(POST /api/auth/oauth/google)로 보낸다. 처음이면 서버가 가입시킨다
+  // 사용자가 창을 닫으면 아무 문구도 띄우지 않는다
+  const submitGoogle = async () => {
+    setError(null);
+    if (!GOOGLE_WEB_CLIENT_ID || !GOOGLE_IOS_CLIENT_ID) {
+      setError(t('auth.googleNotReady'));
+      return;
+    }
+    setSubmitting(true);
+    try {
+      GoogleSignin.configure({
+        webClientId: GOOGLE_WEB_CLIENT_ID,
+        iosClientId: GOOGLE_IOS_CLIENT_ID,
+      });
+      await GoogleSignin.hasPlayServices();
+      const res = await GoogleSignin.signIn();
+      if (res.type === 'success' && res.data.idToken) {
+        const { name, email } = res.data.user;
+        await signInWithGoogle(res.data.idToken, name ?? email);
+        return;
+      }
+    } catch (e) {
+      const cancelled =
+        isErrorWithCode(e) && e.code === statusCodes.IN_PROGRESS;
+      if (!cancelled) {
+        const rejected = e instanceof ApiError && e.status === 401;
+        setError(t(rejected ? 'auth.googleFailed' : 'auth.networkError'));
+      }
+    }
+    setSubmitting(false);
   };
 
   // 키보드가 열려도 로그인 버튼까지 스크롤할 수 있게 한다 (SignupScreen과 같은 방식)
@@ -97,13 +135,15 @@ export default function LoginScreen({ navigation }: Props) {
           <Text style={styles.or}>{t('auth.or')}</Text>
           <View style={styles.line} />
         </View>
-        {/* TODO: Google 로그인(POST /api/auth/oauth/google)은 별도 이슈. Apple 로그인은 넣지 않는다 (2026-11-18) */}
+        {/* Apple 로그인은 넣지 않는다 (2026-11-18) */}
         <View style={styles.social}>
           <SocialButton
             icon={GoogleIcon}
             label={t('auth.google')}
             style={styles.google}
             textColor={colors.text.heading}
+            onPress={submitGoogle}
+            disabled={submitting}
           />
         </View>
       </ScrollView>
@@ -116,14 +156,23 @@ function SocialButton({
   label,
   style,
   textColor,
+  onPress,
+  disabled,
 }: {
   icon: React.FC<SvgProps>;
   label: string;
   style: object;
   textColor: string;
+  onPress: () => void;
+  disabled?: boolean;
 }) {
   return (
-    <Pressable accessibilityRole="button" style={[styles.socialButton, style]}>
+    <Pressable
+      accessibilityRole="button"
+      style={[styles.socialButton, style]}
+      onPress={onPress}
+      disabled={disabled}
+    >
       <Icon width={20} height={20} />
       <Text style={[typography.bodyBase, { color: textColor }]}>{label}</Text>
     </Pressable>

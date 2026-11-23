@@ -11,13 +11,16 @@ import {
   setSession,
   setSessionExpiredHandler,
 } from '../api/client';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import {
-  clearLoginId,
+  clearProfile,
   clearTokens,
-  loadLoginId,
+  loadProfile,
   loadTokens,
-  saveLoginId,
+  saveProfile,
   saveTokens,
+  type Profile,
+  type Tokens,
 } from './tokenStorage';
 
 // loading: 앱 시작 때 저장된 토큰을 확인하는 중
@@ -25,8 +28,9 @@ type Status = 'loading' | 'signedOut' | 'signedIn';
 
 type AuthState = {
   status: Status;
-  loginId: string | null; // 마이페이지 프로필
+  profile: Profile | null; // 마이페이지 프로필
   signIn: (loginId: string, password: string) => Promise<void>;
+  signInWithGoogle: (idToken: string, name: string) => Promise<void>;
   signUp: (form: {
     name: string;
     loginId: string;
@@ -39,29 +43,35 @@ const AuthContext = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<Status>('loading');
-  const [loginId, setLoginId] = useState<string | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
     setSessionExpiredHandler(() => setStatus('signedOut'));
     restore().then(setStatus);
-    loadLoginId()
-      .then(setLoginId)
+    loadProfile()
+      .then(setProfile)
       .catch(() => {});
   }, []);
 
   const value = useMemo(() => {
-    const signIn = async (id: string, password: string) => {
-      const tokens = await authApi.login(id, password);
+    const start = async (tokens: Tokens, next: Profile) => {
       await saveTokens(tokens);
-      await saveLoginId(id).catch(() => {});
+      await saveProfile(next).catch(() => {});
       setSession(tokens);
-      setLoginId(id);
+      setProfile(next);
       setStatus('signedIn');
     };
+    const signIn = async (id: string, password: string) =>
+      start(await authApi.login(id, password), { name: id, method: 'ID' });
     return {
       status,
-      loginId,
+      profile,
       signIn,
+      signInWithGoogle: async (idToken: string, name: string) =>
+        start(await authApi.oauthLogin('google', idToken), {
+          name,
+          method: 'GOOGLE',
+        }),
       // 가입 응답에는 토큰이 없어 같은 아이디·비밀번호로 바로 로그인한다
       signUp: async (form: {
         name: string;
@@ -77,14 +87,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (tokens) {
           await authApi.logout(tokens.refreshToken).catch(() => {});
         }
+        // 다음 Google 로그인 때 계정을 다시 고르게 한다
+        if (profile?.method === 'GOOGLE') {
+          await GoogleSignin.signOut().catch(() => {});
+        }
         setSession(null);
         await clearTokens();
-        await clearLoginId().catch(() => {});
-        setLoginId(null);
+        await clearProfile().catch(() => {});
+        setProfile(null);
         setStatus('signedOut');
       },
     };
-  }, [status, loginId]);
+  }, [status, profile]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

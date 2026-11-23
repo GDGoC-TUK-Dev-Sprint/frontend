@@ -34,3 +34,15 @@ jest.mock('react-native-keychain', () => {
     }),
   };
 });
+
+// Google 로그인은 네이티브 모듈이라 테스트에서는 빈 함수로 바꾼다 (라이브러리 목은 exports에 없어 불러올 수 없다)
+jest.mock('@react-native-google-signin/google-signin', () => ({
+  GoogleSignin: {
+    configure: jest.fn(),
+    hasPlayServices: jest.fn(async () => true),
+    signIn: jest.fn(async () => ({ type: 'cancelled', data: null })),
+    signOut: jest.fn(async () => null),
+  },
+  isErrorWithCode: () => false,
+  statusCodes: {},
+}));

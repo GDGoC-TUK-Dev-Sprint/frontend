@@ -33,3 +33,11 @@ export function logout(refreshToken: string) {
     auth: false,
   });
 }
+
+// 소셜 로그인 (API 3). 앱이 받은 Google ID 토큰을 서버가 검증하고 우리 토큰을 준다. 처음이면 가입된다
+export function oauthLogin(provider: 'google', idToken: string) {
+  return request<Tokens>('POST', `/api/auth/oauth/${provider}`, {
+    body: { idToken },
+    auth: false,
+  });
+}
