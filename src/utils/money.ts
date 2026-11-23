@@ -1,6 +1,6 @@
 // 서버가 표시 통화로 환산해 준 금액을 화면 문자열로 바꾼다 (spec F7-3). 앱은 금액을 계산하지 않는다
 export type Money = { amount: number; currency: string };
-export type MoneyRange = { min: Money; max: Money };
+export type MoneyRange = { min: number; max: number; currency: string };
 
 const SYMBOLS: Record<string, string> = {
   KRW: '₩',
@@ -20,8 +20,9 @@ export function formatMoney({ amount, currency }: Money) {
 }
 
 // 경비는 범위로 보여준다. 최소와 최대가 같으면 한 값만
-export function formatRange({ min, max }: MoneyRange) {
-  return min.amount === max.amount
-    ? formatMoney(min)
-    : `${formatMoney(min)} ~ ${formatMoney(max)}`;
+export function formatRange({ min, max, currency }: MoneyRange) {
+  const low = formatMoney({ amount: min, currency });
+  return min === max
+    ? low
+    : `${low} ~ ${formatMoney({ amount: max, currency })}`;
 }

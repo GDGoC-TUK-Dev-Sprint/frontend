@@ -19,6 +19,8 @@
     "or": "or",
     "google": "Continue with Google",
     "loginFailed": "Incorrect ID or password",
+    "googleNotReady": "Google sign-in is coming soon",
+    "googleFailed": "Could not sign in with Google. Please try again",
     "loginIdTaken": "This ID is already taken",
     "networkError": "Connection problem. Please try again in a moment."
   },
@@ -250,6 +252,7 @@
   },
   "myPage": {
     "idLogin": "Signed in with ID",
+    "googleLogin": "Signed in with Google",
     "favorites": "Saved places",
     "noFavorites": "No saved places yet",
     "pastTrips": "Past trips",
@@ -296,6 +299,9 @@
     "daysTitle": "Daily spending",
     "daysCount": "{{count}} days",
     "peak": "Highest day",
+    "limitationsTitle": "Data limits",
+    "sourcesTitle": "Sources",
+    "items": { "FOOD": "Food", "SIGHTSEEING": "Sights & admission", "TRANSPORT": "Transport", "SHOPPING": "Shopping", "OTHER": "Other" },
     "confirm": "Confirm trip with this budget"
   }
 }

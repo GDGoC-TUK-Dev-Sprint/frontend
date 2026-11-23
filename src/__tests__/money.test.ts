@@ -8,8 +8,8 @@ test('통화 기호와 천 단위 쉼표', () => {
 });
 
 test('범위는 최소~최대, 같으면 한 값', () => {
-  expect(formatRange({ min: krw(37825), max: krw(62827) })).toBe(
-    '₩37,825 ~ ₩62,827',
+  expect(formatRange({ min: 37000, max: 63000, currency: 'KRW' })).toBe(
+    '₩37,000 ~ ₩63,000',
   );
-  expect(formatRange({ min: krw(5000), max: krw(5000) })).toBe('₩5,000');
+  expect(formatRange({ min: 5000, max: 5000, currency: 'KRW' })).toBe('₩5,000');
 });

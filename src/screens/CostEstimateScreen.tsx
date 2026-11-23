@@ -14,7 +14,7 @@ import { ApiError } from '../api/client';
 import {
   confirmTrip,
   getCostEstimate,
-  type Breakdown,
+  type CostBreakdown,
   type CostEstimate,
 } from '../api/trips';
 import type { RootStackParamList } from '../navigation/RootNavigator';
@@ -27,7 +27,7 @@ import {
   typography,
 } from '../theme/tokens';
 import { formatMonthDay, parseDate } from '../utils/date';
-import { formatRange } from '../utils/money';
+import { formatMoney, formatRange } from '../utils/money';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CostEstimate'>;
 type Basis = 'perPerson' | 'total';
@@ -60,7 +60,7 @@ const itemColor = (code: string) =>
 
 // Figma 「04 예상 경비」 (spec F4). 모든 수치는 GET /api/trips/{tripId}/cost-estimate 응답 하나에서 나온다 (F4-9)
 // 시안은 단일 금액·숙박 항목이 있지만 팀 결정대로 범위로 보여주고 숙박은 넣지 않는다 (spec §0)
-// TODO: 시안의 예산 조정 안내 문구는 서버 응답에 아직 없어 넣지 않는다
+// 항목 이름은 서버가 코드만 주므로 앱 문구로 바꾼다 (cost.items.*)
 export default function CostEstimateScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
@@ -113,10 +113,7 @@ export default function CostEstimateScreen({ navigation }: Props) {
     }
   };
 
-  const itemNames = Object.fromEntries(
-    estimate.items.map(i => [i.item.code, i.item.name]),
-  );
-  const pick = (b: Breakdown) => b[basis];
+  const view = estimate[basis];
 
   return (
     <View style={styles.screen}>
@@ -142,7 +139,7 @@ export default function CostEstimateScreen({ navigation }: Props) {
           <Text style={[typography.captionBase, { color: FIGMA.excludes }]}>
             {t('cost.excludes')}
           </Text>
-          <Text style={styles.totalAmount}>{formatRange(pick(estimate))}</Text>
+          <Text style={styles.totalAmount}>{formatRange(view.amount)}</Text>
           <View style={styles.heroFooter}>
             <Text style={[typography.bodyBase, { color: FIGMA.label }]}>
               {basis === 'total'
@@ -153,7 +150,7 @@ export default function CostEstimateScreen({ navigation }: Props) {
               <View style={styles.heroBadge}>
                 <Text style={[typography.bodyBase, { color: FIGMA.accent }]}>
                   {t('cost.perPersonRange', {
-                    amount: formatRange(estimate.perPerson),
+                    amount: formatRange(estimate.perPerson.amount),
                   })}
                 </Text>
               </View>
@@ -161,9 +158,9 @@ export default function CostEstimateScreen({ navigation }: Props) {
           </View>
         </View>
 
-        <BudgetCard estimate={estimate} basis={basis} />
+        <BudgetCard breakdown={view} guidance={estimate.guidance} />
 
-        {/* 항목별 예상 경비. 설명 자리에는 근거 데이터(출처)를 보여준다 (F4-5) */}
+        {/* 항목별 예상 경비. 설명 자리에는 계산 근거 문장을 보여준다 (F4-5) */}
         <View style={styles.card}>
           <View style={styles.headerRow}>
             <View style={styles.titleRow}>
@@ -173,45 +170,43 @@ export default function CostEstimateScreen({ navigation }: Props) {
               </Text>
             </View>
             <Text style={[typography.bodySubtle, { color: FIGMA.hint }]}>
-              {t('cost.itemsCount', { count: estimate.items.length })}
+              {t('cost.itemsCount', { count: view.items.length })}
             </Text>
           </View>
           <View style={styles.shareBar}>
-            {estimate.items.map(i => (
+            {view.items.map(i => (
               <View
-                key={i.item.code}
+                key={i.item}
                 style={{
                   flex: i.sharePct,
-                  backgroundColor: itemColor(i.item.code)[0],
+                  backgroundColor: itemColor(i.item)[0],
                 }}
               />
             ))}
           </View>
           <View>
-            {estimate.items.map((i, index) => (
+            {view.items.map((i, index) => (
               <View
-                key={i.item.code}
+                key={i.item}
                 style={[styles.itemRow, index > 0 && styles.itemDivider]}
               >
                 <View
                   style={[
                     styles.itemIcon,
-                    { backgroundColor: itemColor(i.item.code)[1] },
+                    { backgroundColor: itemColor(i.item)[1] },
                   ]}
                 />
                 <View style={styles.flex}>
                   <Text style={[typography.bodyBase, { color: FIGMA.title }]}>
-                    {i.item.name}
+                    {t(`cost.items.${i.item}`)}
                   </Text>
-                  <Text style={styles.itemSource}>{i.source.name}</Text>
+                  <Text style={styles.itemSource}>{i.basis}</Text>
                 </View>
                 <View style={styles.itemAmount}>
                   <Text style={[typography.bodyBase, { color: FIGMA.title }]}>
-                    {formatRange(pick(i))}
+                    {formatRange(i.amount)}
                   </Text>
-                  <Text
-                    style={[styles.share, { color: itemColor(i.item.code)[0] }]}
-                  >
+                  <Text style={[styles.share, { color: itemColor(i.item)[0] }]}>
                     {`${i.sharePct}%`}
                   </Text>
                 </View>
@@ -230,13 +225,15 @@ export default function CostEstimateScreen({ navigation }: Props) {
               </Text>
             </View>
             <Text style={[typography.bodySubtle, { color: FIGMA.hint }]}>
-              {t('cost.daysCount', { count: estimate.days.length })}
+              {t('cost.daysCount', { count: view.days.length })}
             </Text>
           </View>
-          {estimate.days.map(d => (
-            <DayCard key={d.day} day={d} basis={basis} itemNames={itemNames} />
+          {view.days.map(d => (
+            <DayCard key={d.dayNumber} day={d} />
           ))}
         </View>
+
+        <NotesCard estimate={estimate} />
       </ScrollView>
 
       <View
@@ -295,28 +292,26 @@ function BasisToggle({
   );
 }
 
-// 희망 예산과 비교 (F4-4). 희망 예산이 없으면(상관없음) 숨긴다
+// 희망 예산과 비교 (F4-4). 희망 예산이 없으면(상관없음) 숨긴다. 안내 문장은 1인 기준이다
 function BudgetCard({
-  estimate,
-  basis,
+  breakdown,
+  guidance,
 }: {
-  estimate: CostEstimate;
-  basis: Basis;
+  breakdown: CostBreakdown;
+  guidance: string | null;
 }) {
   const { t } = useTranslation();
-  const { budget } = estimate;
-  const amount = basis === 'total' ? budget.total : budget.perPerson;
-  if (budget.status === 'NO_BUDGET' || !amount) return null;
-  const over = basis === 'total' ? budget.overTotal : budget.overPerPerson;
-  const needed = estimate[basis];
-  const exceeds = budget.status !== 'WITHIN';
+  const { budget, amount: needed } = breakdown;
+  if (!budget) return null;
+  const exceeds = budget.status !== 'WITHIN_BUDGET';
   // 막대: 희망 예산(파랑)과 예상 최대가 예산을 넘는 만큼(빨강)
-  const max = Math.max(needed.max.amount, amount.amount);
+  const set = budget.amount.amount;
+  const max = Math.max(needed.max, set);
   const status =
-    budget.status === 'WITHIN'
+    budget.status === 'WITHIN_BUDGET'
       ? t('cost.budgetWithin')
-      : budget.status === 'OVER' && over
-      ? t('cost.budgetOver', { amount: formatRange(over) })
+      : budget.status === 'OVER_BUDGET' && budget.overBy
+      ? t('cost.budgetOver', { amount: formatRange(budget.overBy) })
       : t('cost.budgetMayExceed');
 
   return (
@@ -347,9 +342,7 @@ function BudgetCard({
           <Text style={[typography.bodyBase, { color: FIGMA.label }]}>
             {t('cost.budgetSet')}
           </Text>
-          <Text style={styles.budgetValue}>
-            {formatRange({ min: amount, max: amount })}
-          </Text>
+          <Text style={styles.budgetValue}>{formatMoney(budget.amount)}</Text>
         </View>
         <View style={styles.row}>
           <Text style={[typography.bodyBase, { color: FIGMA.label }]}>
@@ -367,36 +360,72 @@ function BudgetCard({
         </View>
         <View style={styles.budgetBar}>
           <View
-            style={{
-              flex: amount.amount / max,
-              backgroundColor: colors.brand.primary,
-            }}
+            style={{ flex: set / max, backgroundColor: colors.brand.primary }}
           />
-          {needed.max.amount > amount.amount && (
+          {needed.max > set && (
             <View
               style={{
-                flex: (needed.max.amount - amount.amount) / max,
+                flex: (needed.max - set) / max,
                 backgroundColor: colors.text.negative,
               }}
             />
           )}
         </View>
       </View>
+      {guidance && (
+        <Text style={[typography.bodySubtle, { color: FIGMA.label }]}>
+          {guidance}
+        </Text>
+      )}
     </View>
   );
 }
 
-function DayCard({
-  day,
-  basis,
-  itemNames,
-}: {
-  day: CostEstimate['days'][number];
-  basis: Basis;
-  itemNames: Record<string, string>;
-}) {
+// 데이터 한계와 근거 출처 (핵심 원칙: 범위와 함께 한계를 보여준다, F4-5·F4-6)
+// TODO: 시안의 근거 배지·출처 시트 자리가 정해지지 않아 화면 아래 카드로 둔다 (Figma 확인 필요)
+function NotesCard({ estimate }: { estimate: CostEstimate }) {
+  const { t } = useTranslation();
+  const { limitations, sources } = estimate;
+  if (!limitations.length && !sources.length) return null;
+  return (
+    <View style={styles.card}>
+      {limitations.length > 0 && (
+        <View style={styles.notes}>
+          <Text style={[typography.bodyStrong, { color: FIGMA.title }]}>
+            {t('cost.limitationsTitle')}
+          </Text>
+          {limitations.map(l => (
+            <Text
+              key={l.code}
+              style={[typography.bodySubtle, { color: FIGMA.label }]}
+            >
+              {`· ${l.message}`}
+            </Text>
+          ))}
+        </View>
+      )}
+      {sources.length > 0 && (
+        <View style={styles.notes}>
+          <Text style={[typography.bodyStrong, { color: FIGMA.title }]}>
+            {t('cost.sourcesTitle')}
+          </Text>
+          {sources.map(src => (
+            <Text
+              key={src.name}
+              style={[typography.bodySubtle, { color: FIGMA.hint }]}
+            >
+              {src.detail ? `· ${src.name} (${src.detail})` : `· ${src.name}`}
+            </Text>
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
+
+function DayCard({ day }: { day: CostBreakdown['days'][number] }) {
   const { t, i18n } = useTranslation();
-  const peak = day.peak;
+  const peak = day.highest;
   return (
     <View style={[styles.day, peak && styles.dayPeak]}>
       <View style={styles.row}>
@@ -408,11 +437,11 @@ function DayCard({
                 { color: peak ? colors.surface.default : colors.text.base },
               ]}
             >
-              {day.day}
+              {day.dayNumber}
             </Text>
           </View>
           <Text style={[typography.bodyBase, { color: FIGMA.title }]}>
-            {t('plan.dayTab', { day: day.day })}
+            {t('plan.dayTab', { day: day.dayNumber })}
           </Text>
           {peak ? (
             <View style={styles.peakTag}>
@@ -439,7 +468,7 @@ function DayCard({
             { color: peak ? colors.brand.primary : FIGMA.title },
           ]}
         >
-          {formatRange(day[basis])}
+          {formatRange(day.amount)}
         </Text>
       </View>
       <View style={[styles.chips, peak && styles.chipsPeak]}>
@@ -451,9 +480,7 @@ function DayCard({
                 { color: peak ? colors.brand.primary : colors.text.muted },
               ]}
             >
-              {`${itemNames[item.item] ?? item.item} ${formatRange(
-                item[basis],
-              )}`}
+              {`${t(`cost.items.${item.item}`)} ${formatRange(item.amount)}`}
             </Text>
           </View>
         ))}
@@ -645,6 +672,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: colors.surface.default,
   },
+  notes: { gap: 4 },
   error: {
     ...typography.bodySubtle,
     color: colors.text.negative,

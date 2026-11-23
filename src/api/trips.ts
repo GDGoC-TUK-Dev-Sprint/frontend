@@ -219,29 +219,50 @@ export function deleteTripItem(tripId: number, itemId: number) {
 
 // ── 04 예상 경비 ──
 
-// 금액은 모두 범위다. 숙박·항공은 들어 있지 않다
-export type Breakdown = { perPerson: MoneyRange; total: MoneyRange };
+// 금액은 모두 범위다. 숙박·항공은 들어 있지 않다. 1인(perPerson)과 인원 합계(total)가 같은 구조로 둘 다 온다
+export type CostItemCode =
+  | 'FOOD'
+  | 'SIGHTSEEING'
+  | 'TRANSPORT'
+  | 'SHOPPING'
+  | 'OTHER';
 
-export type CostEstimate = Breakdown & {
-  trip: TripSummary;
+export type CostBreakdown = {
+  amount: MoneyRange;
   budget: {
-    status: 'NO_BUDGET' | 'WITHIN' | 'OVER' | 'MAY_EXCEED';
-    perPerson: Money | null;
-    total: Money | null;
-    overPerPerson: MoneyRange | null;
-    overTotal: MoneyRange | null;
-  };
-  items: (Breakdown & {
-    item: Code; // FOOD·SIGHTSEEING·TRANSPORT·SHOPPING·OTHER
+    amount: Money; // 희망 예산 (1인 / 인원 합계)
+    status: 'WITHIN_BUDGET' | 'MAY_EXCEED' | 'OVER_BUDGET';
+    usagePct: { min: number; max: number } | null; // 예산이 0원이면 null
+    overBy: MoneyRange | null; // 예산 안이면 null
+    leftOver: MoneyRange | null; // 최소도 넘으면 null
+  } | null; // 희망 예산이 없으면 null
+  items: {
+    item: CostItemCode; // 이름은 앱이 정한다
+    amount: MoneyRange;
     sharePct: number;
-    source: Code; // 근거 데이터
-  })[];
-  days: (Breakdown & {
-    day: number;
+    basis: string; // 계산 근거 문장 (요청 언어)
+  }[];
+  days: {
+    dayNumber: number;
     date: string;
-    peak: boolean; // 가장 많이 쓰는 날
-    items: (Breakdown & { item: string })[];
-  })[];
+    amount: MoneyRange;
+    items: { item: CostItemCode; amount: MoneyRange }[];
+    highest: boolean; // 가장 많이 쓰는 날
+  }[];
+};
+
+export type CostEstimate = {
+  trip: TripSummary;
+  perPerson: CostBreakdown;
+  total: CostBreakdown;
+  guidance: string | null; // 예산 조정 안내 (1인 기준). 희망 예산이 없으면 null
+  limitations: { code: string; message: string }[]; // 데이터 한계. message를 그대로 쓴다
+  sources: { name: string; detail: string | null }[]; // 근거 출처
+  exchangeRate: {
+    currency: string;
+    krwPerUnit: number;
+    rateDate: string;
+  } | null; // KRW면 null
 };
 
 export function getCostEstimate(tripId: number) {

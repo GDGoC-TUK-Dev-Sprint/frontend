@@ -26,6 +26,8 @@
     "or": "또는",
     "google": "Google로 계속하기",
     "loginFailed": "아이디 또는 비밀번호가 맞지 않아요",
+    "googleNotReady": "Google 로그인은 아직 준비 중이에요",
+    "googleFailed": "Google 계정으로 로그인하지 못했어요. 다시 시도해 주세요",
     "loginIdTaken": "이미 사용 중인 아이디예요",
     "networkError": "연결이 원활하지 않아요. 잠시 후 다시 시도해 주세요."
   },
@@ -257,6 +259,7 @@
   },
   "myPage": {
     "idLogin": "아이디로 로그인",
+    "googleLogin": "Google 계정으로 로그인",
     "favorites": "찜한 장소",
     "noFavorites": "아직 찜한 장소가 없어요",
     "pastTrips": "이전 여행 기록",
@@ -303,6 +306,9 @@
     "daysTitle": "일자별 예상 지출",
     "daysCount": "일정 {{count}}일간",
     "peak": "최대 지출일",
+    "limitationsTitle": "데이터 한계",
+    "sourcesTitle": "근거 출처",
+    "items": { "FOOD": "식비", "SIGHTSEEING": "관광·입장료", "TRANSPORT": "교통", "SHOPPING": "쇼핑", "OTHER": "기타" },
     "confirm": "이 예산으로 여행 확정하기"
   }
 }
