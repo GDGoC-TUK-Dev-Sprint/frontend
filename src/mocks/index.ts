@@ -245,7 +245,7 @@ export type PlaceDetail = {
   // TODO: 별점·리뷰는 앱 사용자가 입력한다(팀 결정). spec F2-3은 표시하지 않는다고 되어 있고 API가 없다
   rating?: { average: number; count: number };
   address: string;
-  operating: { isOpen: boolean; lastEntry?: string }; // 서버가 한국 시간 기준으로 판단
+  operating?: { isOpen: boolean; lastEntry?: string }; // 서버가 한국 시간 기준으로 판단. 모르면 없다
   hours?: { value: string; note?: string };
   closedDays?: { value: string; note?: string };
   fees?: { rows: { label: string; value: string }[]; note?: string };
