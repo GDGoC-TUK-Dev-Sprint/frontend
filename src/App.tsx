@@ -6,9 +6,13 @@ import { AuthProvider } from './auth/AuthContext';
 import RootNavigator from './navigation/RootNavigator';
 import { TripProvider } from './trips/TripContext';
 import './i18n';
+import { loadPreferences } from './settings/preferences';
 
 // react-native-sortables(동선 화면 드래그) 내부에서 나는 개발용 경고. 동작과 무관하고 개발 중 하단 버튼을 가려서 숨긴다
 LogBox.ignoreLogs(['[Reanimated] Dependencies should only be used on the web']);
+
+// 저장한 언어·통화를 읽는다. 첫 화면은 기기 언어로 잠깐 그려질 수 있다
+loadPreferences();
 
 export default function App() {
   return (

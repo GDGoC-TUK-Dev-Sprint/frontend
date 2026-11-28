@@ -1,12 +1,10 @@
 import i18n from '../i18n';
+import { getCurrency } from '../settings/preferences';
 import { clearTokens, saveTokens, type Tokens } from '../auth/tokenStorage';
 
 // 배포 서버 (backend develop이 자동 배포된다)
 // 맥에서 띄운 백엔드를 쓸 때는 iOS 'http://localhost:8080', Android 에뮬레이터 'http://10.0.2.2:8080'으로 바꾼다
 export const API_BASE_URL = 'https://api.koready.store';
-
-// TODO: 설정 팝업(10)을 만들면 기기에 저장한 표시 통화로 바꾼다 (spec F7-3, F7-5)
-const currency = 'KRW';
 
 // 서버 오류 본문 {code, message, fields}. status 0은 서버에 닿지 못한 경우(통신 오류)
 export class ApiError extends Error {
@@ -42,7 +40,7 @@ async function send(
   const headers: Record<string, string> = {
     Accept: 'application/json',
     'Accept-Language': i18n.language === 'ko' ? 'ko' : 'en',
-    'X-Currency': currency,
+    'X-Currency': getCurrency(),
   };
   if (body !== undefined) {
     headers['Content-Type'] = 'application/json';

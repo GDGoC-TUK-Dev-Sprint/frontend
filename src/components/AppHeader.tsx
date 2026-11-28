@@ -7,6 +7,7 @@ import BellIcon from '../assets/icons/bell.svg';
 import ChevronRightIcon from '../assets/icons/chevron-right.svg';
 import ChevronDownIcon from '../assets/icons/chevron-down.svg';
 import GlobeIcon from '../assets/icons/globe.svg';
+import LanguageCurrencySheet from './LanguageCurrencySheet';
 import NotificationSheet from './NotificationSheet';
 import { colors, fontFamily, typography } from '../theme/tokens';
 
@@ -27,6 +28,7 @@ export default function AppHeader({
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + 16 }]}>
@@ -50,8 +52,11 @@ export default function AppHeader({
       </View>
       {title && <Text style={styles.title}>{title}</Text>}
       <View style={[styles.side, styles.right]}>
-        {/* TODO: 언어 및 통화 설정 팝업(F7, Figma 10) */}
-        <Pressable style={styles.language} accessibilityRole="button">
+        <Pressable
+          onPress={() => setSettingsOpen(true)}
+          style={styles.language}
+          accessibilityRole="button"
+        >
           <GlobeIcon width={13.2} height={13.2} style={styles.globe} />
           <Text style={styles.languageText}>{t('language.current')}</Text>
           <ChevronDownIcon width={7} height={4.317} />
@@ -68,6 +73,10 @@ export default function AppHeader({
           </Pressable>
         )}
       </View>
+      <LanguageCurrencySheet
+        visible={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
       {showBell && (
         <NotificationSheet
           visible={notificationsOpen}
