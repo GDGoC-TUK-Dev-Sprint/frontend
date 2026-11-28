@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -11,7 +11,14 @@ import ChevronRightIcon from '../assets/icons/chevron-right.svg';
 import CopyIcon from '../assets/icons/copy.svg';
 import HeartIcon from '../assets/icons/heart.svg';
 import PinIcon from '../assets/icons/pin.svg';
-import { findMockPlace, type PlaceDetail } from '../mocks';
+import { ApiError } from '../api/client';
+import {
+  getPlaceDetail,
+  setFavorite as saveFavorite,
+  toPlaceDetail,
+} from '../api/places';
+import type { PlaceDetail } from '../mocks';
+import { useTrip } from '../trips/TripContext';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import {
   colors,
@@ -27,17 +34,69 @@ import VisitInfoSection from './placeDetail/VisitInfoSection';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PlaceDetail'>;
 
-// Figma 「07 장소 상세」 (spec F2-3). 데이터는 GET /api/places/{placeId} 더미
+// Figma 「07 장소 상세」 (spec F2-3). GET /api/places/{placeId}. 지금 여행을 넘기면 그 일정에 담긴 장소인지도 받는다
 export default function PlaceDetailScreen({ route, navigation }: Props) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  // TODO: GET /api/places/{placeId} 연동
-  const place = findMockPlace(route.params.placeId);
-  // TODO: 찜은 PUT·DELETE /api/favorites/{placeId} (F12-3). 지금은 화면 안에서만 바뀐다
-  const [favorite, setFavorite] = useState(place?.isFavorite ?? false);
+  const { placeId } = route.params;
+  const { trip } = useTrip();
+  const tripId = trip?.tripId;
+  const [place, setPlace] = useState<PlaceDetail>();
+  const [failed, setFailed] = useState<'notFound' | 'network'>();
+  const [favorite, setFavorite] = useState(false);
+
+  const load = useCallback(() => {
+    setFailed(undefined);
+    getPlaceDetail(placeId, tripId)
+      .then(res => {
+        const detail = toPlaceDetail(res, t('placeDetail.free'));
+        setPlace(detail);
+        setFavorite(detail.isFavorite);
+      })
+      .catch(e =>
+        setFailed(
+          e instanceof ApiError && e.status === 404 ? 'notFound' : 'network',
+        ),
+      );
+  }, [placeId, tripId, t]);
+  useEffect(load, [load]);
+
+  // 화면을 먼저 바꾸고, 실패하면 되돌린다 (F12-3)
+  const toggleFavorite = () => {
+    const next = !favorite;
+    setFavorite(next);
+    saveFavorite(placeId, next).catch(() => setFavorite(!next));
+  };
   // TODO: 담기는 장소 선택(02c)의 담기 목록과 같다 (F2-12). 장소 선택 화면이 생기면 그 상태로 옮긴다
   const [added, setAdded] = useState(false);
 
+  // 받는 동안에는 목록에서 받은 사진·이름·분류를 먼저 보여준다
+  const preview = route.params.preview;
+  if (failed === 'network') {
+    return (
+      <StateView
+        type="error"
+        message={t('auth.networkError')}
+        retryLabel={t('common.retry')}
+        onRetry={load}
+      />
+    );
+  }
+  if (!place && !failed && !preview) {
+    return <StateView type="loading" />;
+  }
+  if (!place && !failed && preview) {
+    return (
+      <ScrollView contentContainerStyle={styles.scroll}>
+        {preview.photo && <PhotoSwiper photos={[preview.photo]} />}
+        <View style={[styles.content, styles.titleBlock]}>
+          <Text style={styles.category}>{preview.category}</Text>
+          <Text style={styles.name}>{preview.name}</Text>
+          <StateView type="loading" />
+        </View>
+      </ScrollView>
+    );
+  }
   if (!place) {
     return <StateView type="empty" message={t('placeDetail.notFound')} />;
   }
@@ -70,7 +129,7 @@ export default function PlaceDetailScreen({ route, navigation }: Props) {
       >
         <Pressable
           style={styles.favorite}
-          onPress={() => setFavorite(!favorite)}
+          onPress={toggleFavorite}
           accessibilityRole="button"
           accessibilityLabel={t(
             favorite ? 'placeDetail.unfavorite' : 'placeDetail.favorite',

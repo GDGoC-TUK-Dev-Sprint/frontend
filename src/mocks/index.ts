@@ -14,6 +14,7 @@ export type FeaturedCourse = {
 // 나의 여행 티켓 (01 메인). GET /api/trips (spec API 17, F12-6)
 // D-day는 startDate로 화면에서 계산한다
 export type Trip = {
+  tripId?: number; // 서버가 만든 여행이면 있다. 더미 여행은 없다
   tripNumber: string;
   title: string;
   region: string;
@@ -23,12 +24,14 @@ export type Trip = {
   // 장소 선택(02c) 조건 요약 카드용. GET /api/trips/{tripId} (spec API 18)
   stayName: string; // 숙소 이름 또는 "○○ 중심"
   budgetPerPerson?: number; // 원. 없으면 상관없음
-  themeCodes: string[];
+  themes: { code: string; name: string }[]; // 고른 카테고리
+  // 동선을 만든 뒤 일차 탭에 쓰는 일자 목록 (POST .../route 응답). 일정은 GET .../days/{dayNumber}로 받는다
+  days?: { dayNumber: number; date: string }[];
   route?: TripRoute; // 동선을 만들기 전에는 없다. 없으면 티켓의 장소 영역을 숨긴다
 };
 
 export type TripRoute = {
-  thumbnail: ImageSourcePropType;
+  thumbnail?: ImageSourcePropType; // 사진이 없는 장소면 없다
   thumbnailLabel: string;
   stops: string[];
 };
@@ -49,7 +52,12 @@ export const mockTripSample: Trip = {
   travelers: 2,
   stayName: '명동 센트럴 호텔',
   budgetPerPerson: 500000,
-  themeCodes: ['SH', 'FD', 'VE', 'NA'],
+  themes: [
+    { code: 'SH', name: '쇼핑' },
+    { code: 'FD', name: '음식' },
+    { code: 'VE', name: '문화관광' },
+    { code: 'NA', name: '자연관광' },
+  ],
   route: {
     thumbnail: require('../assets/images/dummy-place.jpg'),
     thumbnailLabel: '성수동',
@@ -237,7 +245,7 @@ export type PlaceDetail = {
   // TODO: 별점·리뷰는 앱 사용자가 입력한다(팀 결정). spec F2-3은 표시하지 않는다고 되어 있고 API가 없다
   rating?: { average: number; count: number };
   address: string;
-  operating: { isOpen: boolean; lastEntry?: string }; // 서버가 한국 시간 기준으로 판단
+  operating?: { isOpen: boolean; lastEntry?: string }; // 서버가 한국 시간 기준으로 판단. 모르면 없다
   hours?: { value: string; note?: string };
   closedDays?: { value: string; note?: string };
   fees?: { rows: { label: string; value: string }[]; note?: string };
@@ -340,8 +348,8 @@ export type TripStop = {
   id: string; // 일정 항목 ID (DELETE .../items/{itemId})
   placeId: string;
   name: string;
-  category: string; // 대분류 · 중분류
-  photo: PlacePhoto;
+  category: string; // 대분류 · 소분류
+  photo?: PlacePhoto; // 사진이 없는 장소도 있다
   arriveAt: string; // HH:mm
   departAt: string;
   lat: number;
@@ -362,112 +370,6 @@ export type TripDay = {
   stops: TripStop[];
 };
 
-const photoA: PlacePhoto = {
-  source: require('../assets/images/dummy-course.jpg'),
-  copyright: 'Type1',
-};
-const photoB: PlacePhoto = {
-  source: require('../assets/images/dummy-place.jpg'),
-  copyright: 'Type3',
-};
-
-// TODO: GET .../days/{dayNumber}로 교체. 경복궁·국립중앙박물관 외 장소는 상세 더미가 없다
-export const mockTripDays: TripDay[] = [
-  {
-    dayNumber: 1,
-    date: '2026-11-13',
-    lodgingName: '명동 센트럴 호텔',
-    lodgingLat: 37.564,
-    lodgingLng: 126.985,
-    departAt: '09:40',
-    returnAt: '19:00',
-    travelMinutes: 125,
-    transitFarePerPerson: '₩6,100',
-    stops: [
-      {
-        id: 'i1',
-        placeId: 'p-gyeongbokgung',
-        name: '경복궁',
-        category: '역사관광 · 고궁',
-        photo: photoA,
-        arriveAt: '10:00',
-        departAt: '11:30',
-        lat: 37.5796,
-        lng: 126.977,
-      },
-      {
-        id: 'i2',
-        placeId: 'p-ikseondong',
-        name: '익선동 한옥거리',
-        category: '문화관광 · 골목길, 문화거리',
-        photo: photoB,
-        arriveAt: '12:00',
-        departAt: '13:30',
-        lat: 37.5743,
-        lng: 126.9897,
-      },
-      {
-        id: 'i3',
-        placeId: 'p-gwangjang',
-        name: '광장시장',
-        category: '쇼핑 · 상설시장',
-        photo: photoA,
-        arriveAt: '13:45',
-        departAt: '15:15',
-        lat: 37.5701,
-        lng: 126.9996,
-      },
-      {
-        id: 'i4',
-        placeId: 'p-namsan',
-        name: '남산 서울타워',
-        category: '역사관광 · 고궁',
-        photo: photoB,
-        arriveAt: '16:00',
-        departAt: '18:30',
-        lat: 37.5512,
-        lng: 126.9882,
-      },
-    ],
-  },
-  {
-    dayNumber: 2,
-    date: '2026-11-14',
-    lodgingName: '명동 센트럴 호텔',
-    lodgingLat: 37.564,
-    lodgingLng: 126.985,
-    departAt: '09:30',
-    returnAt: '17:00',
-    travelMinutes: 70,
-    transitFarePerPerson: '₩3,000',
-    stops: [
-      {
-        id: 'i5',
-        placeId: 'p-museum',
-        name: '국립중앙박물관',
-        category: '문화관광 · 박물관',
-        photo: photoB,
-        arriveAt: '10:00',
-        departAt: '13:00',
-        lat: 37.5239,
-        lng: 126.9803,
-      },
-    ],
-  },
-  {
-    dayNumber: 3,
-    date: '2026-11-15',
-    lodgingName: '명동 센트럴 호텔',
-    lodgingLat: 37.564,
-    lodgingLng: 126.985,
-    departAt: '10:00',
-    returnAt: '10:00',
-    travelMinutes: 0,
-    transitFarePerPerson: '₩0',
-    stops: [],
-  },
-];
-
 // 추천 장소 후보 (02c 장소 선택). GET /api/trips/{tripId}/candidates (spec API 20, F2-2·F2-8)
 // 순위는 서버가 매긴다. 카테고리 탭마다 따로 순위를 매기므로(F2-6) 탭을 바꾸면 서버에 다시 요청한다
 export type Candidate = {
@@ -476,254 +378,6 @@ export type Candidate = {
   themeCode: string; // 카테고리 칩 필터용 대분류 코드
   category: string; // 대분류 · 중분류
   distanceKm: number; // 숙소에서 직선거리
-  reasons: string[]; // 추천 이유 태그 최대 2개 (§5A.4). 근거 통계가 있을 때만 서버가 준다 (F2-9)
-  photo: PlacePhoto;
-};
-
-const candidate = (
-  placeId: string,
-  name: string,
-  themeCode: string,
-  category: string,
-  distanceKm: number,
-  reasons: string[],
-  photo: PlacePhoto,
-): Candidate => ({
-  placeId,
-  name,
-  themeCode,
-  category,
-  distanceKm,
-  reasons,
-  photo,
-});
-
-const mockCandidates: Candidate[] = [
-  candidate(
-    'p-gwangjang',
-    '광장 시장',
-    'SH',
-    '쇼핑 · 상설시장',
-    1.3,
-    ['쇼핑 테마', '일본인 인기 지역'],
-    photoA,
-  ),
-  candidate(
-    'p-namsan',
-    '남산 타워',
-    'NA',
-    '자연관광 · 전망대',
-    0.3,
-    ['서울 전망 명소', '일본인 인기 지역'],
-    photoB,
-  ),
-  candidate(
-    'p-museum',
-    '국립중앙박물관',
-    'VE',
-    '문화관광 · 박물관',
-    0.6,
-    ['역사·문화 테마', '실내 관광 추천'],
-    photoB,
-  ),
-  candidate(
-    'p-ikseondong',
-    '익선동 한옥거리',
-    'VE',
-    '문화관광 · 골목길, 문화거리',
-    2.2,
-    ['문화관광 테마', '일본인 인기 지역'],
-    photoA,
-  ),
-  candidate(
-    'p-gyeongbokgung',
-    '경복궁',
-    'VE',
-    '역사관광 · 고궁',
-    2.1,
-    ['외국인 입장객 상위', '일본인 인기 지역'],
-    photoA,
-  ),
-  candidate(
-    'p-myeongdong',
-    '명동 거리',
-    'SH',
-    '쇼핑 · 쇼핑거리',
-    0.2,
-    ['쇼핑 테마'],
-    photoB,
-  ),
-  candidate(
-    'p-tosokchon',
-    '토속촌 삼계탕',
-    'FD',
-    '음식 · 한식',
-    2.4,
-    ['음식 테마', '일본인 인기 지역'],
-    photoA,
-  ),
-  candidate(
-    'p-seoulforest',
-    '서울숲',
-    'NA',
-    '자연관광 · 도시공원',
-    6.8,
-    ['자연관광 테마'],
-    photoB,
-  ),
-  candidate(
-    'p-gwangjang-food',
-    '광장시장 먹자골목',
-    'FD',
-    '음식 · 시장음식',
-    1.4,
-    ['음식 테마'],
-    photoA,
-  ),
-  candidate(
-    'p-insadong',
-    '인사동 쌈지길',
-    'SH',
-    '쇼핑 · 전통상점',
-    1.8,
-    ['쇼핑 테마', '외국인 입장객 상위'],
-    photoB,
-  ),
-  candidate(
-    'p-cheonggyecheon',
-    '청계천',
-    'NA',
-    '자연관광 · 하천',
-    0.9,
-    ['자연관광 테마'],
-    photoA,
-  ),
-  candidate(
-    'p-dongdaemun',
-    '동대문디자인플라자',
-    'VE',
-    '문화관광 · 전시시설',
-    2.6,
-    ['문화관광 테마'],
-    photoB,
-  ),
-];
-
-// TODO: GET .../candidates?category=&query=&page= 로 교체. 서버가 검색·카테고리·페이지를 처리한다
-export const searchMockCandidates = (query: string, themeCode?: string) =>
-  mockCandidates.filter(
-    c =>
-      (!themeCode || c.themeCode === themeCode) &&
-      c.name.includes(query.trim()),
-  );
-
-// 조건 입력 선택지 (02 조건 입력·02a 숙소 위치 검색). GET /api/meta/options (spec API 8)
-// 국적은 권역 코드로만 저장한다 (spec F1-1, §11). 권역 매핑은 서버가 한다
-export type Country = {
-  code: string; // ISO 3166-1 alpha-2
-  name: string;
-  nameEn: string;
-  flag: string; // TODO: Figma는 국기 SVG. API 응답에 국기 이미지가 있는지 확인 후 교체
-};
-
-// 여행 테마 8종. 코드는 신분류체계 대분류 (spec F1-7, §5A.2)
-export type Theme = { code: string; name: string };
-
-// 숙소 미정 시 고르는 서울 지역 (spec F1-3 ②)
-export type Area = { code: string; name: string };
-
-export type MetaOptions = {
-  countries: Country[];
-  themes: Theme[];
-  areas: Area[];
-};
-
-export const mockMetaOptions: MetaOptions = {
-  countries: [
-    { code: 'JP', name: '일본', nameEn: 'Japan', flag: '🇯🇵' },
-    { code: 'CN', name: '중국', nameEn: 'China', flag: '🇨🇳' },
-    { code: 'TW', name: '대만', nameEn: 'Taiwan', flag: '🇹🇼' },
-    { code: 'US', name: '미국', nameEn: 'United States', flag: '🇺🇸' },
-    { code: 'TH', name: '태국', nameEn: 'Thailand', flag: '🇹🇭' },
-    { code: 'VN', name: '베트남', nameEn: 'Vietnam', flag: '🇻🇳' },
-  ],
-  themes: [
-    { code: 'SH', name: '쇼핑' },
-    { code: 'EX', name: '체험 관광' },
-    { code: 'FD', name: '음식' },
-    { code: 'EV', name: '축제/공연/행사' },
-    { code: 'HS', name: '역사 관광' },
-    { code: 'NA', name: '자연관광' },
-    { code: 'LS', name: '레저 스포츠' },
-    { code: 'VE', name: '문화 관광' },
-  ],
-  areas: [
-    { code: 'myeongdong-jongno', name: '명동·종로' },
-    { code: 'hongdae-mapo', name: '홍대·마포' },
-    { code: 'gangnam', name: '강남' },
-    { code: 'itaewon-yongsan', name: '이태원·용산' },
-    { code: 'seongsu', name: '성수' },
-    { code: 'jamsil', name: '잠실' },
-    { code: 'dongdaemun', name: '동대문' },
-    { code: 'yeouido', name: '여의도' },
-    { code: 'seoulstation-namdaemun', name: '서울역·남대문' },
-    { code: 'sinchon', name: '신촌' },
-  ],
-};
-
-// 숙소 검색 결과. GET /api/lodgings (spec API 9, F1-3b)
-export type LodgingType = 'hotel' | 'guesthouse' | 'hanok';
-
-export type Lodging = {
-  id: string;
-  name: string;
-  nameEn: string;
-  address: string;
-  type: LodgingType;
-  typeName: string; // 유형 배지 문구
-  lat: number;
-  lng: number;
-};
-
-const mockLodgings: Lodging[] = [
-  {
-    id: 'l1',
-    name: '명동 센트럴 호텔',
-    nameEn: 'Myeongdong Central Hotel',
-    address: '서울 중구 명동길 00',
-    type: 'hotel',
-    typeName: '호텔',
-    lat: 37.564,
-    lng: 126.985,
-  },
-  {
-    id: 'l2',
-    name: '명동 스카이 게스트하우스',
-    nameEn: 'Myeongdong Sky Guesthouse',
-    address: '서울 중구 퇴계로 00',
-    type: 'guesthouse',
-    typeName: '게스트하우스',
-    lat: 37.561,
-    lng: 126.986,
-  },
-  {
-    id: 'l3',
-    name: '명동 한옥 스테이',
-    nameEn: 'Myeongdong Hanok Stay',
-    address: '서울 중구 남대문로 00',
-    type: 'hanok',
-    typeName: '한옥',
-    lat: 37.563,
-    lng: 126.981,
-  },
-];
-
-// TODO: GET /api/lodgings?query= 로 교체. 서버는 이름·주소를 국문·영문으로 검색한다
-export const searchMockLodgings = (query: string) => {
-  const q = query.trim().toLowerCase();
-  return mockLodgings.filter(lodging =>
-    [lodging.name, lodging.nameEn, lodging.address].some(text =>
-      text.toLowerCase().includes(q),
-    ),
-  );
+  reasons: string[]; // 추천 이유 코드 (CATEGORY_MATCH·NEAR_STAY). 화면 문구는 장소 선택이 정한다
+  photo?: PlacePhoto;
 };

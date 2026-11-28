@@ -20,16 +20,18 @@ export default function VisitInfoSection({ place }: { place: PlaceDetail }) {
     <View style={styles.section}>
       <View style={styles.header}>
         <Text style={styles.heading}>{t('placeDetail.visitInfo')}</Text>
-        <StatusBadge
-          status={operating.isOpen ? 'open' : 'closed'}
-          label={
-            operating.isOpen
-              ? operating.lastEntry
-                ? t('placeDetail.openUntil', { time: operating.lastEntry })
-                : t('placeDetail.open')
-              : t('placeDetail.closed')
-          }
-        />
+        {operating && (
+          <StatusBadge
+            status={operating.isOpen ? 'open' : 'closed'}
+            label={
+              operating.isOpen
+                ? operating.lastEntry
+                  ? t('placeDetail.openUntil', { time: operating.lastEntry })
+                  : t('placeDetail.open')
+                : t('placeDetail.closed')
+            }
+          />
+        )}
       </View>
 
       <View style={styles.grid}>

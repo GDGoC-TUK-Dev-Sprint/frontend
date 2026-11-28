@@ -111,12 +111,14 @@ export function StopCard({
   return (
     <Pressable style={styles.stop} onPress={onPress} accessibilityRole="button">
       <View style={styles.image}>
-        {/* R-K11: Type3은 자르지 않는다 */}
-        <Image
-          source={stop.photo.source}
-          resizeMode={stop.photo.copyright === 'Type3' ? 'contain' : 'cover'}
-          style={StyleSheet.absoluteFill}
-        />
+        {/* R-K11: Type3은 자르지 않는다. 사진이 없는 장소는 빈 칸으로 둔다 */}
+        {stop.photo && (
+          <Image
+            source={stop.photo.source}
+            resizeMode={stop.photo.copyright === 'Type3' ? 'contain' : 'cover'}
+            style={StyleSheet.absoluteFill}
+          />
+        )}
         <View style={styles.order}>
           <Text style={[typography.captionBase, styles.orderText]}>
             {order}

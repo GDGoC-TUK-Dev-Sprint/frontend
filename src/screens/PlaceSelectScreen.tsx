@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -14,60 +14,170 @@ import ImageCredit from '../components/ImageCredit';
 import ArrowForwardIcon from '../assets/icons/arrow-forward.svg';
 import EffectIcon from '../assets/icons/effect.svg';
 import WarningIcon from '../assets/icons/warning.svg';
-import { mockMetaOptions, searchMockCandidates } from '../mocks';
+import { ApiError } from '../api/client';
+import {
+  createRoute,
+  getCandidates,
+  toCandidate,
+  type CandidatePage,
+} from '../api/trips';
+import type { Candidate } from '../mocks';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import { useTrip } from '../trips/TripContext';
 import { colors, shadow, spacing, typography } from '../theme/tokens';
-import { nightsBetween, parseDate } from '../utils/date';
 import ConditionCard from './placeSelect/ConditionCard';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PlaceSelect'>;
 
-const PAGE_SIZE = 5; // spec F2-11
-const MAX_PER_DAY = 6; // spec F2-10, F3-1
+const PAGE_SIZE = 5; // spec F2-11, 서버 기본값과 같다
+const SEARCH_DELAY_MS = 300;
 
-// Figma 「02c 장소 선택」 (spec F2). 후보는 GET /api/trips/{tripId}/candidates 더미
+// Figma 「02c 장소 선택」 (spec F2). 후보는 GET /api/trips/{tripId}/candidates
 export default function PlaceSelectScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { trip } = useTrip();
+  const { trip, setTrip } = useTrip();
   const [query, setQuery] = useState('');
   const [themeCode, setThemeCode] = useState<string>(); // 없으면 전체
   const [page, setPage] = useState(1);
-  // 담은 장소. 저장 API 없이 동선 만들기 요청에 담아 보낸다 (F2-12)
-  // TODO: 장소 상세의 「일정에 담기」와 같은 목록이다. 동선 만들기 연동 때 공용 상태로 옮긴다
-  const [picked, setPicked] = useState<string[]>([]);
+  const [result, setResult] = useState<CandidatePage>();
+  const [loadFailed, setLoadFailed] = useState(false);
+  // 담은 장소. 저장 API 없이 동선 만들기 요청에 담아 보낸다 (F2-12). 동선에 이미 들어간 장소(inTrip)는 처음에 담아 둔다
+  const [picked, setPicked] = useState<Candidate[]>([]);
+  const [seen, setSeen] = useState<string[]>([]); // 이미 담아 본 inTrip 장소 (빼면 다시 담지 않는다)
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const tripId = trip?.tripId;
+  // 조건을 바꾸면 후보가 달라지고 서버가 동선을 지운다. 담은 장소를 비우고 첫 페이지부터 다시 받는다
+  const conditionKey = trip
+    ? [
+        trip.stayName,
+        trip.startDate,
+        trip.endDate,
+        trip.travelers,
+        trip.themes.map(c => c.code).join(),
+      ].join('|')
+    : '';
+  const [lastConditionKey, setLastConditionKey] = useState(conditionKey);
+  if (conditionKey !== lastConditionKey) {
+    setLastConditionKey(conditionKey);
+    setPicked([]);
+    setSeen([]);
+    setPage(1);
+  }
 
-  if (!trip) {
+  // 검색어는 입력이 멈춘 뒤, 카테고리·페이지는 바로 다시 부른다. 늦게 온 이전 응답은 버린다
+  useEffect(() => {
+    if (!tripId) return;
+    let stale = false;
+    const q = query.trim();
+    const timer = setTimeout(
+      () => {
+        setLoadFailed(false);
+        getCandidates(tripId, {
+          category: q ? undefined : themeCode,
+          query: q || undefined,
+          page: page - 1,
+        })
+          .then(res => {
+            if (stale) return;
+            setResult(res);
+            const inTrip = res.items
+              .filter(item => item.inTrip)
+              .map(toCandidate)
+              .filter(c => !seen.includes(c.placeId));
+            if (inTrip.length) {
+              setSeen(prev => [...prev, ...inTrip.map(c => c.placeId)]);
+              setPicked(prev => [...prev, ...inTrip]);
+            }
+          })
+          .catch(() => !stale && setLoadFailed(true));
+      },
+      q ? SEARCH_DELAY_MS : 0,
+    );
+    return () => {
+      stale = true;
+      clearTimeout(timer);
+    };
+    // seen은 담기 기록이라 다시 부를 이유가 아니다
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tripId, query, themeCode, page, conditionKey]);
+
+  if (!trip || !tripId) {
     return <StateView type="empty" message={t('placeSelect.noTrip')} />;
   }
 
-  // TODO: GET /api/meta/options 연동
-  const themes = mockMetaOptions.themes.filter(theme =>
-    trip.themeCodes.includes(theme.code),
+  const themes = trip.themes;
+  const guide = result?.guide;
+  const range = guide
+    ? { min: guide.recommendedMin, max: guide.recommendedMax }
+    : { min: 0, max: 0 };
+  const pageItems = result?.items.map(toCandidate) ?? [];
+  const totalPages = Math.max(
+    Math.ceil((result?.totalCount ?? 0) / PAGE_SIZE),
+    1,
   );
-  const days =
-    nightsBetween(parseDate(trip.startDate), parseDate(trip.endDate)) + 1;
-  const range = { min: days * 3, max: days * 5 }; // 권장 = 일수 × 3~5곳
-
-  const results = searchMockCandidates(query, themeCode);
-  const totalPages = Math.max(Math.ceil(results.length / PAGE_SIZE), 1);
-  const pageItems = results.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   // 검색어·카테고리가 바뀌면 첫 페이지부터
   const changeFilter = (next: () => void) => {
     next();
     setPage(1);
   };
 
-  const togglePick = (placeId: string) =>
+  const isPicked = (placeId: string) => picked.some(p => p.placeId === placeId);
+  const togglePick = (place: Candidate) =>
     setPicked(prev =>
-      prev.includes(placeId)
-        ? prev.filter(id => id !== placeId)
-        : [...prev, placeId],
+      isPicked(place.placeId)
+        ? prev.filter(p => p.placeId !== place.placeId)
+        : [...prev, place],
     );
 
-  // TODO: POST /api/trips/{tripId}/route(API 21)에 picked를 담아 보내고, 응답 동선으로 동선 화면을 그린다
-  const makeRoute = () => navigation.navigate('Route');
+  // 추천 이유 코드를 화면 문구로: "쇼핑 테마", "숙소 가까움"
+  const reasonLabel = (code: string, place: Candidate) =>
+    code === 'NEAR_STAY'
+      ? t('placeSelect.reasonNearStay')
+      : t('placeSelect.reasonTheme', {
+          name: place.category.split(' · ')[0],
+        });
+
+  // 담은 장소로 동선을 만들고(POST .../route), 일자 목록·제목을 여행에 넣은 뒤 동선 화면으로 간다
+  const makeRoute = async () => {
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const res = await createRoute(
+        tripId,
+        picked.map(p => Number(p.placeId)),
+      );
+      setTrip({
+        ...trip,
+        title: res.trip.title ?? trip.title,
+        days: res.days.map(({ dayNumber, date }) => ({ dayNumber, date })),
+        route: {
+          thumbnail: picked[0]?.photo?.source,
+          thumbnailLabel: picked[0]?.name ?? '',
+          stops: picked.map(p => p.name),
+        },
+      });
+      // TODO: 동선에 넣지 못한 장소(unscheduled) 안내는 시안에 없어 이름만 알린다
+      if (res.unscheduled.length) {
+        setSubmitError(
+          t('placeSelect.unscheduled', {
+            names: res.unscheduled.map(u => u.place.name).join(', '),
+          }),
+        );
+      }
+      setSubmitting(false);
+      navigation.navigate('Route');
+    } catch (e) {
+      const tooMany = e instanceof ApiError && e.code === 'TOO_MANY_PLACES';
+      setSubmitError(
+        tooMany
+          ? t('placeSelect.tooMany', { perDay: guide?.maxPerDay })
+          : t('auth.networkError'),
+      );
+      setSubmitting(false);
+    }
+  };
 
   return (
     <View style={styles.screen}>
@@ -87,11 +197,11 @@ export default function PlaceSelectScreen({ navigation }: Props) {
           </Text>
         </View>
 
-        {/* TODO: 「변경」은 조건 입력을 지금 조건으로 채워 열고 PUT /api/trips/{tripId}(API 19)로 저장한다. 지금은 빈 조건 입력을 연다 */}
+        {/* 「변경」: 지금 조건으로 채운 조건 입력을 열고 같은 여행을 고친다 (PUT /api/trips/{tripId}) */}
         <ConditionCard
           trip={trip}
           themes={themes}
-          onChange={() => navigation.navigate('TripCondition')}
+          onChange={() => navigation.navigate('TripCondition', { tripId })}
         />
 
         <View style={styles.filters}>
@@ -128,9 +238,9 @@ export default function PlaceSelectScreen({ navigation }: Props) {
           <WarningIcon width={20} height={20} color={colors.text.info} />
           <Text style={styles.infoText}>
             {t('placeSelect.recommendInfo', {
-              days,
+              days: guide?.days ?? trip.days?.length ?? 0,
               ...range,
-              perDay: MAX_PER_DAY,
+              perDay: guide?.maxPerDay ?? 0,
             })}
           </Text>
         </View>
@@ -139,28 +249,35 @@ export default function PlaceSelectScreen({ navigation }: Props) {
         <ImageCredit align="right" style={styles.credit} />
 
         <View style={styles.list}>
-          {pageItems.length === 0 && (
+          {loadFailed && (
+            <Text style={styles.empty}>{t('auth.networkError')}</Text>
+          )}
+          {!loadFailed && result && pageItems.length === 0 && (
             <Text style={styles.empty}>{t('placeSelect.empty')}</Text>
           )}
           {pageItems.map((place, index) => {
-            const added = picked.includes(place.placeId);
+            const added = isPicked(place.placeId);
+            // 검색 결과는 순위가 없다(rank null). 그때는 목록 순서를 보여준다
+            const rank =
+              result?.items[index]?.rank ?? (page - 1) * PAGE_SIZE + index + 1;
             return (
               <PlaceCard
                 key={place.placeId}
-                rank={(page - 1) * PAGE_SIZE + index + 1}
+                rank={rank}
                 name={place.name}
                 category={place.category}
                 distance={t('placeSelect.distance', { km: place.distanceKm })}
-                reasons={place.reasons}
-                image={place.photo.source}
-                cropImage={place.photo.copyright === 'Type1'}
+                reasons={place.reasons.map(code => reasonLabel(code, place))}
+                image={place.photo?.source}
+                cropImage={place.photo?.copyright === 'Type1'}
                 added={added}
                 addLabel={t('placeSelect.add')}
                 addedLabel={t('placeSelect.added')}
-                onToggleAdd={() => togglePick(place.placeId)}
+                onToggleAdd={() => togglePick(place)}
                 onPress={() =>
                   navigation.navigate('PlaceDetail', {
                     placeId: place.placeId,
+                    preview: place,
                   })
                 }
               />
@@ -168,7 +285,7 @@ export default function PlaceSelectScreen({ navigation }: Props) {
           })}
         </View>
 
-        {results.length > 0 && (
+        {pageItems.length > 0 && (
           <Pagination page={page} total={totalPages} onChange={setPage} />
         )}
       </ScrollView>
@@ -192,16 +309,18 @@ export default function PlaceSelectScreen({ navigation }: Props) {
             style={[
               styles.progressFill,
               {
-                width: `${Math.min(picked.length / range.min, 1) * 100}%`,
+                width: `${
+                  range.min ? Math.min(picked.length / range.min, 1) * 100 : 0
+                }%`,
               },
             ]}
           />
         </View>
-        {/* TODO: 권장보다 적게 골랐을 때 추천순으로 채우는 옵션 (spec F2-10, Q11) */}
+        {submitError && <Text style={styles.error}>{submitError}</Text>}
         <Button
           label={t('placeSelect.makeRoute', { count: picked.length })}
           onPress={makeRoute}
-          disabled={picked.length === 0}
+          disabled={picked.length === 0 || submitting}
           icon={ArrowForwardIcon}
           iconSize={12}
           shadow={picked.length > 0}
@@ -239,6 +358,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: colors.text.muted,
   },
+  error: { ...typography.bodySubtle, color: colors.text.negative },
   footer: {
     gap: 8,
     padding: spacing.screenPadding,

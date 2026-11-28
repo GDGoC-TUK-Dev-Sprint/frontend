@@ -15,3 +15,34 @@ console.warn = (message, ...rest) => {
   if (String(message).includes('DrawerLayoutAndroid is deprecated')) return;
   warn(message, ...rest);
 };
+
+// 보안 저장소(Keychain·Keystore)는 네이티브 모듈이라 테스트에서는 메모리로 바꾼다
+jest.mock('react-native-keychain', () => {
+  let saved = false;
+  return {
+    ACCESSIBLE: {
+      AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY: 'AfterFirstUnlockThisDeviceOnly',
+    },
+    getGenericPassword: jest.fn(async () => saved),
+    setGenericPassword: jest.fn(async (username, password) => {
+      saved = { username, password };
+      return true;
+    }),
+    resetGenericPassword: jest.fn(async () => {
+      saved = false;
+      return true;
+    }),
+  };
+});
+
+// Google 로그인은 네이티브 모듈이라 테스트에서는 빈 함수로 바꾼다 (라이브러리 목은 exports에 없어 불러올 수 없다)
+jest.mock('@react-native-google-signin/google-signin', () => ({
+  GoogleSignin: {
+    configure: jest.fn(),
+    hasPlayServices: jest.fn(async () => true),
+    signIn: jest.fn(async () => ({ type: 'cancelled', data: null })),
+    signOut: jest.fn(async () => null),
+  },
+  isErrorWithCode: () => false,
+  statusCodes: {},
+}));

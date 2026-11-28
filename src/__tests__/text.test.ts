@@ -1,4 +1,4 @@
-import { stripHtml } from '../utils/text';
+import { flagEmoji, stripHtml } from '../utils/text';
 
 test('br은 줄바꿈, 나머지 태그는 지운다', () => {
   expect(stripHtml('10:00 ~ 18:00<br>수·토 ~21:00')).toBe(
@@ -13,4 +13,9 @@ test('엔티티를 되돌리고 앞뒤 공백을 지운다', () => {
   expect(stripHtml(' 대인&nbsp;3,000원 &amp; 소인 ')).toBe(
     '대인 3,000원 & 소인',
   );
+});
+
+test('국가 코드를 국기 이모지로 바꾼다', () => {
+  expect(flagEmoji('JP')).toBe('🇯🇵');
+  expect(flagEmoji('us')).toBe('🇺🇸');
 });

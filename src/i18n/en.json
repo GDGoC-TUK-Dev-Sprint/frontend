@@ -1,6 +1,6 @@
 {
   "language": { "current": "English" },
-  "common": { "back": "Back", "notifications": "Notifications", "clear": "Clear", "close": "Close", "imageSource": "Images provided by Korea Tourism Organization." },
+  "common": { "cancel": "Cancel", "back": "Back", "notifications": "Notifications", "clear": "Clear", "close": "Close", "retry": "Try again", "imageSource": "Images provided by Korea Tourism Organization." },
   "tabs": {
     "home": "Home",
     "map": "Map",
@@ -18,8 +18,11 @@
     "loginNotice": "Log in to save your trip plans and view them anytime",
     "or": "or",
     "google": "Continue with Google",
-    "apple": "Continue with Apple",
-    "tempLogout": "Temp log out"
+    "loginFailed": "Incorrect ID or password",
+    "googleNotReady": "Google sign-in is coming soon",
+    "googleFailed": "Could not sign in with Google. Please try again",
+    "loginIdTaken": "This ID is already taken",
+    "networkError": "Connection problem. Please try again in a moment."
   },
   "signup": {
     "name": "Name",
@@ -29,7 +32,7 @@
     "passwordConfirm": "Confirm password",
     "passwordConfirmPlaceholder": "Re-enter password",
     "passwordMismatch": "Passwords don't match",
-    "socialNotice": "Google and Apple accounts can start right from the login screen",
+    "socialNotice": "Google accounts can start right from the login screen",
     "submit": "Sign up"
   },
   "onboarding": {
@@ -49,6 +52,10 @@
     }
   },
   "home": {
+    "delete": "Delete trip",
+    "deleteTitle": "Delete this trip?",
+    "deleteMessage": "You can't undo this.",
+    "deleteConfirm": "Delete",
     "heading": "Start a Korea trip\nmade just for you",
     "description": "Get place recommendations, the best route, and estimated costs all in one place.",
     "detail": "More",
@@ -103,6 +110,7 @@
     "notFound": "Notice not found"
   },
   "placeDetail": {
+    "free": "Free",
     "photoCount": "{{index}} / {{total}}",
     "rating": "★ {{average}} · {{count}} reviews",
     "copy": "Copy",
@@ -146,7 +154,8 @@
     "durationM": "{{minutes}}m",
     "addPlace": "Add a place",
     "viewRouteOnMap": "See the full route on the map",
-    "empty": "No confirmed trip yet"
+    "empty": "No confirmed trip yet",
+    "noRoute": "No route yet. Tap “View schedule” on your Home ticket to pick places"
   },
   "placeSelect": {
     "badge": "Data-driven picks",
@@ -167,7 +176,11 @@
     "selected": "{{count}} selected",
     "recommendRange": "· Suggested {{min}}–{{max}}",
     "makeRoute": "Build route with {{count}}",
-    "noTrip": "Trip not found"
+    "noTrip": "Trip not found",
+    "reasonTheme": "{{name}}",
+    "reasonNearStay": "Near your stay",
+    "tooMany": "You can add up to {{perDay}} places a day. Remove some places.",
+    "unscheduled": "Couldn't fit into the route: {{names}}"
   },
   "pagination": {
     "first": "First page",
@@ -179,6 +192,7 @@
     "summary": "Day {{day}} · {{count}} places · {{from}} - {{to}}",
     "routeNote": "{{duration}} total travel incl. hotel round trip · Connected in visit order",
     "backToList": "View as list",
+    "backToRoute": "Back to route",
     "lodging": "Hotel · {{name}}"
   },
   "route": {
@@ -237,7 +251,22 @@
     "endDate": "Check-out",
     "prevMonth": "Previous month",
     "nextMonth": "Next month",
-    "apply": "Apply"
+    "apply": "Apply",
+    "activeTripExists": "Delete your current trip to create a new one."
+  },
+  "myPage": {
+    "idLogin": "Signed in with ID",
+    "googleLogin": "Signed in with Google",
+    "favorites": "Saved places",
+    "noFavorites": "No saved places yet",
+    "pastTrips": "Past trips",
+    "noPastTrips": "No past trips yet",
+    "settings": "Settings",
+    "languageCurrency": "Language & currency",
+    "account": "Account",
+    "logout": "Log out",
+    "withdraw": "Delete account",
+    "withdrawPending": "Account deletion is coming soon"
   },
   "lodging": {
     "title": "Your stay",
@@ -247,7 +276,101 @@
     "privateNotice": "Private stays like Airbnb may not appear.\nPick the location on the map below instead.",
     "mapTitle": "Pick a location on the map",
     "mapSubtitle": "Move the pin to set your stay",
+    "mapSearchPlaceholder": "Search an address or place",
+    "mapChecking": "Checking the address",
+    "mapNoAddress": "No address here. Move the pin",
+    "mapOutsideSeoul": "Only locations in Seoul are supported for now",
+    "mapConfirm": "Use this location",
     "undecidedTitle": "No stay booked yet?",
     "undecidedSubtitle": "Pick an area and we will use its center as your base."
+  },
+  "cost": {
+    "totalTitle": "Estimated total",
+    "perPerson": "Per person",
+    "totalBasis": "All travelers",
+    "excludes": "Excludes lodging and flights.",
+    "partyBasis": "For {{count}} travelers",
+    "perPersonBasis": "Per person",
+    "perPersonRange": "Per person {{amount}}",
+    "budgetTitle": "Compared with your budget",
+    "budgetWithin": "Within budget",
+    "budgetMayExceed": "May exceed budget",
+    "budgetOver": "{{amount}} over budget",
+    "budgetSet": "Your budget",
+    "budgetNeeded": "Estimated cost",
+    "itemsTitle": "Cost by category",
+    "itemsCount": "{{count}} categories",
+    "daysTitle": "Daily spending",
+    "daysCount": "{{count}} days",
+    "peak": "Highest day",
+    "limitationsTitle": "Data limits",
+    "sourcesTitle": "Sources",
+    "items": { "FOOD": "Food", "SIGHTSEEING": "Sights & admission", "TRANSPORT": "Transport", "SHOPPING": "Shopping", "OTHER": "Other" },
+    "confirm": "Confirm trip with this budget"
+  },
+  "settings": {
+    "title": "Language & currency",
+    "description": "Choose your language and display currency.",
+    "language": "Language",
+    "languageCount": "{{count}} languages",
+    "default": "Default",
+    "currency": "Display currency",
+    "currencyNote": "Amounts are converted to the currency you choose.",
+    "apply": "Apply"
+  },
+  "expense": {
+    "totalBasis": "Total ({{count}} people)",
+    "completed": "Done",
+    "notCompleted": "You can enter expenses only for confirmed trips that have ended",
+    "notSaved": "No expenses entered yet",
+    "heading": "How much did you spend\non this trip?",
+    "description": "Enter your actual spending and we'll compare it\nwith the estimate in a trip report.",
+    "estimated": "Estimated {{amount}}",
+    "otherPlaceholder": "Other item name",
+    "removeOther": "Remove other item",
+    "addOther": "Add other item",
+    "tip": "It doesn't have to be exact. Rough amounts are enough for a useful report.",
+    "actualSum": "Actual spending (total entered)",
+    "estimate": "Estimate",
+    "budgetUsage": "{{pct}}% of budget used",
+    "underBudget": "Saved {{amount}} within budget!",
+    "overBudget": "{{amount}} over budget",
+    "createReport": "Create trip report",
+    "tripDone": "Trip completed",
+    "tripMeta": "{{period}} · {{count}} travelers",
+    "reportQuestion": "How was your Seoul trip?",
+    "reportIntro": "We compare your estimate with what you actually spent.",
+    "totalSpent": "Total spent",
+    "estimateAmount": "Est. {{amount}}",
+    "actualAmount": "Actual {{amount}}",
+    "savedVsEstimate": "You saved {{amount}} vs. the estimate",
+    "overVsEstimate": "You spent {{amount}} more than estimated",
+    "accuracy": "Accuracy {{pct}}",
+    "errorRate": "Error {{pct}}",
+    "compareTitle": "How close was the estimate?",
+    "vsTotal": "vs. total",
+    "actual": "Actual",
+    "planBasis": "Planned",
+    "finalAmount": "Final total",
+    "spentLess": "You spent {{amount}} less than estimated",
+    "spentMore": "You spent {{amount}} more than estimated",
+    "status": {
+      "BELOW": "Below the estimated range",
+      "WITHIN": "Within the estimated range",
+      "ABOVE": "Above the estimated range"
+    },
+    "execution": "Budget used (actual / estimate)",
+    "limit": "Estimate max {{amount}}",
+    "byItemTitle": "Compare by category",
+    "byItemCount": "{{count}} spending categories",
+    "fields": "{{count}} categories",
+    "overBadge": "+{{amount}} over",
+    "savedBadge": "-{{amount}} saved",
+    "noEstimate": "No estimate",
+    "shareTitle": "Spending breakdown",
+    "shareTotal": "100% total",
+    "backToTrips": "Back to my trips",
+    "writeExpense": "Enter expenses",
+    "viewReport": "View report"
   }
 }

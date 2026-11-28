@@ -1,10 +1,12 @@
 {
   "language": { "current": "한국어" },
   "common": {
+    "cancel": "취소",
     "back": "뒤로 가기",
     "notifications": "알림",
     "clear": "지우기",
     "close": "닫기",
+    "retry": "다시 시도",
     "imageSource": "한국관광공사 이미지를 사용하였습니다."
   },
   "tabs": {
@@ -24,8 +26,11 @@
     "loginNotice": "로그인하면 여행 계획을 저장하고 언제든 다시 볼 수 있어요",
     "or": "또는",
     "google": "Google로 계속하기",
-    "apple": "Apple로 계속하기",
-    "tempLogout": "임시 로그아웃"
+    "loginFailed": "아이디 또는 비밀번호가 맞지 않아요",
+    "googleNotReady": "Google 로그인은 아직 준비 중이에요",
+    "googleFailed": "Google 계정으로 로그인하지 못했어요. 다시 시도해 주세요",
+    "loginIdTaken": "이미 사용 중인 아이디예요",
+    "networkError": "연결이 원활하지 않아요. 잠시 후 다시 시도해 주세요."
   },
   "signup": {
     "name": "이름",
@@ -35,7 +40,7 @@
     "passwordConfirm": "비밀번호 확인",
     "passwordConfirmPlaceholder": "비밀번호 다시 입력",
     "passwordMismatch": "비밀번호가 일치하지 않아요",
-    "socialNotice": "Google·Apple 계정은 로그인 화면에서 바로 시작할 수 있어요",
+    "socialNotice": "Google 계정은 로그인 화면에서 바로 시작할 수 있어요",
     "submit": "가입하기"
   },
   "onboarding": {
@@ -55,6 +60,10 @@
     }
   },
   "home": {
+    "delete": "여행 삭제",
+    "deleteTitle": "이 여행을 삭제할까요?",
+    "deleteMessage": "삭제한 여행은 되돌릴 수 없어요.",
+    "deleteConfirm": "삭제",
     "heading": "나에게 딱 맞는 한국 여행을\n시작해보세요",
     "description": "여행지를 추천받고, 최적의 동선을 만들고, 예상 경비까지 한 번에 확인해보세요.",
     "detail": "자세히",
@@ -109,6 +118,7 @@
     "notFound": "공지사항을 찾을 수 없어요"
   },
   "placeDetail": {
+    "free": "무료",
     "photoCount": "{{index}} / {{total}}",
     "rating": "★ {{average}} · 리뷰 {{count}}개",
     "copy": "복사",
@@ -152,7 +162,8 @@
     "durationM": "{{minutes}}분",
     "addPlace": "장소 추가하기",
     "viewRouteOnMap": "지도에서 전체 동선 한눈에 보기",
-    "empty": "아직 확정한 여행이 없어요"
+    "empty": "아직 확정한 여행이 없어요",
+    "noRoute": "아직 동선을 만들지 않았어요. 홈 티켓의 「일정 자세히 보기」에서 장소를 골라 주세요"
   },
   "placeSelect": {
     "badge": "데이터 기반 맞춤 추천",
@@ -173,7 +184,11 @@
     "selected": "{{count}}곳 선택",
     "recommendRange": "· 권장 {{min}}~{{max}}곳",
     "makeRoute": "{{count}}곳으로 동선 만들기",
-    "noTrip": "여행 정보를 찾을 수 없어요"
+    "noTrip": "여행 정보를 찾을 수 없어요",
+    "reasonTheme": "{{name}} 테마",
+    "reasonNearStay": "숙소 가까움",
+    "tooMany": "하루 최대 {{perDay}}곳까지 넣을 수 있어요. 담은 장소를 줄여 주세요.",
+    "unscheduled": "동선에 넣지 못한 장소: {{names}}"
   },
   "pagination": {
     "first": "첫 페이지",
@@ -185,6 +200,7 @@
     "summary": "{{day}}일차 · 장소 {{count}}곳 · {{from}} - {{to}}",
     "routeNote": "숙소 왕복 포함 총 이동 {{duration}} · 방문 순서대로 이었어요",
     "backToList": "목록으로 보기",
+    "backToRoute": "동선으로 돌아가기",
     "lodging": "숙소 · {{name}}"
   },
   "route": {
@@ -243,7 +259,22 @@
     "endDate": "체크아웃 날짜",
     "prevMonth": "이전 달",
     "nextMonth": "다음 달",
-    "apply": "적용하기"
+    "apply": "적용하기",
+    "activeTripExists": "지금 여행을 삭제해야 새 여행을 만들 수 있습니다"
+  },
+  "myPage": {
+    "idLogin": "아이디로 로그인",
+    "googleLogin": "Google 계정으로 로그인",
+    "favorites": "찜한 장소",
+    "noFavorites": "아직 찜한 장소가 없어요",
+    "pastTrips": "이전 여행 기록",
+    "noPastTrips": "아직 다녀온 여행이 없어요",
+    "settings": "설정",
+    "languageCurrency": "언어 및 통화",
+    "account": "계정 관리",
+    "logout": "로그아웃",
+    "withdraw": "회원 탈퇴",
+    "withdrawPending": "회원 탈퇴는 아직 준비 중이에요"
   },
   "lodging": {
     "title": "숙소 위치",
@@ -253,7 +284,101 @@
     "privateNotice": "에어비앤비 같은 개인 숙소는 검색되지 않을 수 있어요.\n아래에서 지도로 직접 선택해주세요.",
     "mapTitle": "지도에서 위치 직접 선택",
     "mapSubtitle": "핀을 움직여 숙소 위치를 정해요",
+    "mapSearchPlaceholder": "주소나 장소 이름으로 검색",
+    "mapChecking": "주소를 확인하는 중이에요",
+    "mapNoAddress": "주소가 없는 위치예요. 핀을 옮겨 주세요",
+    "mapOutsideSeoul": "지금은 서울 안에서만 고를 수 있어요",
+    "mapConfirm": "이 위치로 정하기",
     "undecidedTitle": "아직 숙소를 정하지 못했나요?",
     "undecidedSubtitle": "지역을 고르면 그 지역 중심을 숙소로 보고 추천해요."
+  },
+  "cost": {
+    "totalTitle": "총 예상 경비 예측",
+    "perPerson": "1인 기준",
+    "totalBasis": "전체 기준",
+    "excludes": "숙박과 항공 제외 경비입니다.",
+    "partyBasis": "동행 {{count}}인 기준 계산",
+    "perPersonBasis": "1인 기준 계산",
+    "perPersonRange": "1인 {{amount}}",
+    "budgetTitle": "희망 예산과 비교",
+    "budgetWithin": "예산 안",
+    "budgetMayExceed": "예산을 넘을 수 있어요",
+    "budgetOver": "{{amount}} 초과 예상",
+    "budgetSet": "설정 희망 예산",
+    "budgetNeeded": "예상 필요 경비",
+    "itemsTitle": "항목별 예상 경비",
+    "itemsCount": "총 {{count}}개 항목",
+    "daysTitle": "일자별 예상 지출",
+    "daysCount": "일정 {{count}}일간",
+    "peak": "최대 지출일",
+    "limitationsTitle": "데이터 한계",
+    "sourcesTitle": "근거 출처",
+    "items": { "FOOD": "식비", "SIGHTSEEING": "관광·입장료", "TRANSPORT": "교통", "SHOPPING": "쇼핑", "OTHER": "기타" },
+    "confirm": "이 예산으로 여행 확정하기"
+  },
+  "settings": {
+    "title": "언어 및 통화",
+    "description": "원하는 언어와 표시 통화를 선택해주세요.",
+    "language": "언어",
+    "languageCount": "{{count}}개 언어 지원",
+    "default": "기본",
+    "currency": "표시 통화",
+    "currencyNote": "선택한 통화로 환산 금액을 함께 표시해드려요.",
+    "apply": "적용하기"
+  },
+  "expense": {
+    "totalBasis": "전체 기준 ({{count}}인)",
+    "completed": "완료",
+    "notCompleted": "끝난 확정 여행만 지출을 입력할 수 있어요",
+    "notSaved": "아직 입력한 지출이 없어요",
+    "heading": "이번 여행에서는\n얼마나 사용하셨나요?",
+    "description": "실제 지출을 입력하면 예상 경비와 비교한\n맞춤 여행 리포트를 만들어드려요.",
+    "estimated": "사전 예상 {{amount}}",
+    "otherPlaceholder": "기타 항목 이름",
+    "removeOther": "기타 항목 삭제",
+    "addOther": "기타 항목 추가",
+    "tip": "모든 항목을 완벽히 맞추지 않아도 괜찮아요. 대략적인 지출만으로도 충분한 분석 리포트가 완성됩니다.",
+    "actualSum": "실제 지출 (입력 합계)",
+    "estimate": "예상 경비",
+    "budgetUsage": "예산 대비 {{pct}}% 소진",
+    "underBudget": "예산 내 -{{amount}} 세이브!",
+    "overBudget": "예산 +{{amount}} 초과",
+    "createReport": "여행 리포트 생성하기",
+    "tripDone": "여행 완료",
+    "tripMeta": "{{period}} · 여행자 {{count}}명",
+    "reportQuestion": "서울 여행은 어떠셨나요?",
+    "reportIntro": "여행 전 예상했던 경비와 실제 지출을 꼼꼼히 비교해 리포트로 정리해 드려요.",
+    "totalSpent": "총 지출 금액",
+    "estimateAmount": "예상 {{amount}}",
+    "actualAmount": "실제 {{amount}}",
+    "savedVsEstimate": "예상보다 {{amount}} 세이브했어요",
+    "overVsEstimate": "예상보다 {{amount}} 더 썼어요",
+    "accuracy": "예측 일치도 {{pct}}",
+    "errorRate": "오차율 {{pct}}",
+    "compareTitle": "예상 경비와 얼마나 달랐을까요?",
+    "vsTotal": "총액 대비",
+    "actual": "실제 지출",
+    "planBasis": "사전 계획 기준",
+    "finalAmount": "최종 집계 금액",
+    "spentLess": "예상보다 {{amount}} 적게 사용했어요",
+    "spentMore": "예상보다 {{amount}} 더 사용했어요",
+    "status": {
+      "BELOW": "예상 범위보다 알뜰하게 지출",
+      "WITHIN": "예상 범위 안에서 지출",
+      "ABOVE": "예상 범위를 넘겨 지출"
+    },
+    "execution": "예산 집행률 (실제 / 예상)",
+    "limit": "예상 한도 {{amount}}",
+    "byItemTitle": "항목별로 비교해볼까요?",
+    "byItemCount": "총 {{count}}개 주요 소비 카테고리",
+    "fields": "{{count}}개 분야",
+    "overBadge": "+{{amount}} 초과",
+    "savedBadge": "-{{amount}} 절약",
+    "noEstimate": "예상 없음",
+    "shareTitle": "실제 지출 비중",
+    "shareTotal": "총 100%",
+    "backToTrips": "내 여행으로 돌아가기",
+    "writeExpense": "지출 입력",
+    "viewReport": "리포트 보기"
   }
 }
