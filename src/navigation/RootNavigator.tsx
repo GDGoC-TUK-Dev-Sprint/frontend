@@ -17,6 +17,8 @@ import OnboardingScreen from '../screens/OnboardingScreen';
 import PlaceDetailScreen from '../screens/PlaceDetailScreen';
 import PlaceSelectScreen from '../screens/PlaceSelectScreen';
 import CostEstimateScreen from '../screens/CostEstimateScreen';
+import ExpenseInputScreen from '../screens/ExpenseInputScreen';
+import ExpenseReportScreen from '../screens/ExpenseReportScreen';
 import RouteScreen from '../screens/RouteScreen';
 import SignupScreen from '../screens/SignupScreen';
 import TripConditionScreen from '../screens/TripConditionScreen';
@@ -29,10 +31,11 @@ export type RootStackParamList = {
   Login: undefined;
   Signup: undefined;
   Main: NavigatorScreenParams<MainTabParamList> | undefined;
-  TripCondition: undefined;
+  // tripId가 있으면 그 여행의 조건을 채워 열고 저장할 때 고친다 (장소 선택의 「변경」)
+  TripCondition: { tripId?: number } | undefined;
   Notices: undefined;
   NoticeDetail: { id: string };
-  // preview: 상세 API(GET /api/places/{placeId})가 생기기 전까지 목록에서 아는 정보로 먼저 그린다
+  // preview: 상세(GET /api/places/{placeId})를 받는 동안 목록에서 아는 정보로 먼저 그린다
   PlaceDetail: {
     placeId: string;
     preview?: { name: string; category: string; photo?: PlacePhoto };
@@ -41,6 +44,8 @@ export type RootStackParamList = {
   Route: undefined;
   RouteMap: undefined;
   CostEstimate: undefined;
+  ExpenseInput: { tripId: number };
+  ExpenseReport: { tripId: number };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -98,6 +103,17 @@ export default function RootNavigator() {
             <Stack.Screen
               name="CostEstimate"
               component={CostEstimateScreen}
+              options={{ header: renderMainHeader }}
+            />
+            {/* Figma 「08 지출 입력」·「09 지출 리포트」: 메인과 같은 헤더 */}
+            <Stack.Screen
+              name="ExpenseInput"
+              component={ExpenseInputScreen}
+              options={{ header: renderMainHeader }}
+            />
+            <Stack.Screen
+              name="ExpenseReport"
+              component={ExpenseReportScreen}
               options={{ header: renderMainHeader }}
             />
             {/* Figma 「07 장소 상세」: 메인과 같은 로고 + 언어 + 알림 헤더 */}

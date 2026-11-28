@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   Pressable,
@@ -7,17 +7,39 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
+import { listTrips, type TripListItem } from '../api/trips';
+import type { RootStackParamList } from '../navigation/RootNavigator';
 import ChevronRightIcon from '../assets/icons/chevron-right.svg';
 import { useAuth } from '../auth/AuthContext';
+import LanguageCurrencySheet from '../components/LanguageCurrencySheet';
+import { useCurrency } from '../settings/preferences';
 import { colors, fontFamily, spacing, typography } from '../theme/tokens';
 
 // Figma 「12 마이페이지」 (spec F12)
-// TODO: 찜 목록(GET /api/favorites)·이전 여행(GET /api/trips)·회원 탈퇴 API가 서버에 없어 빈 상태로 둔다
-// TODO: 언어·통화 변경 화면이 없다. 지금 값만 보여준다 (통화는 설정 화면 전까지 KRW 고정, api/client.ts)
+// TODO: 찜 목록 조회·회원 탈퇴 API가 서버에 없어 찜은 빈 상태, 탈퇴는 안내만 띄운다
+// 이전 여행(GET /api/trips?period=PAST)을 누르면 지출 입력, 이미 입력했으면 리포트로 간다
 export default function MyPageScreen() {
   const { t } = useTranslation();
   const { profile, signOut } = useAuth();
+  const currency = useCurrency();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const [pastTrips, setPastTrips] = useState<TripListItem[]>([]);
+
+  // 탭을 다시 열 때마다 받는다 (지출을 저장하면 리포트로 바뀐다)
+  useEffect(
+    () =>
+      navigation.addListener('focus', () => {
+        listTrips('PAST')
+          .then(res => setPastTrips(res.items))
+          .catch(() => {}); // 못 받으면 빈 상태로 둔다
+      }),
+    [navigation],
+  );
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
@@ -53,14 +75,35 @@ export default function MyPageScreen() {
 
       <View style={styles.card}>
         <Text style={styles.title}>{t('myPage.pastTrips')}</Text>
-        <Text style={styles.empty}>{t('myPage.noPastTrips')}</Text>
+        {pastTrips.length === 0 ? (
+          <Text style={styles.empty}>{t('myPage.noPastTrips')}</Text>
+        ) : (
+          pastTrips.map(trip => (
+            <Row
+              key={trip.tripId}
+              label={trip.title ?? trip.ticketNo}
+              value={t(
+                trip.expenseSaved
+                  ? 'expense.viewReport'
+                  : 'expense.writeExpense',
+              )}
+              onPress={() =>
+                navigation.navigate(
+                  trip.expenseSaved ? 'ExpenseReport' : 'ExpenseInput',
+                  { tripId: trip.tripId },
+                )
+              }
+            />
+          ))
+        )}
       </View>
 
       <View style={styles.card}>
         <Text style={styles.title}>{t('myPage.settings')}</Text>
         <Row
           label={t('myPage.languageCurrency')}
-          value={`${t('language.current')} · KRW`}
+          value={`${t('language.current')} · ${currency}`}
+          onPress={() => setSettingsOpen(true)}
         />
       </View>
 
@@ -73,6 +116,10 @@ export default function MyPageScreen() {
           onPress={() => Alert.alert(t('myPage.withdrawPending'))}
         />
       </View>
+      <LanguageCurrencySheet
+        visible={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
     </ScrollView>
   );
 }
