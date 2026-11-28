@@ -88,6 +88,7 @@ export type TripSummary = {
   editable: boolean; // 확정한 여행은 false
   progress: 'UPCOMING' | 'ONGOING' | 'COMPLETED';
   title: string | null; // 동선을 만든 뒤 생긴다
+  nationality: Code;
   startDate: string;
   endDate: string;
   nights: number;
@@ -95,12 +96,55 @@ export type TripSummary = {
   partySize: number;
   budgetPerPerson: Money | null;
   categories: Code[];
-  stay: { type: string; name: string; nameKo: string; address: string | null };
+  // 이름은 장소면 장소 이름, 지역이면 지역 이름, 핀이면 핀 주소. placeId·areaCode는 그 유형일 때만
+  stay: {
+    type: 'PLACE' | 'AREA' | 'PIN';
+    placeId: number | null;
+    areaCode: string | null;
+    name: string;
+    nameKo: string;
+    address: string | null;
+    location: LatLng;
+  };
+  routeCreated: boolean;
 };
 
 // 끝나지 않은 확정 여행이 있으면 409 ACTIVE_TRIP_EXISTS
 export function createTrip(body: TripRequest) {
   return request<TripSummary>('POST', '/api/trips', { body });
+}
+
+// 확정한 여행 목록 (API 17). CURRENT는 메인 티켓, PAST는 마이페이지 이전 여행
+export type TripListItem = TripSummary & {
+  daySummaries: {
+    dayNumber: number;
+    date: string;
+    places: string[]; // 그날 주요 장소 앞 3곳 (식사 제외)
+    areaNames: string[];
+    image: PlaceSummary['image'];
+  }[];
+  expenseSaved: boolean;
+};
+
+export function listTrips(period: 'CURRENT' | 'PAST') {
+  return request<{ items: TripListItem[]; totalCount: number }>(
+    'GET',
+    `/api/trips?period=${period}`,
+  );
+}
+
+export function getTrip(tripId: number) {
+  return request<TripSummary>('GET', `/api/trips/${tripId}`);
+}
+
+// 조건 다시 저장 (API 19). 서버가 그 여행의 동선을 지운다. 확정한 여행이면 409
+export function updateTrip(tripId: number, body: TripRequest) {
+  return request<TripSummary>('PUT', `/api/trips/${tripId}`, { body });
+}
+
+// 메인 티켓의 X. 확정 여부와 관계없이 지운다 (204)
+export function deleteTrip(tripId: number) {
+  return request<void>('DELETE', `/api/trips/${tripId}`);
 }
 
 // ── 02c 장소 선택 ──
@@ -278,7 +322,7 @@ export function confirmTrip(tripId: number) {
 
 // 목록·타임라인은 작은 사진이라 썸네일을 쓴다 (원본은 수 MB라 목록에서 늦게 뜬다)
 // iOS는 http 이미지를 막는다. TourAPI가 http로 줄 수 있어(R-K12) https로 바꾼다
-const toPhoto = (image: PlaceSummary['image']): PlacePhoto | undefined =>
+export const toPhoto = (image: PlaceSummary['image']): PlacePhoto | undefined =>
   image
     ? {
         source: {

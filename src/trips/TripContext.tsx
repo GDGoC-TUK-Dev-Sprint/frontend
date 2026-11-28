@@ -5,7 +5,7 @@ import type { Trip } from '../mocks';
 // TODO: GET /api/trips(spec API 17)·POST /api/trips(API 16) 연동 시 서버 응답으로 교체. 지금은 앱을 끄면 사라진다
 type TripState = {
   trip: Trip | null;
-  setTrip: (trip: Trip) => void;
+  setTrip: (trip: Trip | null) => void; // null이면 메인이 빈 상태가 된다 (여행 삭제)
 };
 
 const TripContext = createContext<TripState | null>(null);

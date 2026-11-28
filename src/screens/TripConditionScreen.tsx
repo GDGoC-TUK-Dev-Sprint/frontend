@@ -12,7 +12,13 @@ import StateView from '../components/StateView';
 import ArrowForwardIcon from '../assets/icons/arrow-forward.svg';
 import CheckIcon from '../assets/icons/check.svg';
 import { ApiError } from '../api/client';
-import { createTrip, getMetaOptions, type MetaOptions } from '../api/trips';
+import {
+  createTrip,
+  getMetaOptions,
+  getTrip,
+  updateTrip,
+  type MetaOptions,
+} from '../api/trips';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import { useTrip } from '../trips/TripContext';
 import { colors, shadow, spacing, typography } from '../theme/tokens';
@@ -24,12 +30,14 @@ import ScheduleSection from './tripCondition/ScheduleSection';
 import BudgetThemeSection from './tripCondition/BudgetThemeSection';
 
 // Figma 「02 조건 입력」 (spec F1). 선택지는 GET /api/meta/options, 만들기는 POST /api/trips
+// 조건 변경(tripId)이면 GET /api/trips/{tripId}로 채우고 PUT /api/trips/{tripId}로 고친다 (API 19)
 // 구역은 tripCondition/ 폴더, 입력 상태는 useTripCondition 훅. 이 파일은 배치와 선택 창(시트·달력)만 맡는다
 // TODO: 추천 모드 "상관없음" 토글은 Figma에 없어 넣지 않음 (spec Q14)
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TripCondition'>;
 
-export default function TripConditionScreen({ navigation }: Props) {
+export default function TripConditionScreen({ navigation, route }: Props) {
+  const editTripId = route.params?.tripId;
   const { t } = useTranslation();
   const { setTrip } = useTrip();
   const insets = useSafeAreaInsets();
@@ -39,12 +47,22 @@ export default function TripConditionScreen({ navigation }: Props) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // 조건 변경이면 여행 조건도 같이 받아 채운다 (지역은 선택지의 지역 목록에서 찾는다)
+  const { fill } = form;
   const loadOptions = useCallback(() => {
     setLoadFailed(false);
-    getMetaOptions()
-      .then(setOptions)
+    Promise.all([
+      getMetaOptions(),
+      editTripId ? getTrip(editTripId) : undefined,
+    ])
+      .then(([res, summary]) => {
+        if (summary) fill(summary, res.areas);
+        setOptions(res);
+      })
       .catch(() => setLoadFailed(true));
-  }, []);
+    // fill은 렌더마다 새로 만들어지는 함수라 넣지 않는다
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editTripId]);
   useEffect(loadOptions, [loadOptions]);
 
   // 서버에 여행을 만든 뒤 장소 선택(02c)으로 간다. 뒤로 가면 조건 입력이 아니라 메인으로 돌아간다
@@ -55,10 +73,16 @@ export default function TripConditionScreen({ navigation }: Props) {
     setSubmitting(true);
     setSubmitError(null);
     try {
+      if (editTripId) {
+        // 서버가 동선을 지웠으니 앱도 일자·동선 없이 새로 둔다. 장소 선택으로 돌아가면 새 조건으로 다시 받는다
+        setTrip(form.toTrip(await updateTrip(editTripId, body)));
+        navigation.goBack();
+        return;
+      }
       setTrip(form.toTrip(await createTrip(body)));
       navigation.replace('PlaceSelect');
     } catch (e) {
-      // 끝나지 않은 확정 여행은 하나만 둔다. 삭제 버튼은 여행 삭제 API(31)가 생기면 붙인다
+      // 끝나지 않은 확정 여행은 하나만 둔다 (메인 티켓의 X로 지운다)
       const active = e instanceof ApiError && e.code === 'ACTIVE_TRIP_EXISTS';
       setSubmitError(
         t(active ? 'condition.activeTripExists' : 'auth.networkError'),

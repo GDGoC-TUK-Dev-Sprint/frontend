@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
+  Alert,
   Image,
   Pressable,
   ScrollView,
@@ -16,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import Button from '../components/Button';
 import ImageCredit from '../components/ImageCredit';
 import ArrowRightIcon from '../assets/icons/arrow-right.svg';
+import CloseIcon from '../assets/icons/close.svg';
 import CalendarFillIcon from '../assets/icons/calendar-fill.svg';
 import ChatIcon from '../assets/icons/chat.svg';
 import ChevronSmallIcon from '../assets/icons/chevron-small.svg';
@@ -23,6 +25,9 @@ import FlightIcon from '../assets/icons/flight.svg';
 import MapIcon from '../assets/icons/map.svg';
 import MarkerPinIcon from '../assets/icons/marker-pin.svg';
 import TicketIcon from '../assets/icons/ticket.svg';
+import { ApiError } from '../api/client';
+import { deleteTrip, listTrips, toPhoto } from '../api/trips';
+import { summaryToTrip } from './tripCondition/useTripCondition';
 import { mockFeaturedCourse, type Trip, type TripRoute } from '../mocks';
 import type { MainTabParamList } from '../navigation/MainTabs';
 import type { RootStackParamList } from '../navigation/RootNavigator';
@@ -48,7 +53,57 @@ const STOP_COLORS = [colors.brand.primary, '#6366F1'];
 // Figma 「01 메인」·「01a 초기 메인」. 서버 데이터는 src/mocks 더미
 export default function HomeScreen({ navigation }: Props) {
   const { t } = useTranslation();
-  const { trip } = useTrip();
+  const { trip, setTrip } = useTrip();
+
+  // 앱이 들고 있는 여행이 없으면 서버에 남은 확정 여행을 불러온다 (있으면 새 여행을 만들 수 없다, 409 ACTIVE_TRIP_EXISTS)
+  // ponytail: 첫 여행 하나만. 여러 개 보여주는 목록 화면(F12-6)이 생기면 바꾼다
+  useEffect(() => {
+    if (trip) return;
+    let stale = false;
+    listTrips('CURRENT')
+      .then(({ items: [item] }) => {
+        if (stale || !item) return;
+        const first = item.daySummaries[0];
+        setTrip({
+          ...summaryToTrip(t, item),
+          // 동선을 만들기 전이면 비어 온다. 없는 것으로 둬야 일정 보기가 장소 선택으로 간다
+          days: first
+            ? item.daySummaries.map(({ dayNumber, date }) => ({
+                dayNumber,
+                date,
+              }))
+            : undefined,
+          route: first && {
+            thumbnail: toPhoto(first.image)?.source,
+            thumbnailLabel: first.places[0] ?? '',
+            stops: first.places,
+          },
+        });
+      })
+      .catch(() => {}); // 못 받으면 빈 상태로 둔다
+    return () => {
+      stale = true;
+    };
+  }, [trip, setTrip, t]);
+
+  // 확인 창을 띄운 뒤 서버에서 지운다. 서버에 이미 없으면(404) 앱에서도 지운다
+  const confirmDelete = () =>
+    Alert.alert(t('home.deleteTitle'), t('home.deleteMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('home.deleteConfirm'),
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            if (trip?.tripId) await deleteTrip(trip.tripId);
+            setTrip(null);
+          } catch (e) {
+            if (e instanceof ApiError && e.status === 404) setTrip(null);
+            else Alert.alert(t('auth.networkError'));
+          }
+        },
+      },
+    ]);
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
@@ -138,6 +193,7 @@ export default function HomeScreen({ navigation }: Props) {
               navigation.navigate(trip.days ? 'Plan' : 'PlaceSelect')
             }
             onViewMap={() => navigation.navigate('Map')}
+            onDelete={confirmDelete}
           />
         ) : (
           <EmptyTrip onStart={() => navigation.navigate('TripCondition')} />
@@ -171,10 +227,12 @@ function TripTicket({
   trip,
   onViewSchedule,
   onViewMap,
+  onDelete,
 }: {
   trip: Trip;
   onViewSchedule: () => void;
   onViewMap: () => void;
+  onDelete: () => void;
 }) {
   const { t, i18n } = useTranslation();
   const formatDate = (date: string) =>
@@ -198,6 +256,15 @@ function TripTicket({
           <Text style={styles.tripNumberText}>
             {t('home.tripNumber', { number: trip.tripNumber })}
           </Text>
+          {/* TODO: Figma에서 X 위치·크기 확인 필요 */}
+          <Pressable
+            onPress={onDelete}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={t('home.delete')}
+          >
+            <CloseIcon width={16} height={16} color={colors.text.subtle} />
+          </Pressable>
         </View>
       </View>
       {/* RN은 한쪽 테두리만 점선으로 그릴 수 없어 점선 상자의 윗변만 보이게 자른다 */}

@@ -48,6 +48,23 @@ export default function PlaceSelectScreen({ navigation }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const tripId = trip?.tripId;
+  // 조건을 바꾸면 후보가 달라지고 서버가 동선을 지운다. 담은 장소를 비우고 첫 페이지부터 다시 받는다
+  const conditionKey = trip
+    ? [
+        trip.stayName,
+        trip.startDate,
+        trip.endDate,
+        trip.travelers,
+        trip.themes.map(c => c.code).join(),
+      ].join('|')
+    : '';
+  const [lastConditionKey, setLastConditionKey] = useState(conditionKey);
+  if (conditionKey !== lastConditionKey) {
+    setLastConditionKey(conditionKey);
+    setPicked([]);
+    setSeen([]);
+    setPage(1);
+  }
 
   // 검색어는 입력이 멈춘 뒤, 카테고리·페이지는 바로 다시 부른다. 늦게 온 이전 응답은 버린다
   useEffect(() => {
@@ -84,7 +101,7 @@ export default function PlaceSelectScreen({ navigation }: Props) {
     };
     // seen은 담기 기록이라 다시 부를 이유가 아니다
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tripId, query, themeCode, page]);
+  }, [tripId, query, themeCode, page, conditionKey]);
 
   if (!trip || !tripId) {
     return <StateView type="empty" message={t('placeSelect.noTrip')} />;
@@ -180,11 +197,11 @@ export default function PlaceSelectScreen({ navigation }: Props) {
           </Text>
         </View>
 
-        {/* TODO: 「변경」은 조건 입력을 지금 조건으로 채워 열고 PUT /api/trips/{tripId}(API 19)로 저장한다. 지금은 빈 조건 입력을 연다 */}
+        {/* 「변경」: 지금 조건으로 채운 조건 입력을 열고 같은 여행을 고친다 (PUT /api/trips/{tripId}) */}
         <ConditionCard
           trip={trip}
           themes={themes}
-          onChange={() => navigation.navigate('TripCondition')}
+          onChange={() => navigation.navigate('TripCondition', { tripId })}
         />
 
         <View style={styles.filters}>

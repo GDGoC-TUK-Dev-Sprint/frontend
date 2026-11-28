@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import type { DateRange } from '../../components/DateRangeModal';
 import type {
   Area,
@@ -10,7 +11,7 @@ import type {
   TripSummary,
 } from '../../api/trips';
 import type { Trip } from '../../mocks';
-import { formatDot, nightsBetween } from '../../utils/date';
+import { formatDot, nightsBetween, parseDate } from '../../utils/date';
 
 // 조건 입력 화면(Figma 「02 조건 입력」, spec F1)의 입력 상태와 규칙
 
@@ -28,6 +29,32 @@ export type Stay =
 
 // 한 번에 하나만 열리는 선택 창: 국적 시트, 숙소 검색 시트, 날짜 선택
 export type Picker = 'country' | 'lodging' | 'map' | 'dates';
+
+// 서버 여행 요약 → 앱 여행. 조건 입력과 메인(서버에 남은 여행 불러오기)이 같이 쓴다
+export const summaryToTrip = (t: TFunction, summary: TripSummary): Trip => ({
+  tripId: summary.tripId,
+  tripNumber: summary.ticketNo,
+  title:
+    summary.title ??
+    t('condition.tripTitle', {
+      period: summary.nights
+        ? t('condition.nights', {
+            nights: summary.nights,
+            days: summary.days,
+          })
+        : t('condition.dayTrip'),
+    }),
+  region: t('condition.tripRegion'),
+  startDate: summary.startDate,
+  endDate: summary.endDate,
+  travelers: summary.partySize,
+  stayName:
+    summary.stay.type === 'AREA'
+      ? t('condition.areaCenter', { area: summary.stay.name })
+      : summary.stay.name,
+  budgetPerPerson: summary.budgetPerPerson?.amount,
+  themes: summary.categories,
+});
 
 export function useTripCondition() {
   const { t } = useTranslation();
@@ -89,32 +116,45 @@ export function useTripCondition() {
       : undefined;
 
   // 서버가 만든 여행을 메인 티켓·장소 선택이 쓰는 모양으로 바꾼다. 제목은 동선을 만든 뒤 서버가 정한다
-  const toTrip = (summary: TripSummary): Trip => ({
-    tripId: summary.tripId,
-    tripNumber: summary.ticketNo,
-    title:
-      summary.title ??
-      t('condition.tripTitle', {
-        period: summary.nights
-          ? t('condition.nights', {
-              nights: summary.nights,
-              days: summary.days,
-            })
-          : t('condition.dayTrip'),
-      }),
-    region: t('condition.tripRegion'),
-    startDate: summary.startDate,
-    endDate: summary.endDate,
-    travelers: summary.partySize,
-    stayName:
-      summary.stay.type === 'AREA'
-        ? t('condition.areaCenter', { area: summary.stay.name })
-        : summary.stay.name,
-    budgetPerPerson: summary.budgetPerPerson?.amount,
-    themes: summary.categories,
-  });
+  const toTrip = (summary: TripSummary) => summaryToTrip(t, summary);
+
+  // 조건 변경: 저장된 여행으로 채운다. 예산이 프리셋이면 프리셋, 아니면 직접입력
+  // ponytail: 예산은 원으로 입력받아 표시 통화가 KRW가 아니면 직접입력 칸에 그 통화 숫자가 들어간다. 예산 통화 입력이 생기면 바꾼다
+  const fill = (summary: TripSummary, areas: Area[]) => {
+    setCountry(summary.nationality);
+    const s = summary.stay;
+    const area = areas.find(a => a.code === s.areaCode);
+    setStay(
+      s.type === 'PLACE' && s.placeId
+        ? {
+            kind: 'lodging',
+            lodging: {
+              placeId: s.placeId,
+              name: s.name,
+              nameKo: s.nameKo,
+              address: s.address ?? '',
+              lodgingType: { code: '', name: '' }, // 요약에는 없다. 조건 입력은 이름만 보여준다
+              location: s.location,
+            },
+          }
+        : s.type === 'AREA' && area
+        ? { kind: 'area', area }
+        : { kind: 'pin', location: s.location, address: s.name },
+    );
+    setDates({
+      start: parseDate(summary.startDate),
+      end: parseDate(summary.endDate),
+    });
+    setTravelers(summary.partySize);
+    const amount = summary.budgetPerPerson?.amount;
+    setAnyBudget(!amount);
+    setBudget(amount || undefined);
+    setCustomBudget(!!amount && !BUDGET_PRESETS.includes(amount));
+    setThemeCodes(summary.categories.map(c => c.code));
+  };
 
   return {
+    fill,
     country,
     stay,
     dates,
